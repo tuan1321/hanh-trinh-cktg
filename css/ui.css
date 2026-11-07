@@ -403,6 +403,8 @@ body.match-open main, body.match-open footer { visibility: hidden; }
 .po-pack span { font-size: 66px; filter: drop-shadow(0 6px 18px color-mix(in srgb, var(--pc) 70%, transparent)); }
 .po-pack b { font: 700 15px var(--display); color: color-mix(in srgb, var(--pc) 75%, white); letter-spacing: 1px; }
 .po-card.shake { animation: poRattle .85s ease-in both; }
+.po-card.idle { animation: poIdle 2.2s ease-in-out infinite; }
+@keyframes poIdle { 50% { transform: translateY(-8px) rotate(-1.5deg); } }
 @keyframes poRattle {
   0% { transform: scale(.9); } 20% { transform: scale(1) rotate(-2deg); } 30% { transform: rotate(3deg); } 40% { transform: rotate(-4deg); }
   50% { transform: rotate(5deg) scale(1.03); } 60% { transform: rotate(-6deg) scale(1.05); } 70% { transform: rotate(6deg) scale(1.07); }
@@ -454,6 +456,8 @@ body.match-open main, body.match-open footer { visibility: hidden; }
 .ugl small { font-size: 11px; color: var(--muted); }
 .ugl.ok { border-color: rgba(163, 255, 71, .55); }
 .ugl.ok small { color: var(--lime); }
+.cd-levels { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+.cd-levels .ugl { min-width: 54px; padding: 4px 8px; }
 .ugl.cur { background: linear-gradient(180deg, rgba(139, 92, 246, .35), rgba(34, 211, 238, .12)); border-color: var(--c); }
 
 /* ===== Điện thoại: gọn, nhiều thẻ trên một màn hình, dễ chạm ===== */

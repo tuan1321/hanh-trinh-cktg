@@ -1,11 +1,11 @@
-// ===== Âm thanh: hiệu ứng (tự tổng hợp), nhạc nền (file mp3), giọng bình luận (giọng đọc của máy) =====
+// ===== Âm thanh: hiệu ứng (tự tổng hợp) và nhạc nền (file mp3) =====
 // Hiệu ứng tự tổng hợp bằng Web Audio, không dùng file. Nhạc nền: Kevin MacLeod (incompetech.com), CC BY 4.0.
 // Trình duyệt chỉ cho phát âm sau khi người chơi bấm/chạm, nên nhạc bắt đầu từ lần chạm đầu tiên.
 
 // ----- Cài đặt (lưu trên máy) -----
 const AUDIO_CFG = (() => {
   const KEY = 'hanhtrinh_cktg_audio';
-  const def = { sfx: true, music: true, voice: true, sv: 0.8, mv: 0.45 };
+  const def = { sfx: true, music: true, sv: 0.8, mv: 0.45 };
   let c = { ...def };
   try {
     const old = localStorage.getItem('hanhtrinh_cktg_sfx'); // bản trước chỉ có bật/tắt hiệu ứng
@@ -252,8 +252,8 @@ const SFX = (() => {
 const MUSIC = (() => {
   const TRACKS = { menu: 'audio/menu-heroic-age.mp3', match: 'audio/match-five-armies.mp3' };
   const els = {}, gains = {};
-  let cur = 'menu', unlocked = false, duck = 1;
-  const vol = () => (AUDIO_CFG.music ? AUDIO_CFG.mv * duck : 0);
+  let cur = 'menu', unlocked = false;
+  const vol = () => (AUDIO_CFG.music ? AUDIO_CFG.mv : 0);
   function el(name) {
     if (els[name]) return els[name];
     const a = new Audio(TRACKS[name]);
@@ -291,79 +291,20 @@ const MUSIC = (() => {
     play(name) { if (cur === name) return; cur = name; apply(); },
     refresh: apply,
     setVolume(v) { AUDIO_CFG.mv = v; apply(); },
-    duck(on) { duck = on ? 0.35 : 1; if (unlocked && AUDIO_CFG.music && els[cur]) fadeTo(cur, vol(), 0.4); },
   };
 })();
 
-// ----- Giọng bình luận viên: giọng đọc tiếng Việt có sẵn trên máy (Web Speech) -----
-const VOICE = (() => {
-  const syn = window.speechSynthesis;
-  let voice = null, busyPrio = -1, pending = null;
-  function pickVoice() {
-    if (!syn) return null;
-    const vs = syn.getVoices().filter(v => /^vi/i.test(v.lang));
-    voice = vs.find(v => /NamMinh/i.test(v.name)) || vs.find(v => /Natural|Online/i.test(v.name)) || vs.find(v => /Google/i.test(v.name)) || vs[0] || null;
-    return voice;
-  }
-  if (syn) { pickVoice(); syn.onvoiceschanged = pickVoice; }
-  // đọc cho tự nhiên: bỏ biểu tượng, chữ IN HOA thành thường, phiên âm vài thuật ngữ
-  const SAY = [[/FIRST BLOOD/gi, 'Phớt Blớt'], [/SOLO KILL/gi, 'sô lô kiu'], [/\bACE\b/g, 'Ây'], [/Baron Nashor/gi, 'Ba rôn'], [/\bBARON\b/gi, 'Ba rôn'],
-    [/\bgank\b/gi, 'găng'], [/\bfarm\b/gi, 'pham'], [/\bcombat\b/gi, 'com bát'], [/BLV:/g, ''], [/(\d)-(\d)/g, '$1 đổi $2'], [/(\d+(?:\.\d)?)k vàng/g, '$1 nghìn vàng']];
-  function clean(t) {
-    t = String(t).replace(/[\p{Extended_Pictographic}‍️]/gu, '').replace(/[#"“”()]/g, ' ');
-    SAY.forEach(([re, s]) => { t = t.replace(re, s); });
-    // chữ IN HOA (CHIẾN THẮNG, PHÁ HỦY…) đọc như chữ thường; giữ mã đội 3 chữ không dấu (SKT, GEN…)
-    t = t.replace(/(?<![\p{L}\p{N}])\p{Lu}{3,}(?![\p{L}\p{N}])/gu, w => (w.length >= 4 || /[^A-Z]/.test(w) ? w.toLowerCase() : w));
-    return t.replace(/\s+/g, ' ').trim();
-  }
-  function speak(text, prio, rate) {
-    const u = new SpeechSynthesisUtterance(clean(text));
-    u.lang = 'vi-VN'; if (voice) u.voice = voice;
-    u.rate = rate; u.pitch = 1.05; u.volume = 1;
-    busyPrio = prio;
-    u.onstart = () => MUSIC.duck(true);
-    u.onend = u.onerror = () => {
-      busyPrio = -1; MUSIC.duck(false);
-      if (pending) { const p = pending; pending = null; speak(p.text, p.prio, p.rate); }
-    };
-    syn.speak(u);
-  }
-  return {
-    get supported() { return !!syn; },
-    get available() { return !!(syn && (voice || pickVoice())); },
-    get voiceName() { return voice ? voice.name : ''; },
-    // prio cao hơn câu đang đọc thì cắt ngang; thấp hơn thì chờ (chỉ giữ 1 câu chờ)
-    say(text, prio = 1, rate = 1.1) {
-      if (!AUDIO_CFG.voice || !syn || !text || !(voice || pickVoice())) return;
-      if (busyPrio < 0 && !syn.speaking) return speak(text, prio, rate);
-      if (prio > busyPrio + 1) { pending = null; busyPrio = -1; syn.cancel(); return setTimeout(() => speak(text, prio, rate), 60); }
-      if (!pending || prio >= pending.prio) pending = { text, prio, rate };
-    },
-    stop() { pending = null; busyPrio = -1; if (syn) syn.cancel(); MUSIC.duck(false); },
-  };
-})();
 
 // ----- Âm thanh cho diễn biến trận đấu -----
 const MatchAudio = (() => {
   const lastAt = {};
   const gate = (k, ms) => { const n = performance.now(); if (lastAt[k] && n - lastAt[k] < ms) return false; lastAt[k] = n; return true; };
-  function prioOf(e) {
-    if (e.type === 'end') return 5;
-    if (e.type === 'ace' || (e.type === 'obj' && ['baron', 'elder', 'soul'].includes(e.obj))) return 4;
-    if (e.type === 'fight' || (e.type === 'kill' && e.big) || e.banner) return 3;
-    if (e.type === 'obj' || e.type === 'tower') return 2;
-    if (e.type === 'kill') return 1;
-    return 0;
-  }
   return {
-    start(gameNo, teams) {
+    start() {
       MUSIC.play('match');
       if (gate('start', 500)) SFX.gameStart();
-      VOICE.stop();
-      VOICE.say(`Ván ${gameNo}. ${teams[0].name} gặp ${teams[1].name}. Trận đấu bắt đầu!`, 3, 1.1);
     },
     event(e, speed) {
-      // hiệu ứng
       const sp = Math.max(1, speed || 1);
       if (e.type === 'kill') { if (gate('kill', 200 * sp)) SFX.kill(e.big); }
       else if (e.type === 'fight') { if (gate('fight', 400)) SFX.fight((e.dead || []).length); }
@@ -378,12 +319,9 @@ const MatchAudio = (() => {
         else if (e.obj === 'elder') SFX.elder();
       }
       if (e.banner && gate('banner', 300)) SFX.banner();
-      // giọng đọc: tua nhanh thì chỉ đọc diễn biến lớn
-      const p = prioOf(e), min = sp >= 4 ? 3 : sp >= 2 ? 2 : 0;
-      if (p >= min) VOICE.say(e.text, p, Math.min(1.45, 1.05 + (sp - 1) * 0.12));
     },
     result(win) { setTimeout(() => (win ? SFX.victory() : SFX.defeat()), 600); },
-    skip() { VOICE.stop(); },
-    end() { VOICE.stop(); MUSIC.play('menu'); },
+    skip() { },
+    end() { MUSIC.play('menu'); },
   };
 })();

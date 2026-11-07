@@ -14,6 +14,3 @@ match-five-armies.mp3
 
 HIỆU ỨNG ÂM THANH
   Tự tổng hợp bằng Web Audio trong js/sfx.js, không dùng file âm thanh nào.
-
-GIỌNG BÌNH LUẬN
-  Dùng giọng đọc tiếng Việt có sẵn trên thiết bị/trình duyệt của người chơi (Web Speech API).

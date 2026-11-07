@@ -202,7 +202,7 @@ function cardHTML(c, o = {}) {
     + (o.isNew ? '<span class="c-chip c-new">MỚI</span>' : '')
     + (champ && msi ? `<span class="c-chip c-msi" title="Vô địch MSI ${c.year}">MSI</span>` : '')
     + (o.chem > 0 ? `<span class="c-chip c-chem" title="Điểm ăn ý">🔗+${o.chem}</span>` : '');
-  const right = (o.count > 1 ? `<span class="c-chip c-count" title="Đang có ${o.count} thẻ giống hệt (cùng cấp)">${o.count} thẻ</span>` : '')
+  const right = (o.count > 1 ? `<span class="c-chip c-count" title="Đang có ${o.count} thẻ">${o.count} thẻ</span>` : '')
     + (o.delta != null ? `<span class="c-chip c-delta ${o.delta > 0 ? 'up' : o.delta < 0 ? 'down' : ''}">⚡${o.delta > 0 ? '+' : ''}${o.delta}</span>` : '');
   const yearTag = champ ? `<em class="champ" title="Vô địch CKTG ${c.year}">🏆 CKTG ${c.year}</em>`
     : msi ? `<em class="msi" title="Vô địch MSI ${c.year}">⭐ MSI ${c.year}</em>` : `<em>${c.year}</em>`;
@@ -284,15 +284,15 @@ function showPackModal(p, res) {
   SFX.ctx(); // mở khóa âm thanh ngay trong lượt bấm
   const fxOf = r => TIER_FX[r.c.tier.id] || TIER_FX.B;
   openModal(`<div class="po pack-${p.id}">
-    <div class="po-head"><b>${p.icon} ${p.name}</b><span class="po-step" id="po-step">Đang mở gói…</span></div>
+    <div class="po-head"><b>${p.icon} ${p.name}</b><span class="po-step" id="po-step">${res.length} thẻ</span></div>
     <div class="po-stage" id="po-stage">
       <div class="po-rays"></div><div class="po-glow"></div>
-      <div class="po-card shake" id="po-card"><div class="po-pack"><span>${p.icon}</span><b>${p.name}</b></div></div>
+      <div class="po-card idle" id="po-card"><div class="po-pack"><span>${p.icon}</span><b>${p.name}</b></div></div>
       <div class="po-burst" id="po-burst"></div><div class="po-flash"></div>
-      <div class="po-tap" id="po-tap">Chạm để mở nhanh</div>
+      <div class="po-tap" id="po-tap">Chạm để mở gói</div>
     </div>
     <div class="po-tray" id="po-tray">${res.map(() => '<span class="po-slot">?</span>').join('')}</div>
-    <div class="actions" id="po-act"><button class="btn ghost" id="po-skip">⏩ Mở hết</button><button class="btn primary" id="po-next" disabled>Thẻ tiếp theo ▶</button></div>
+    <div class="actions" id="po-act"><button class="btn ghost" id="po-skip">⏩ Mở hết</button><button class="btn primary" id="po-next">🎁 Mở gói</button></div>
   </div>`);
   const root = $('#modal-box .po'), stage = $('#po-stage'), slot = $('#po-card');
   const alive = () => root.isConnected;
@@ -312,7 +312,13 @@ function showPackModal(p, res) {
   const mini = (r, fx) => `<span class="po-mini" style="--tcol:${fx.c}" title="${esc(r.c.name)} ${r.c.year}"><span class="po-av">${avatarHTML(r.c)}</span><b>${r.c.tier.id}</b></span>`;
 
   (async () => {
+    // 0) chờ người chơi bấm mở gói
+    await waitTap();
+    if (!alive()) return;
+    $('#po-next').disabled = true;
+    $('#po-tap').textContent = 'Chạm để mở nhanh';
     // 1) gói rung rồi bung ra
+    slot.classList.remove('idle'); replay(slot, 'shake');
     SFX.packShake();
     await wait(850);
     if (!alive()) return;
@@ -516,12 +522,20 @@ function pickModal(role) {
 // ===== Render: bộ sưu tập =====
 const colFilter = { role: 'ALL', tier: 'ALL', all: false, sort: 'rating' };
 function renderCollection() {
-  const mine = ownedKeys().map(cardOf);
-  let list = colFilter.all ? mine.concat(CARDS.filter(c => !ownedBase(c.id))) : mine;
+  // chỉ hiện thẻ gốc: gom mọi cấp + của cùng một thẻ thành 1 ô (số lượng = tổng các cấp)
+  const groups = new Map();
+  ownedKeys().forEach(k => {
+    const c = cardOf(k);
+    const g = groups.get(c.baseId) || { n: 0, keys: [] };
+    g.n += owned(k); g.keys.push(c); groups.set(c.baseId, g);
+  });
+  const openKey = g => (g.keys.find(c => inLineup(c.id)) || g.keys.sort((a, b) => b.lv - a.lv)[0]).id;
+  const mine = [...groups.keys()].map(id => CARD[id]);
+  let list = colFilter.all ? mine.concat(CARDS.filter(c => !groups.has(c.id))) : mine;
   list = list.filter(c => (colFilter.role === 'ALL' || c.role === colFilter.role) && (colFilter.tier === 'ALL' || c.tier.id === colFilter.tier));
-  list = groupSort(list, colFilter.sort === 'rating' ? (a, b) => b.rating - a.rating : colFilter.sort === 'year' ? (a, b) => b.year - a.year || b.rating - a.rating : (a, b) => a.name.localeCompare(b.name) || a.year - b.year);
+  list = list.slice().sort(colFilter.sort === 'rating' ? (a, b) => b.rating - a.rating : colFilter.sort === 'year' ? (a, b) => b.year - a.year || b.rating - a.rating : (a, b) => a.name.localeCompare(b.name) || a.year - b.year);
   const dupes = ownedKeys().reduce((s, k) => s + S.cards[k] - 1, 0);
-  const nBase = new Set(mine.map(c => c.baseId)).size;
+  const nBase = groups.size;
   $('#view-collection').innerHTML = `
   <div class="panel">
     <div class="filters">
@@ -533,7 +547,7 @@ function renderCollection() {
     </div>
     <div class="tier-legend">${TIERS.map((t, i) => `<span class="tl tier-${t.cls}"><b>${t.id}</b> ${t.min ? '≥' + t.min : '<' + TIERS[i - 1].min} · ${t.desc}</span>`).join('')}</div>
     <p class="muted">Đã sưu tầm ${nBase}/${CARDS.length} thẻ. Nhấn vào thẻ để xem chi tiết, chỉ số ẩn và nâng cấp. Thẻ trùng dùng làm nguyên liệu nâng cấp.</p>
-    <div class="card-grid">${list.map(c => { const o = !!owned(c.id); return cardHTML(c, { click: o, locked: !o, count: owned(c.id), inLineup: inLineup(c.id) }); }).join('') || '<p class="muted">Không có thẻ.</p>'}</div>
+    <div class="card-grid">${list.map(c => { const g = groups.get(c.id); return g ? cardHTML(c, { click: true, count: g.n, inLineup: g.keys.some(x => inLineup(x.id)) }).replace(`data-id="${c.id}"`, `data-id="${openKey(g)}"`) : cardHTML(c, { locked: true }); }).join('') || '<p class="muted">Không có thẻ.</p>'}</div>
   </div>`;
   $('#f-role').onchange = e => { colFilter.role = e.target.value; renderCollection(); };
   $('#f-tier').onchange = e => { colFilter.tier = e.target.value; renderCollection(); };
@@ -552,9 +566,11 @@ function cardModal(k) {
   const c = cardOf(k);
   const other = CARDS.filter(x => x.name === c.name).sort((a, b) => a.year - b.year);
   const canUp = c.lv < MAX_UP && owned(k) >= 2;
+  const lvs = ownedKeys().map(cardOf).filter(x => x.baseId === c.baseId).sort((a, b) => a.lv - b.lv);
   openModal(`<div class="card-detail">${cardHTML(c)}
     <div>
       <h2>${esc(c.name)} <span class="muted">${c.year}${c.lv ? ' · +' + c.lv : ''}</span></h2>
+      ${lvs.length > 1 ? `<div class="cd-levels">${lvs.map(x => `<button class="ugl ${x.id === k ? 'cur' : ''}" data-k="${x.id}"><b class="${x.lv ? lvClass(x.lv) : ''}">${x.lv ? '+' + x.lv : 'Gốc'}</b><small>${owned(x.id)} thẻ</small></button>`).join('')}</div>` : ''}
       <div class="kv"><span>Vị trí</span><b>${ROLE_INFO[c.role].icon} ${ROLE_INFO[c.role].vn}</b></div>
       <div class="kv"><span>Đội / Khu vực</span><b class="kv-team"><span class="mini-logo">${teamLogoHTML(c.team)}</span>${esc(TEAM_INFO[c.team]?.name || c.team)} · ${c.region}</b></div>
       <div class="kv"><span>Bậc · Chỉ số tổng</span><b class="tier-text tier-${c.tier.cls}">${c.tier.id} · ${c.rating}${c.lv ? ` <small class="muted">(gốc ${CARD[c.baseId].rating} +${UPG_BONUS[c.lv]})</small>` : ''}</b></div>
@@ -575,6 +591,7 @@ function cardModal(k) {
   $('#cd-up').onclick = () => { closeModal(); upgSel = k; switchView('upgrade'); };
   $('#cd-sell').onclick = () => { if (sellCard(k)) { owned(k) ? cardModal(k) : closeModal(); } };
   $('#cd-close').onclick = closeModal;
+  document.querySelectorAll('#modal-box .cd-levels .ugl').forEach(b => b.onclick = () => cardModal(b.dataset.k));
 }
 
 // ===== Render: cửa hàng =====
@@ -713,7 +730,7 @@ $('#credits-btn').onclick = () => {
     <ol class="credits">${list.map(c => `<li><b>${esc(c.name)}${c.year ? ' (' + c.year + ')' : ''}</b> – ảnh của ${esc(c.artist || 'không rõ')}, giấy phép <a href="${esc(c.licenseUrl || c.page)}" target="_blank" rel="noopener">${esc(c.license)}</a>, <a href="${esc(c.page)}" target="_blank" rel="noopener">nguồn</a>${c.edited ? ' (đã cắt/thu nhỏ)' : ''}</li>`).join('') || '<li>Chưa có ảnh.</li>'}</ol>
     <h3>🎵 Nhạc nền</h3>
     <ul class="credits"><li><b>“Heroic Age”</b> và <b>“Five Armies”</b> – Kevin MacLeod (<a href="https://incompetech.com" target="_blank" rel="noopener">incompetech.com</a>), giấy phép <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.</li>
-      <li>Hiệu ứng âm thanh tự tạo bằng Web Audio; giọng bình luận dùng giọng đọc có sẵn trên thiết bị của người chơi.</li></ul>
+      <li>Hiệu ứng âm thanh tự tạo bằng Web Audio.</li></ul>
     <div class="actions"><button class="btn" id="cr-close">Đóng</button></div>`, true);
   $('#cr-close').onclick = closeModal;
 };
@@ -721,7 +738,7 @@ $('#donate-btn').onclick = openDonate;
 $('#donate-btn2').onclick = openDonate;
 // ===== Cài đặt âm thanh =====
 const sfxIcon = () => {
-  const any = AUDIO_CFG.sfx || AUDIO_CFG.music || AUDIO_CFG.voice;
+  const any = AUDIO_CFG.sfx || AUDIO_CFG.music;
   $('#sfx-btn').textContent = any ? '🔊' : '🔇'; $('#sfx-btn').classList.toggle('off', !any);
 };
 function audioModal() {
@@ -731,26 +748,20 @@ function audioModal() {
       <div class="au-txt"><b>${icon} ${name}</b><small>${desc}</small>
         ${vol ? `<input type="range" min="0" max="1" step="0.05" value="${AUDIO_CFG[vol]}" data-v="${vol}" aria-label="Âm lượng ${name}">` : ''}</div>
     </div>`;
-  const vOk = VOICE.available;
   openModal(`<h2>🔊 Âm thanh</h2>
     ${row('music', '🎵', 'Nhạc nền', 'Nhạc sảnh và nhạc trận đấu', 'mv')}
     ${row('sfx', '💥', 'Hiệu ứng', 'Mở thẻ, nâng cấp, diễn biến trận đấu', 'sv')}
-    ${row('voice', '🎙️', 'Giọng bình luận viên', vOk ? `Giọng đọc của máy: ${esc(VOICE.voiceName)}` : 'Máy này chưa có giọng đọc tiếng Việt')}
-    ${vOk ? '<button class="btn small" id="au-test">▶ Nghe thử giọng bình luận</button>'
-      : `<p class="muted small au-help">${VOICE.supported ? 'Cách thêm giọng tiếng Việt: <b>Windows</b> – Cài đặt → Thời gian &amp; ngôn ngữ → Giọng nói → thêm Tiếng Việt (hoặc dùng trình duyệt Edge). <b>Android</b> – Cài đặt → Chuyển văn bản thành giọng nói → Google → tải Tiếng Việt. <b>iPhone</b> – Cài đặt → Trợ năng → Nội dung được đọc → Giọng nói → Tiếng Việt. Sau đó tải lại trang.' : 'Trình duyệt này không hỗ trợ đọc văn bản.'}</p>`}
     <p class="muted small">Nhạc nền: “Heroic Age”, “Five Armies” – Kevin MacLeod (incompetech.com), giấy phép <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>. Hiệu ứng âm thanh được tạo trực tiếp trong trình duyệt.</p>
     <div class="actions"><button class="btn primary" id="au-close">Xong</button></div>`);
   document.querySelectorAll('#modal-box [data-k]').forEach(i => i.onchange = () => {
     AUDIO_CFG[i.dataset.k] = i.checked; AUDIO_CFG.save(); sfxIcon();
     if (i.dataset.k === 'music') MUSIC.refresh();
-    if (i.dataset.k === 'voice' && !i.checked) VOICE.stop();
     if (i.dataset.k === 'sfx' && i.checked) SFX.tick(3);
   });
   document.querySelectorAll('#modal-box [data-v]').forEach(i => {
     i.oninput = () => { const v = +i.value; if (i.dataset.v === 'mv') MUSIC.setVolume(v); else SFX.setVolume(v); };
     i.onchange = () => { AUDIO_CFG.save(); if (i.dataset.v === 'sv') SFX.tick(2); };
   });
-  if ($('#au-test')) $('#au-test').onclick = () => { VOICE.stop(); VOICE.say('🩸 FIRST BLOOD! Faker hạ gục Chovy ở đường giữa! Một pha xử lý cực đỉnh!', 3, 1.1); };
   $('#au-close').onclick = closeModal;
 }
 $('#sfx-btn').onclick = audioModal;
