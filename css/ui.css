@@ -335,6 +335,105 @@ body.match-open main, body.match-open footer { visibility: hidden; }
   .hs.intl .hs-dot { width: 32px; height: 32px; font-size: 15px; }
 }
 
+/* ===== Điện thoại: gọn, nhiều thẻ trên một màn hình, dễ chạm ===== */
+button, .btn, .card, .slot, select, label { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.scoreboard { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+.sb-team { min-width: 0; }
+.match-box { overflow-x: hidden; }
+
+@media (max-width: 640px) {
+  /* iOS phóng to trang khi ô nhập dưới 16px */
+  select, input[type=text], input[type=email], input[type=password], textarea { font-size: 16px; }
+
+  /* đầu trang đội hình: tên + vòng sức mạnh nằm cùng hàng */
+  .team-hero .panel-head { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; }
+  .team-hero .team-name { gap: 10px; min-width: 0; flex: 1; }
+  .team-hero .tn-box { min-width: 0; }
+  .team-hero .my-logo { width: 34px; height: 40px; }
+  .team-name label { font-size: 10px; margin-bottom: 2px; }
+  #team-name.tn-name { width: auto; max-width: 100%; gap: 4px; padding: 2px 4px; margin-left: -4px; }
+  #team-name.tn-name b { font-size: 15px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #team-name.tn-name i { font-size: 12px; }
+  .tn-hint { font-size: 10px; line-height: 1.25; }
+  .power-ring { width: 92px; height: 92px; }
+  .power-ring > div { width: 78px; height: 78px; padding: 0 6px; }
+  .power-ring small { font-size: 8px; letter-spacing: .5px; }
+  .power-ring b { font-size: 26px; }
+  .power-ring span { font-size: 8px; line-height: 1.2; max-width: 70px; }
+
+  /* đội hình: 3 thẻ trên, 2 thẻ dưới ở giữa */
+  .lineup { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px 8px; }
+  .lineup .slot { grid-column: span 2; min-width: 0; }
+  .lineup .slot:nth-child(4) { grid-column: 2 / 4; }
+  .lineup .slot:nth-child(5) { grid-column: 4 / 6; }
+  .slot-label { font-size: 9.5px; letter-spacing: .2px; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* lưới thẻ: 3 cột */
+  .card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .center-grid { grid-template-columns: repeat(3, minmax(0, 112px)); }
+
+  /* bộ lọc bộ sưu tập */
+  .filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 8px; }
+  .filters select { width: 100%; min-width: 0; padding-left: 10px; padding-right: 6px; }
+  .filters .check { font-size: 13px; line-height: 1.2; }
+  .filters .btn { grid-column: 1 / -1; white-space: nowrap; }
+  .tier-legend { flex-wrap: nowrap; overflow-x: auto; margin: 8px -16px; padding: 0 16px 4px; scrollbar-width: none; scroll-snap-type: x proximity; }
+  .tier-legend::-webkit-scrollbar { display: none; }
+  .tl { flex-shrink: 0; white-space: nowrap; scroll-snap-align: start; }
+
+  /* cửa hàng: 2 gói một hàng */
+  .packs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .pack { padding: 14px 10px; gap: 4px; }
+  .pack-icon { font-size: 36px; }
+  .pack h4 { font-size: 15px; }
+  .pack .muted { font-size: 12px; }
+  .odds { margin: 6px 0 10px; }
+  .odd { grid-template-columns: 24px minmax(0, 1fr) 34px; gap: 5px; font-size: 11px; margin: 4px 0; }
+  .pack .btn { padding-left: 6px; padding-right: 6px; font-size: 13px; white-space: nowrap; }
+
+  /* nâng cấp: thẻ không quá to */
+  .upg-stage .card { max-width: 150px; margin: 0 auto; }
+
+  /* hộp thoại: kiểu bảng trượt từ đáy */
+  .overlay#modal { align-items: flex-end; padding: 0; }
+  #modal .modal-box { width: 100%; max-height: 90dvh; border-radius: 22px 22px 0 0; padding: 20px 16px calc(18px + env(safe-area-inset-bottom)); }
+
+  /* trận đấu: toàn màn hình */
+  #match.overlay { padding: 0; }
+  .match-box { max-height: 100dvh; height: 100dvh; border-radius: 0; padding: 10px 10px calc(10px + env(safe-area-inset-bottom)); gap: 8px; border: 0; }
+  .m-head b#m-title { font-size: 15px; }
+  .m-series { padding: 3px 10px; font-size: 12px; }
+  .scoreboard { gap: 6px; padding: 8px; }
+  .sb-name { font-size: 12.5px; gap: 5px; line-height: 1.15; overflow-wrap: anywhere; }
+  .sb-name > :not(.sb-logo) { min-width: 0; overflow-wrap: anywhere; }
+  .sb-logo { width: 20px; height: 24px; }
+  .sb-sub { font-size: 10.5px; }
+  .sb-kills { font-size: 24px; gap: 8px; }
+  .sb-clock { font-size: 12px; padding: 2px 7px; }
+  .gd { font-size: 11px; }
+  .m-body { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .map-wrap { max-width: min(100%, 52dvh); }
+  .kda { padding: 4px 6px; border-radius: 14px; }
+  .kda-row { grid-template-columns: 24px minmax(0, 1fr) auto; gap: 5px; padding: 4px 0; font-size: 12px; }
+  .kda-row .kav, .kda-row .ro-av { width: 24px; height: 24px; }
+  .kdv { font-size: 12px; }
+  .kda-row.dead::after { right: 40px; font-size: 10px; }
+  .kf { font-size: 10.5px; padding: 2px 7px; }
+  .m-ctrl .btn { padding: 7px 10px; }
+  .commentary { height: 140px; font-size: 13px; }
+}
+@media (max-width: 860px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 400px) {
+  .pc-id { padding: 10px; gap: 8px; }
+  .pc-id code { font-size: 20px; letter-spacing: 2px; }
+  .net { flex-wrap: wrap; }
+  .tabs button { font-size: 8.5px; }
+}
+@media (max-width: 340px) {
+  .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .packs { grid-template-columns: 1fr; }
+}
+
 /* ===== Người dùng chọn giảm chuyển động ===== */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
