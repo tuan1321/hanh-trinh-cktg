@@ -96,15 +96,20 @@ function doUpgrade(k) {
     <div class="ua-sparks">${Array.from({ length: 24 }, (_, i) => `<i style="--a:${i * 15}deg;--d:${rand(0, 0.8).toFixed(2)}s"></i>`).join('')}</div>
   </div>`);
   const box = $('#modal-box .upg-anim');
-  // âm thanh từng bước: đặt 2 thẻ → nạp năng lượng → nhập thẻ → 3 nhát đập → kết quả
+  // âm thanh từng bước (≈5 giây): đặt 2 thẻ → nạp năng lượng + nhịp tim dồn dần → nhập thẻ
+  // → 3 nhát đập → trống lăn + tiếng rít dâng lên → im bặt → kết quả
+  const RESULT = 5200;
   const at = (ms, fn) => setTimeout(() => { if (box.isConnected) fn(); }, ms);
   const hit = () => { box.classList.remove('hit'); void box.offsetWidth; box.classList.add('hit'); };
   SFX.ctx();
-  SFX.place(); at(180, () => SFX.place());
-  at(150, () => SFX.charge(2.3));
-  at(1200, () => { SFX.clang(0); hit(); });
-  [1650, 1950, 2250].forEach((ms, i) => at(ms, () => { SFX.clang(i + 2); hit(); }));
+  SFX.place(); at(300, () => SFX.place());
+  at(300, () => SFX.charge(4.7));
+  [500, 1250, 1900, 2450, 2900, 3300, 3650, 3950].forEach((ms, i) => at(ms, () => SFX.heartbeat(0, 0.7 + i * 0.06)));
+  at(2000, () => { SFX.clang(0); hit(); });
+  [3000, 3600, 4150].forEach((ms, i) => at(ms, () => { SFX.clang(i + 2); hit(); }));
+  at(4250, () => { SFX.drumroll(0.9, 0, 1 + next.lv * 0.03); SFX.swell(0.95, 0, 1); });
   setTimeout(() => {
+    SFX.cutSuspense();
     if (!box.isConnected) { upgBusy = false; renderAll(); return; }
     if (ok) SFX.success(next.lv); else SFX.fail();
     box.classList.add(ok ? 'success' : 'fail');
@@ -118,5 +123,5 @@ function doUpgrade(k) {
     act.innerHTML = '<button class="btn primary" id="ua-ok">Tiếp tục</button>';
     box.appendChild(act);
     act.querySelector('button').onclick = () => { upgBusy = false; closeModal(); renderAll(); };
-  }, 2600);
+  }, RESULT);
 }

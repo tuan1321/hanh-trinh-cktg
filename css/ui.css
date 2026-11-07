@@ -389,7 +389,7 @@ body.match-open main, body.match-open footer { visibility: hidden; }
 .po-card .flip { width: 100%; cursor: inherit; }
 .po-card .flip:not(.flipped):hover .flip-inner { transform: none; }
 .po-card .flip-inner { transition: transform .75s cubic-bezier(.3, 1.4, .5, 1); }
-.po-card.enter { animation: poEnter .5s cubic-bezier(.2, 1.25, .4, 1) both; }
+.po-card.enter { animation: poEnter .75s cubic-bezier(.2, 1.25, .4, 1) both; }
 @keyframes poEnter { from { transform: translateY(90px) scale(.5) rotate(-8deg); opacity: 0; } }
 .po-card.pulse .flip-back { animation: poPulse .24s ease-out; }
 @keyframes poPulse { 0% { filter: brightness(2.6); transform: scale(1.07); box-shadow: 0 0 46px #fff; } 100% { filter: none; transform: none; } }
@@ -402,7 +402,7 @@ body.match-open main, body.match-open footer { visibility: hidden; }
 }
 .po-pack span { font-size: 66px; filter: drop-shadow(0 6px 18px color-mix(in srgb, var(--pc) 70%, transparent)); }
 .po-pack b { font: 700 15px var(--display); color: color-mix(in srgb, var(--pc) 75%, white); letter-spacing: 1px; }
-.po-card.shake { animation: poRattle .85s ease-in both; }
+.po-card.shake { animation: poRattle 1.35s ease-in both; }
 .po-card.idle { animation: poIdle 2.2s ease-in-out infinite; }
 @keyframes poIdle { 50% { transform: translateY(-8px) rotate(-1.5deg); } }
 @keyframes poRattle {
@@ -435,6 +435,10 @@ body.match-open main, body.match-open footer { visibility: hidden; }
   .po-sc { width: calc(33.33% - 6px); }
 }
 @media (prefers-reduced-motion: reduce) { .po-stage.big, .po-card.shake { animation: none; } }
+
+/* ===== Nâng cấp: nhịp chậm ≈5 giây (khớp với âm thanh trong upgrade.js) ===== */
+.ua-main { animation-duration: 5.2s; }
+.ua-mat { animation-duration: 2.6s; }
 
 /* ===== Nâng cấp: chớp sáng mỗi nhát đập ===== */
 .ua-hit { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 42%, rgba(255,255,255,.9), rgba(255, 210, 63, .35) 30%, transparent 62%); }

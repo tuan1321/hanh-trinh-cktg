@@ -18,6 +18,9 @@ const AUDIO_CFG = (() => {
 
 const SFX = (() => {
   let ac = null, master = null, musicBus = null, noiseBuf = null;
+  let sus = null, out = null; // kênh riêng cho âm hồi hộp (trống lăn, nhịp tim…) để cắt ngay khi lật thẻ
+  const susBus = () => { if (!sus) { sus = ac.createGain(); sus.connect(master); } return sus; };
+  const onSus = fn => { if (!ctx()) return; out = susBus(); try { fn(); } finally { out = null; } };
 
   function ctx(force) {
     if (!AUDIO_CFG.sfx && !force) return null;
@@ -25,9 +28,14 @@ const SFX = (() => {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return null;
       ac = new AC();
+      // nén → khuếch đại → chặn đỉnh: to hơn mà không bị rè
       const comp = ac.createDynamicsCompressor();
-      comp.connect(ac.destination);
-      master = ac.createGain(); master.gain.value = AUDIO_CFG.sv * 0.75; master.connect(comp);
+      comp.threshold.value = -20; comp.knee.value = 10; comp.ratio.value = 4; comp.attack.value = 0.004; comp.release.value = 0.2;
+      const boost = ac.createGain(); boost.gain.value = 2.2;
+      const lim = ac.createDynamicsCompressor();
+      lim.threshold.value = -2; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.002; lim.release.value = 0.1;
+      comp.connect(boost); boost.connect(lim); lim.connect(ac.destination);
+      master = ac.createGain(); master.gain.value = AUDIO_CFG.sv * 1.3; master.connect(comp);
       musicBus = ac.createGain(); musicBus.gain.value = 1; musicBus.connect(ac.destination);
       noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
       const d = noiseBuf.getChannelData(0);
@@ -53,7 +61,7 @@ const SFX = (() => {
     env(g, s, a, vol, dur);
     let node = o;
     if (lp) { const fl = ac.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = lp; o.connect(fl); node = fl; }
-    node.connect(g); g.connect(master);
+    node.connect(g); g.connect(out || master);
     o.start(s); o.stop(s + a + dur + 0.05);
   }
   // tiếng ồn có lọc: gió, va chạm, nổ, đám đông
@@ -64,7 +72,7 @@ const SFX = (() => {
     fl.type = type; fl.Q.value = q; fl.frequency.setValueAtTime(f, s);
     if (to) fl.frequency.exponentialRampToValueAtTime(to, s + a + dur);
     env(g, s, a, vol, dur);
-    n.connect(fl); fl.connect(g); g.connect(master);
+    n.connect(fl); fl.connect(g); g.connect(out || master);
     n.start(s, Math.random() * 0.5); n.stop(s + a + dur + 0.05);
   }
   const chord = (notes, o) => notes.forEach(n => tone(NOTE(n), o));
@@ -108,7 +116,49 @@ const SFX = (() => {
     ctx,
     get context() { return ac; },
     get musicBus() { ctx(true); return musicBus; },
-    setVolume(v) { AUDIO_CFG.sv = v; if (master) master.gain.value = v * 0.75; },
+    setVolume(v) { AUDIO_CFG.sv = v; if (master) master.gain.value = v * 1.3; },
+
+    // ----- Âm tạo hồi hộp -----
+    heartbeat(t = 0, v = 1) { // thình… thịch
+      onSus(() => {
+        tone(62, { t, dur: 0.16, vol: 0.55 * v, to: 42 });
+        tone(58, { t: t + 0.19, dur: 0.2, vol: 0.42 * v, to: 38 });
+        noise({ t, dur: 0.06, vol: 0.08 * v, type: 'lowpass', f: 300 });
+      });
+    },
+    drumroll(dur = 1.2, t = 0, v = 1) { // trống lăn dồn dập, to dần
+      onSus(() => {
+        const n = Math.round(dur / 0.045);
+        for (let i = 0; i < n; i++) {
+          const k = i / n, tt = t + i * 0.045;
+          noise({ t: tt, dur: 0.05, vol: (0.06 + k * 0.22) * v, type: 'bandpass', f: 1800 + k * 900, q: 1.2 });
+          if (i % 2 === 0) tone(150 + k * 60, { t: tt, dur: 0.05, vol: (0.06 + k * 0.16) * v, to: 90 });
+        }
+      });
+    },
+    swell(dur = 1.2, t = 0, v = 1) { // tiếng rít ngược dâng lên, tắt phụt ngay trước khi lộ kết quả
+      onSus(() => {
+        const s = at(t), n = ac.createBufferSource(), fl = ac.createBiquadFilter(), g = ac.createGain();
+        n.buffer = noiseBuf; n.loop = true;
+        fl.type = 'bandpass'; fl.Q.value = 0.9; fl.frequency.setValueAtTime(500, s); fl.frequency.exponentialRampToValueAtTime(7000, s + dur);
+        g.gain.setValueAtTime(0.0001, s); g.gain.exponentialRampToValueAtTime(0.32 * v, s + dur); g.gain.linearRampToValueAtTime(0, s + dur + 0.03);
+        n.connect(fl); fl.connect(g); g.connect(out); n.start(s); n.stop(s + dur + 0.05);
+        tone(110, { t, dur, type: 'sawtooth', vol: 0.07 * v, to: 440, a: dur * 0.9, lp: 2500 });
+      });
+    },
+    // cắt ngay mọi âm hồi hộp đang phát / đã hẹn (khi lật thẻ, khi chạm mở nhanh)
+    cutSuspense() {
+      if (!ac || !sus) return;
+      const old = sus; sus = null;
+      old.gain.cancelScheduledValues(ac.currentTime);
+      old.gain.setTargetAtTime(0, ac.currentTime, 0.015);
+      setTimeout(() => { try { old.disconnect(); } catch (e) { } }, 400);
+    },
+    stinger(t = 0, v = 1) { // nốt trầm "dừm" báo hiệu
+      tone(NOTE(33), { t, dur: 1.3, vol: 0.5 * v, to: NOTE(31) });
+      chord([45, 52, 57], { t, dur: 1.1, type: 'sawtooth', vol: 0.05 * v, a: 0.02, lp: 900 });
+      noise({ t, dur: 0.5, vol: 0.2 * v, type: 'lowpass', f: 500, to: 100 });
+    },
     toggle() { AUDIO_CFG.sfx = !AUDIO_CFG.sfx; AUDIO_CFG.save(); if (AUDIO_CFG.sfx) ctx(); return AUDIO_CFG.sfx; },
 
     // ----- Mở gói -----

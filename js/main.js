@@ -304,9 +304,9 @@ function showPackModal(p, res) {
     wake = () => { clearTimeout(t); wake = null; r(); };
   });
   const waitTap = () => new Promise(r => { step = () => { step = null; r(); }; });
-  stage.onclick = () => { if (step) step(); else { fast = true; if (wake) wake(); } };
+  stage.onclick = () => { if (step) step(); else { fast = true; SFX.cutSuspense(); if (wake) wake(); } };
   $('#po-next').onclick = () => { if (step) step(); };
-  $('#po-skip').onclick = () => { skipAll = true; if (wake) wake(); if (step) step(); };
+  $('#po-skip').onclick = () => { skipAll = true; SFX.cutSuspense(); if (wake) wake(); if (step) step(); };
   const replay = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
   const burst = n => { $('#po-burst').innerHTML = Array.from({ length: n }, (_, i) => `<i style="--a:${(360 / n * i + rand(-8, 8)).toFixed(0)}deg;--r:${rand(90, 180).toFixed(0)}px;--d:${rand(0, .12).toFixed(2)}s"></i>`).join(''); };
   const mini = (r, fx) => `<span class="po-mini" style="--tcol:${fx.c}" title="${esc(r.c.name)} ${r.c.year}"><span class="po-av">${avatarHTML(r.c)}</span><b>${r.c.tier.id}</b></span>`;
@@ -319,8 +319,9 @@ function showPackModal(p, res) {
     $('#po-tap').textContent = 'Chạm để mở nhanh';
     // 1) gói rung rồi bung ra
     slot.classList.remove('idle'); replay(slot, 'shake');
-    SFX.packShake();
-    await wait(850);
+    SFX.packShake(); SFX.heartbeat(0.3); SFX.heartbeat(0.9, 1.1);
+    await wait(1350);
+    SFX.cutSuspense();
     if (!alive()) return;
     replay(stage, 'flash');
     for (let i = 0; i < res.length; i++) {
@@ -338,19 +339,23 @@ function showPackModal(p, res) {
       if (!skipAll) {
         // 2) thẻ bay ra
         replay(slot, 'enter'); SFX.whoosh();
-        await wait(480);
-        // 3) nhấp nháy vài lần (bậc càng cao càng nhiều lần, càng dồn dập)
+        await wait(800);
+        // 3) nhấp nháy vài lần kèm nhịp tim (bậc càng cao càng nhiều lần, càng dồn dập)
         for (let k = 0; k < fx.n && !fast && !skipAll && alive(); k++) {
-          replay(slot, 'pulse'); SFX.tick(k);
-          await wait(Math.max(130, 300 - k * 32));
+          replay(slot, 'pulse'); SFX.tick(k); SFX.heartbeat(0, 0.8 + k * 0.08);
+          await wait(Math.max(300, 640 - k * 70));
         }
         if (!alive()) return;
-        // 4) ánh sáng màu của bậc thẻ
+        // 4) ánh sáng màu của bậc thẻ + trống lăn dồn tới lúc lật
+        const D = [1.3, 1.5, 1.8, 2.1, 2.6, 3.0][fx.i];
         stage.classList.add('lit');
         if (fx.i >= 5) stage.classList.add('sss');
         if (fx.i >= 4) stage.classList.add('big');
         SFX.glow(fx.i);
-        await wait(fx.i >= 4 ? 1150 : fx.i >= 2 ? 800 : 600);
+        if (fx.i >= 3) SFX.stinger();
+        if (!fast && !skipAll) { SFX.drumroll(D - 0.1, 0.1, 0.8 + fx.i * 0.08); SFX.swell(D - 0.05, 0.05, 0.8 + fx.i * 0.08); }
+        await wait(D * 1000);
+        SFX.cutSuspense();
         if (!alive()) return;
       } else {
         stage.classList.add('lit');
