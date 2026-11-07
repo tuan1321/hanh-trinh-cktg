@@ -69,6 +69,7 @@ function readKey(k) { try { return migrate(JSON.parse(localStorage.getItem(k)));
 async function onAuthChange(user) {
   AUTH.user = user;
   hint(!!user);
+  if (typeof ACTIVITY !== 'undefined') { if (user) ACTIVITY.start(user); else ACTIVITY.stop(); }
   if (!user) {
     AUTH.lastWritten = null;
     // đăng xuất (hoặc chưa đăng nhập)
@@ -213,7 +214,7 @@ function openAcct() {
     $('#ac-name').textContent = displayName(u);
     $('#ac-mail').textContent = u.email || '';
     $('#ac-sync').onclick = () => { cloudSave(true); toast('Đang lưu lên tài khoản…'); };
-    $('#ac-out').onclick = () => { cloudSave(true); closeModal(); AUTH.auth.signOut(); };
+    $('#ac-out').onclick = () => { cloudSave(true); if (typeof ACTIVITY !== 'undefined') ACTIVITY.stop(); closeModal(); AUTH.auth.signOut(); };
     $('#ac-close').onclick = closeModal;
     return;
   }

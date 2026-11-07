@@ -49,6 +49,12 @@ Bấm nút **👤 Đăng nhập** góc trên: đăng nhập bằng Google hoặc
 5. **Firestore → Rules** → dán nội dung file `firestore.rules` → **Publish**. (Mỗi khi file này thay đổi, dán lại và Publish — ví dụ luật giữ tên đội.)
 6. **Project settings → Your apps → Web (`</>`)** → đăng ký app → chép đối tượng `firebaseConfig` vào `js/firebase-config.js` (thay `null`).
 
+## Thống kê truy cập (cho chủ trang)
+- **Trang quản trị**: `admin.html` (ví dụ https://cktg.online/admin.html). Xem tổng tài khoản, đang chơi, hoạt động hôm nay / 7 / 30 ngày, biểu đồ 30 ngày, thiết bị – trình duyệt, bảng từng tài khoản (lần đầu, hoạt động gần nhất, số lượt vào, tổng thời gian chơi).
+- Dữ liệu ghi ở Firestore `activity/{uid}` và `daily/{ngày}` (chỉ tài khoản đã đăng nhập; thời gian chỉ tính khi tab đang mở và có thao tác). Code ở `js/activity.js`.
+- **Cấp quyền xem**: đăng nhập admin.html → chép UID hiện ra → Firestore → tạo collection `admins`, document ID = UID đó (thêm 1 trường bất kỳ). Nhớ Publish `firestore.rules` mới.
+- **Lượt truy cập của mọi người (cả Khách)**: bật Google Analytics trong Firebase (Project settings → Integrations), điền Measurement ID `G-…` vào `ANALYTICS_ID` trong `js/firebase-config.js`.
+
 ## Ảnh tuyển thủ & logo đội
 56 tuyển thủ dùng ảnh tự do (Creative Commons / public domain) từ Wikimedia Commons và Openverse; 7 đội có logo tự do. Nguồn ghi đầy đủ trong `img/CREDITS.txt` và nút "📷 Nguồn ảnh" trong game (danh sách ở `js/credits.js`). Các tuyển thủ còn lại dùng chân dung tự vẽ (áo đấu theo màu đội); mỗi đội có huy hiệu riêng. Muốn dùng ảnh thật của bạn:
 - `img/players/<Tên>.png` (hoặc .jpg), ví dụ `img/players/Faker.png`

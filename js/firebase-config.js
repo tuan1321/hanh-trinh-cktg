@@ -10,6 +10,10 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "463436938386",
   appId: "1:463436938386:web:6212165ecb5ea6ceb5ba4b",
 };
+// Google Analytics đếm mọi lượt truy cập (kể cả Khách): Firebase Console → Project settings → Integrations
+// → Google Analytics → Enable; rồi lấy "Measurement ID" (dạng G-XXXXXXXXXX) ở Project settings → Your apps.
+// Để null = không dùng Google Analytics.
+const ANALYTICS_ID = null;
 /* Ví dụ:
 const FIREBASE_CONFIG = {
   apiKey: "AIza...",
