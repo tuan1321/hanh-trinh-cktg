@@ -41,7 +41,8 @@ const ownedBase = id => ownedKeys().some(k => cardOf(k).baseId === id);
 
 function newGame() {
   const keep = S ? { profile: S.profile, friends: S.friends } : {}; // chơi lại vẫn giữ mã kết bạn & bạn bè
-  S = { v: SAVE_VER, ...keep, teamName: 'Vietnam Legends', money: 1500, level: 1, exp: 0, cards: {}, lineup: { TOP: null, JNG: null, MID: null, ADC: null, SUP: null }, packs: [], won: {}, best: {}, run: null, ach: {}, stats: { w: 0, l: 0, titles: 0, fw: 0, maxUp: 0, maxPow: 0, ups: 0 } };
+  const nameKeep = S ? { teamName: S.teamName, nameKey: S.nameKey, myNames: S.myNames, nameChanges: S.nameChanges, wantName: S.wantName } : {}; // chơi lại vẫn giữ tên đội
+  S = { v: SAVE_VER, ...keep, teamName: null, ...nameKeep, money: 1500, level: 1, exp: 0, cards: {}, lineup: { TOP: null, JNG: null, MID: null, ADC: null, SUP: null }, packs: [], won: {}, best: {}, run: null, ach: {}, stats: { w: 0, l: 0, titles: 0, fw: 0, maxUp: 0, maxPow: 0, ups: 0 } };
   const got = [];
   const used = new Set();
   ROLES.forEach(r => {
@@ -52,6 +53,7 @@ function newGame() {
     const c = pick(CARDS.filter(c => c.rating <= 70 && !used.has(c.name)));
     addCard(c.id); got.push(c); used.add(c.name);
   }
+  ensureSocial(); ensureName();
   save();
   return got;
 }
@@ -299,7 +301,7 @@ function renderTeam() {
   $('#view-team').innerHTML = `
   <div class="panel team-hero">
     <div class="panel-head">
-      <div class="team-name"><span class="my-logo">${clubLogoHTML(S.teamName, true)}</span><div><label>Đội của bạn ✏️</label><input id="team-name" maxlength="24" value="${esc(S.teamName)}" title="Nhấn để đổi tên đội"></div></div>
+      <div class="team-name"><span class="my-logo">${clubLogoHTML(S.teamName, true)}</span><div class="tn-box"><label>Đội của bạn</label><button class="tn-name" id="team-name" title="Đổi tên đội"><b>${esc(S.teamName)}</b><i>✏️</i></button>${isDefaultName(S.teamName) ? '<small class="tn-hint">Tên mặc định · bấm để đặt tên riêng</small>' : ''}</div></div>
       <div class="power-ring" style="--p:${power ? Math.max(4, Math.min(100, (power - 55) / 60 * 100)).toFixed(0) : 0}"><div><small>Sức mạnh</small><b>${power ?? '—'}</b><span>TB ${avg} · ẩn +${hb} · ăn ý +${chem.bonus}</span></div></div>
     </div>
     <div class="lineup">
@@ -331,7 +333,7 @@ function renderTeam() {
       </div>
     </div>
   </div>`;
-  $('#team-name').onchange = e => { S.teamName = e.target.value.trim() || 'Vietnam Legends'; save(); renderTeam(); };
+  $('#team-name').onclick = renameModal;
   document.querySelectorAll('#view-team .slot').forEach(el => el.onclick = () => pickModal(el.dataset.role));
   document.querySelectorAll('[data-sugg]').forEach(b => b.onclick = () => equip(b.dataset.sugg));
   $('#btn-friendly').onclick = friendly;
@@ -606,6 +608,6 @@ $('#reset').onclick = () => {
 
 S = load();
 if (!S) { const got = newGame(); renderAll(); welcome(got); }
-else renderAll();
+else { ensureSocial(); ensureName(); save(); renderAll(); }
 moveInk(true);
 loadCustomImages(() => { if ($('#modal').classList.contains('hidden')) renderAll(); });

@@ -123,21 +123,44 @@ document.addEventListener('pointerdown', e => {
   setTimeout(() => w.remove(), 650);
 });
 
-// --- Thẻ nghiêng 3D theo chuột ---
+// --- Thẻ nghiêng 3D theo chuột (tối đa 1 lần cập nhật mỗi khung hình) ---
 if (!UI_REDUCED && matchMedia('(hover: hover) and (pointer: fine)').matches) {
-  let cur = null;
+  let cur = null, pending = null, raf = 0;
   const reset = c => { c.classList.remove('tilting'); c.style.removeProperty('--rx'); c.style.removeProperty('--ry'); };
-  document.addEventListener('pointermove', e => {
+  const apply = () => {
+    raf = 0;
+    const e = pending; pending = null;
+    if (!e) return;
     const c = e.target.closest && e.target.closest('.card.clickable');
     if (cur && cur !== c) { reset(cur); cur = null; }
     if (!c) return;
     cur = c;
     const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
     c.classList.add('tilting');
-    c.style.setProperty('--rx', ((0.5 - y) * 14).toFixed(2) + 'deg');
-    c.style.setProperty('--ry', ((x - 0.5) * 16).toFixed(2) + 'deg');
-    c.style.setProperty('--mx', (x * 100).toFixed(1) + '%');
-    c.style.setProperty('--my', (y * 100).toFixed(1) + '%');
+    c.style.setProperty('--rx', ((0.5 - y) * 14).toFixed(1) + 'deg');
+    c.style.setProperty('--ry', ((x - 0.5) * 16).toFixed(1) + 'deg');
+    c.style.setProperty('--mx', (x * 100).toFixed(0) + '%');
+    c.style.setProperty('--my', (y * 100).toFixed(0) + '%');
+  };
+  document.addEventListener('pointermove', e => {
+    if (e.pointerType !== 'mouse') return;
+    pending = e;
+    if (!raf) raf = requestAnimationFrame(apply);
   }, { passive: true });
   document.addEventListener('pointerleave', () => { if (cur) { reset(cur); cur = null; } });
 }
+
+// --- Đánh dấu khi hộp thoại / trận đấu đang mở (CSS dừng hiệu ứng phía sau cho nhẹ máy) ---
+(function overlayWatch() {
+  const modal = document.getElementById('modal'), match = document.getElementById('match');
+  if (!modal || !match) return;
+  const sync = () => {
+    const m = !match.classList.contains('hidden');
+    document.body.classList.toggle('match-open', m);
+    document.body.classList.toggle('ov-open', m || !modal.classList.contains('hidden'));
+  };
+  const mo = new MutationObserver(sync);
+  mo.observe(modal, { attributes: true, attributeFilter: ['class'] });
+  mo.observe(match, { attributes: true, attributeFilter: ['class'] });
+  sync();
+})();

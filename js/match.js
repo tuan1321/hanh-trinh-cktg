@@ -481,7 +481,8 @@ const MatchUI = (() => {
     let waves = [], nextWave = 65;
     const fx = [];
     const evs = g.events;
-    let gs = 0, idx = 0, look = 0, done = false, last = performance.now(), lastDom = 0;
+    let gs = 0, idx = 0, look = 0, done = false, last = performance.now(), lastDom = 0, lastSec = -1;
+    const clockEl = $id('m-clock'), commEl = $id('comm');
     let snap = { kills: [0, 0], gold: [2500, 2500], towers: [0, 0], drag: [0, 0], baron: [0, 0], kd: [0, 1].map(() => Object.fromEntries(ROLES.map(r => [r, [0, 0]]))), lanes: [[0, 0, 0], [0, 0, 0]], inhib: [[0, 0, 0], [0, 0, 0]], nt: [0, 0], nexus: [1, 1] };
     updateBoard(snap, teams);
 
@@ -495,7 +496,8 @@ const MatchUI = (() => {
       d.className = `c-line ${e.side === 0 ? 'blue' : e.side === 1 ? 'red' : 'neutral'} ${e.big ? 'big' : ''}`;
       d.innerHTML = `<span class="c-time">${fmtTime(e.t)}</span><span class="c-text"></span>`;
       d.querySelector('.c-text').textContent = e.text;
-      $id('comm').prepend(d);
+      commEl.prepend(d);
+      while (commEl.children.length > 80) commEl.lastChild.remove(); // giữ danh sách bình luận gọn
     }
     function feed(k) {
       const el = document.createElement('div');
@@ -546,7 +548,7 @@ const MatchUI = (() => {
         const c = C(s, r);
         c.deadAt = e.t; c.deadUntil = e.t + 10 + (e.t / 60) * 1.1; c.wasDead = true; c.path = []; c.task = null;
       });
-      updateBoard(snap, teams);
+      if (!quiet) updateBoard(snap, teams);
     }
     function sparks(p, c, n) {
       for (let i = 0; i < n; i++) { const a = rand(0, Math.PI * 2), v = rand(4, 12); addFx({ t: 'spark', x: p[0], y: p[1], vx: Math.cos(a) * v, vy: Math.sin(a) * v, c, dur: rand(500, 900) }); }
@@ -604,6 +606,7 @@ const MatchUI = (() => {
     }
     $id('m-skip').onclick = () => {
       while (idx < evs.length) apply(evs[idx++], true);
+      updateBoard(snap, teams);
       gs = g.duration; look = evs.length; waves = [];
       champs.forEach(c => { if (gs < c.deadUntil) return; const h = homePos(c, gs); c.x = h[0]; c.y = h[1]; c.path = []; });
       finish();
@@ -649,7 +652,8 @@ const MatchUI = (() => {
           }
         } else if (gs > c.busyUntil && gs >= c.nextIdle && !done) idle(c);
       });
-      $id('m-clock').textContent = fmtTime(Math.min(gs, g.duration));
+      const sec = Math.floor(Math.min(gs, g.duration));
+      if (sec !== lastSec) { lastSec = sec; clockEl.textContent = fmtTime(sec); }
       // cập nhật trạng thái hồi sinh trong bảng K/D (4 lần/giây)
       if (t - lastDom > 250) {
         lastDom = t;

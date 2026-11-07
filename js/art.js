@@ -70,13 +70,41 @@ function probeImage(key, bases, done) {
 }
 // Ảnh tự do đã tải sẵn (danh sách trong js/credits.js) được dùng ngay, không cần dò
 if (typeof IMAGE_CREDITS !== 'undefined') IMAGE_CREDITS.forEach(c => { CUSTOM_IMG[c.kind === 'team' ? 't:' + c.code : 'p:' + c.name] = c.path; });
+// Dò ảnh tự thêm (img/players, img/teams). Để tránh hàng trăm yêu cầu 404 mỗi lần mở game:
+// - nhớ kết quả trong trình duyệt 12 giờ (mở trang với ?anhmoi để dò lại ngay)
+// - chạy khi trình duyệt rảnh, tối đa 4 yêu cầu cùng lúc
+const IMG_CACHE_KEY = 'hanhtrinh_cktg_imgprobe_v1', IMG_CACHE_TTL = 12 * 3600 * 1000;
 function loadCustomImages(onDone) {
+  let cache = null;
+  try { cache = JSON.parse(localStorage.getItem(IMG_CACHE_KEY)); } catch (e) { }
+  const fresh = cache && Date.now() - cache.ts < IMG_CACHE_TTL && !/[?&]anhmoi\b/.test(location.search);
+  if (fresh) {
+    let added = false;
+    Object.entries(cache.found || {}).forEach(([k, u]) => { if (!CUSTOM_IMG[k]) { CUSTOM_IMG[k] = u; added = true; } });
+    if (added) onDone();
+    return;
+  }
   const jobs = [];
   [...new Set(CARDS.map(c => c.name))].filter(n => !CUSTOM_IMG['p:' + n]).forEach(n => jobs.push(['p:' + n, ['img/players/' + encodeURIComponent(n)]]));
   [...new Set(CARDS.map(c => c.team))].filter(t => !CUSTOM_IMG['t:' + t]).forEach(t => jobs.push(['t:' + t, ['img/teams/' + encodeURIComponent(t)]]));
-  let left = jobs.length;
-  if (!left) return;
-  jobs.forEach(([k, b]) => probeImage(k, b, () => { if (--left === 0 && Object.keys(CUSTOM_IMG).length) onDone(); }));
+  if (!jobs.length) return;
+  const found = {};
+  let next = 0, active = 0, left = jobs.length;
+  const pump = () => {
+    while (active < 4 && next < jobs.length) {
+      const [k, b] = jobs[next++];
+      active++;
+      probeImage(k, b, () => {
+        active--;
+        if (CUSTOM_IMG[k]) found[k] = CUSTOM_IMG[k];
+        if (--left === 0) {
+          try { localStorage.setItem(IMG_CACHE_KEY, JSON.stringify({ ts: Date.now(), found })); } catch (e) { }
+          if (Object.keys(found).length) onDone();
+        } else pump();
+      });
+    }
+  };
+  if ('requestIdleCallback' in window) requestIdleCallback(pump, { timeout: 3000 }); else setTimeout(pump, 1000);
 }
 
 // ----- Chân dung tuyển thủ -----
@@ -115,9 +143,13 @@ function avatarSVG(card) {
     <path d="M30,53 C31,62 38,64 44,62" stroke="#1f2937" stroke-width="2" fill="none"/><circle cx="44.5" cy="62" r="1.8" fill="#1f2937"/>
   </svg>`;
 }
+const AV_CACHE = new Map();
 function avatarHTML(card) {
   const img = CUSTOM_IMG['p:' + card.name];
-  return img ? `<img class="av-img" src="${img}" alt="${esc(card.name)}">` : avatarSVG(card);
+  if (img) return `<img class="av-img" src="${img}" alt="${esc(card.name)}" loading="lazy" decoding="async">`;
+  // chân dung tự vẽ chỉ phụ thuộc tên + đội → tạo 1 lần rồi dùng lại
+  const k = card.name + '|' + card.team;
+  return AV_CACHE.get(k) || (AV_CACHE.set(k, avatarSVG(card)), AV_CACHE.get(k));
 }
 // Ảnh ẩn cho thẻ chưa mở: bóng người tối + dấu hỏi, viền theo màu bậc thẻ
 function hiddenAvatarSVG() {

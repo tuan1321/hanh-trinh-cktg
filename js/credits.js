@@ -146,7 +146,7 @@ const IMAGE_CREDITS = [
     },
     {
         "name":  "Faker",
-        "path":  "img/players/Faker.png",
+        "path":  "img/players/Faker.jpg",
         "artist":  "Marie Claire",
         "license":  "CC BY 4.0",
         "licenseUrl":  "https://creativecommons.org/licenses/by/4.0",
@@ -182,7 +182,7 @@ const IMAGE_CREDITS = [
     },
     {
         "name":  "ShowMaker",
-        "path":  "img/players/ShowMaker.png",
+        "path":  "img/players/ShowMaker.jpg",
         "artist":  "fomos esports",
         "license":  "CC BY 3.0",
         "licenseUrl":  "https://creativecommons.org/licenses/by/3.0",
@@ -272,7 +272,7 @@ const IMAGE_CREDITS = [
     },
     {
         "name":  "Gumayusi",
-        "path":  "img/players/Gumayusi.png",
+        "path":  "img/players/Gumayusi.jpg",
         "artist":  "Marie Claire",
         "license":  "CC BY 4.0",
         "licenseUrl":  "https://creativecommons.org/licenses/by/4.0",
@@ -317,7 +317,7 @@ const IMAGE_CREDITS = [
     },
     {
         "name":  "Mikyx",
-        "path":  "img/players/Mikyx.png",
+        "path":  "img/players/Mikyx.jpg",
         "artist":  "G2 Esports",
         "license":  "CC BY 3.0",
         "licenseUrl":  "https://creativecommons.org/licenses/by/3.0",

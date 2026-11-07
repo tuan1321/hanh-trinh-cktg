@@ -12,5 +12,5 @@ Logo đội: đặt vào thư mục  img/teams/
   - Ví dụ: img/teams/T1.png
   - Nên dùng ảnh PNG nền trong suốt.
 
-Sau khi thêm ảnh, tải lại trang (F5). Tuyển thủ/đội nào chưa có ảnh sẽ dùng hình tự vẽ.
+Sau khi thêm ảnh, mở trang với ?anhmoi ở cuối địa chỉ (ví dụ index.html?anhmoi) để game dò ảnh mới ngay (bình thường game chỉ dò 12 giờ một lần). Tuyển thủ/đội nào chưa có ảnh sẽ dùng hình tự vẽ.
 Lưu ý: chỉ dùng ảnh bạn có quyền sử dụng.

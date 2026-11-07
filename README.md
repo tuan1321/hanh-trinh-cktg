@@ -28,6 +28,13 @@ Hoặc tải về và **mở `index.html` bằng Chrome/Edge**, không cần cà
 - **Đấu đội đã lưu**: giao hữu với đội hình bạn bè bất cứ lúc nào.
 - **Trực tuyến**: bật "📡 Trực tuyến" để thấy bạn bè đang mở game và **mời đấu trực tiếp BO1/BO3/BO5**; người mời tạo trận, hai bên xem cùng một trận. Kết nối máy-máy (WebRTC) qua máy chủ trung gian miễn phí PeerJS — cần có mạng; một số mạng công ty/trường học có thể chặn kết nối này.
 
+## Tên đội
+- Mặc định mỗi người có tên **`HLV #<mã kết bạn>`**, không bao giờ trùng ai.
+- **Tên riêng cần đăng nhập** (bấm tên đội ở tab Đội hình). Tên được giữ trên máy chủ: người khác **không bao giờ đặt lại được**, kể cả khi bạn đã đổi sang tên khác. Bạn được quay lại tên cũ của mình miễn phí.
+- Luật đặt tên: 3–20 ký tự, ít nhất 2 chữ cái; chỉ chữ (có dấu), số, khoảng trắng và `. _ - '`; so trùng không phân biệt hoa thường / dấu / khoảng trắng ("Rồng Lửa" = "rong-lua"); không trùng đội AI hay đội chuyên nghiệp thật, không giả danh quản trị, không từ thô tục, không dùng `#`.
+- Lần đổi tên riêng đầu miễn phí, sau đó 5.000 💰 mỗi lần.
+- Khách đã đặt tên riêng ở bản cũ: tên được cất lại và tự đăng ký khi đăng nhập (nếu chưa ai dùng).
+
 ## Đăng nhập & lưu tiến trình theo tài khoản
 Bấm nút **👤 Đăng nhập** góc trên: đăng nhập bằng Google hoặc email/mật khẩu, tiến trình tự lưu lên tài khoản và chơi tiếp được trên máy khác. Chưa đăng nhập thì chơi ở chế độ **Khách** (lưu trên trình duyệt); lần đầu đăng nhập có thể chuyển tiến trình Khách vào tài khoản.
 
@@ -36,7 +43,7 @@ Bấm nút **👤 Đăng nhập** góc trên: đăng nhập bằng Google hoặc
 2. **Build → Authentication → Get started** → bật **Google** và **Email/Password**.
 3. **Authentication → Settings → Authorized domains** → thêm `tuan1321.github.io`.
 4. **Build → Firestore Database → Create database** → chọn vùng gần (ví dụ `asia-southeast1`) → **production mode**.
-5. **Firestore → Rules** → dán nội dung file `firestore.rules` → **Publish**.
+5. **Firestore → Rules** → dán nội dung file `firestore.rules` → **Publish**. (Mỗi khi file này thay đổi, dán lại và Publish — ví dụ luật giữ tên đội.)
 6. **Project settings → Your apps → Web (`</>`)** → đăng ký app → chép đối tượng `firebaseConfig` vào `js/firebase-config.js` (thay `null`).
 
 ## Ảnh tuyển thủ & logo đội
@@ -44,7 +51,7 @@ Bấm nút **👤 Đăng nhập** góc trên: đăng nhập bằng Google hoặc
 - `img/players/<Tên>.png` (hoặc .jpg), ví dụ `img/players/Faker.png`
 - `img/teams/<Mã đội>.png`, ví dụ `img/teams/T1.png`
 
-Tải lại trang là game tự nhận. Chi tiết trong `img/HUONG-DAN.txt`.
+Game dò ảnh mới 12 giờ một lần (để tránh hàng trăm yêu cầu thừa mỗi lần mở). Muốn thấy ảnh vừa thêm ngay, mở trang với `?anhmoi` ở cuối địa chỉ, ví dụ `index.html?anhmoi`. Chi tiết trong `img/HUONG-DAN.txt`.
 
 ## Cấu trúc
 - `index.html` – khung trang
@@ -58,6 +65,7 @@ Tải lại trang là game tự nhận. Chi tiết trong `img/HUONG-DAN.txt`.
 - `js/tour.js` – giải đấu: chương độ khó, vòng bảng, Thụy Sĩ, loại trực tiếp
 - `js/upgrade.js` – nâng cấp thẻ +1…+10
 - `js/achieve.js` – thành tựu
+- `js/names.js` – luật đặt tên đội, giữ tên duy nhất
 - `js/donate-config.js` – thông tin ủng hộ nhà phát hành
 - `js/main.js` – logic game & giao diện các tab
 

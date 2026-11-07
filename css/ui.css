@@ -15,9 +15,9 @@ body {
     radial-gradient(1200px 600px at 50% -10%, rgba(109, 40, 217, .22), transparent 60%),
     radial-gradient(900px 500px at 100% 100%, rgba(14, 116, 144, .16), transparent 60%),
     linear-gradient(180deg, #0c0a24 0%, #08071a 100%);
-  background-attachment: fixed;
 }
-body::before, body::after { opacity: .38; }
+/* khối màu nền đứng yên: tránh làm mọi lớp mờ (backdrop-filter) phía trên phải vẽ lại mỗi khung hình */
+body::before, body::after { opacity: .38; animation: none; will-change: auto; }
 html::after {
   content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, .55) 100%);
@@ -129,7 +129,26 @@ main { position: relative; }
 @keyframes vOut { to { opacity: 0; transform: translate3d(var(--dx, -26px), 0, 0); } }
 
 /* ===== Khung & nút ===== */
-.panel { box-shadow: 0 10px 40px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .08); }
+/* khung: bỏ làm mờ nền (rất tốn GPU khi cuộn), thay bằng nền đặc hơn một chút – nhìn gần như cũ */
+.panel {
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+  background: linear-gradient(180deg, rgba(36, 30, 78, .55), rgba(24, 20, 56, .5));
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+.hs-label { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(13, 10, 40, .9); }
+
+/* ánh sáng lướt trên thẻ: chạy bằng transform (GPU lo, không phải vẽ lại thẻ) */
+.card-shine { background-size: 100% 100%; background-position: 0 0; transform: translateX(-130%); }
+.card.clickable:hover .card-shine { animation: shineT 1s ease forwards; }
+.tier-SS .card-shine, .tier-SSS .card-shine { animation: shineT 2.8s linear infinite; }
+@keyframes shineT { from { transform: translateX(-130%); } to { transform: translateX(130%); } }
+/* viền cầu vồng thẻ SSS: chỉ chạy khi rê chuột / trong hộp thoại (vẽ lại tốn kém khi có nhiều thẻ) */
+.tier-SSS.card { animation: none; }
+.tier-SSS.card:hover, .modal-box .tier-SSS.card { animation: rainbow 3s linear infinite; }
+
+/* khi hộp thoại / màn trận đấu mở: dừng hiệu ứng lặp phía sau để lớp mờ toàn màn hình không phải tính lại */
+body.ov-open main *, body.ov-open .topbar * { animation-play-state: paused !important; }
+body.match-open main, body.match-open footer { visibility: hidden; }
 .btn { position: relative; overflow: hidden; isolation: isolate; transition: transform .2s var(--ease-out), box-shadow .25s, background .25s, border-color .25s; }
 .btn:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
 .btn.primary::after {
@@ -150,11 +169,11 @@ main { position: relative; }
 
 /* ===== Thẻ: nghiêng 3D & vệt sáng theo chuột ===== */
 @media (hover: hover) and (pointer: fine) {
-  .card.clickable { transition: transform .45s var(--ease-out), box-shadow .3s; will-change: transform; }
+  .card.clickable { transition: transform .45s var(--ease-out), box-shadow .3s; }
   .card.clickable:hover {
     transform: perspective(800px) translateY(-6px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(1.04);
   }
-  .card.clickable.tilting { transition: transform .1s linear, box-shadow .3s; }
+  .card.clickable.tilting { transition: transform .1s linear, box-shadow .3s; will-change: transform; }
   .card.clickable::after {
     content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 3;
     background: radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, .24), transparent 48%);
@@ -177,6 +196,34 @@ main { position: relative; }
 /* thông báo */
 .toast { animation: toastIn .45s var(--ease-out); }
 @keyframes toastIn { from { opacity: 0; transform: translateY(-18px) scale(.9); } }
+
+/* ===== Tên đội & hộp thoại đổi tên ===== */
+.tn-box { min-width: 0; }
+#team-name.tn-name {
+  display: flex; align-items: center; gap: 10px; max-width: 100%; padding: 4px 12px 4px 0; cursor: pointer;
+  background: none; border: 0; border-radius: 10px; box-shadow: none; color: var(--text); text-align: left;
+}
+.tn-name b { font: 700 22px var(--display); letter-spacing: .5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tn-name i { font-style: normal; font-size: 14px; opacity: .5; transition: opacity .2s, transform .3s var(--ease-out); }
+.tn-name:hover i { opacity: 1; transform: rotate(-12deg) scale(1.15); }
+.tn-name:hover b { color: #c4b5fd; }
+.tn-name:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+.tn-hint { display: block; color: var(--muted); font-size: 11px; }
+.rn-field { position: relative; margin: 12px 0 6px; }
+.rn-field input {
+  width: 100%; padding: 13px 64px 13px 14px; border-radius: 12px; outline: none; font: 600 17px var(--font); color: var(--text);
+  background: rgba(0, 0, 0, .3); border: 1px solid var(--stroke2); transition: border-color .2s, box-shadow .2s;
+}
+.rn-field input:focus { border-color: var(--c); box-shadow: 0 0 0 3px rgba(34, 211, 238, .2); }
+.rn-field span { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); }
+.rn-msg { min-height: 22px; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.rn-msg.good { color: var(--lime); }
+.rn-msg.bad { color: var(--red); }
+.rn-msg.wait { color: var(--muted); }
+.name-rules { margin-top: 12px; background: rgba(255, 255, 255, .04); border: 1px solid var(--stroke); border-radius: 12px; padding: 10px 14px; font-size: 13px; }
+.name-rules summary { cursor: pointer; font-weight: 700; }
+.name-rules ol { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 4px; color: var(--muted); }
+@media (max-width: 640px) { .tn-name b { font-size: 18px; } }
 
 /* ===== Màn hình tải ===== */
 #splash {

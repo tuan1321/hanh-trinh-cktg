@@ -2,8 +2,15 @@
 // - Đăng nhập bằng Google hoặc email/mật khẩu
 // - Tiến trình lưu ở saves/{uid} trên Firestore (chỉ chủ tài khoản đọc/ghi được, xem firestore.rules)
 // - Mỗi tài khoản có bản sao trên máy (khóa riêng); khi đăng xuất quay về bản lưu Khách
+// Tiết kiệm tài nguyên:
+// - Khách chưa từng đăng nhập: không tải thư viện Firebase (~400KB) cho tới khi bấm "Đăng nhập".
+// - Gom thay đổi, chỉ ghi lên máy chủ khi dữ liệu thật sự khác lần ghi trước, tối đa 1 lần / vài giây.
 const FB_VER = '10.12.2';
-const AUTH = { ready: false, user: null, boundUid: null, db: null, auth: null, sync: 'off', lastSync: null, timer: null };
+const AUTH = { ready: false, loading: null, user: null, boundUid: null, db: null, auth: null, sync: 'off', lastSync: null, timer: null, firstChange: 0, lastWritten: null };
+const AUTH_HINT = 'hanhtrinh_cktg_auth'; // đánh dấu máy này từng đăng nhập → tải Firebase ngay khi mở trang
+const SYNC_DEBOUNCE = 4000, SYNC_MAX_WAIT = 20000;
+const hint = v => { try { v ? localStorage.setItem(AUTH_HINT, '1') : localStorage.removeItem(AUTH_HINT); } catch (e) { } };
+const hasHint = () => { try { return localStorage.getItem(AUTH_HINT) === '1'; } catch (e) { return false; } };
 
 function authConfigured() { return typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey; }
 
@@ -14,10 +21,9 @@ function loadScript(src) {
     document.head.appendChild(s);
   });
 }
-async function initAuth() {
-  renderAcct();
-  if (!authConfigured()) return;
-  try {
+function startFirebase() {
+  if (AUTH.loading) return AUTH.loading;
+  AUTH.loading = (async () => {
     const base = `https://www.gstatic.com/firebasejs/${FB_VER}/`;
     await loadScript(base + 'firebase-app-compat.js');
     await Promise.all([loadScript(base + 'firebase-auth-compat.js'), loadScript(base + 'firebase-firestore-compat.js')]);
@@ -26,11 +32,23 @@ async function initAuth() {
     AUTH.db = firebase.firestore();
     AUTH.ready = true;
     AUTH.auth.onAuthStateChanged(onAuthChange);
-  } catch (e) {
+    renderAcct();
+  })().catch(e => {
+    AUTH.loading = null;
     console.warn(e);
     toast('Không kết nối được máy chủ đăng nhập – đang chơi ở chế độ Khách', 'err');
-  }
+    throw e;
+  });
+  return AUTH.loading;
+}
+function initAuth() {
   renderAcct();
+  if (!authConfigured()) return;
+  // chỉ tải Firebase ngay nếu máy này từng đăng nhập; khách thì đợi tới khi bấm "Đăng nhập"
+  if (hasHint()) {
+    const go = () => startFirebase().catch(() => { });
+    if ('requestIdleCallback' in window) requestIdleCallback(go, { timeout: 1500 }); else setTimeout(go, 300);
+  }
 }
 
 // ----- đổi bản lưu đang dùng -----
@@ -39,6 +57,7 @@ function switchSave(newS) {
   if (wasOnline) goOffline(true);
   S = newS;
   ensureSocial();
+  ensureName();
   currentView = 'team';
   switchView('team');
   refreshSocialUI();
@@ -49,7 +68,9 @@ function readKey(k) { try { return migrate(JSON.parse(localStorage.getItem(k)));
 
 async function onAuthChange(user) {
   AUTH.user = user;
+  hint(!!user);
   if (!user) {
+    AUTH.lastWritten = null;
     // đăng xuất (hoặc chưa đăng nhập)
     if (AUTH.boundUid) {
       AUTH.boundUid = null; setSync('off');
@@ -66,7 +87,7 @@ async function onAuthChange(user) {
   let cloud = null, failed = false;
   try {
     const d = await AUTH.db.collection('saves').doc(user.uid).get();
-    if (d.exists) cloud = migrate(JSON.parse(d.data().data));
+    if (d.exists) { AUTH.lastWritten = d.data().data; cloud = migrate(JSON.parse(d.data().data)); }
   } catch (e) { failed = true; console.warn(e); }
   if (failed) {
     // không đọc được máy chủ: dùng bản sao trên máy nếu có, không ghi đè máy chủ
@@ -84,6 +105,7 @@ async function onAuthChange(user) {
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { }
     setSync('ok');
     toast(`Chào mừng trở lại, ${displayName(user)}!`, 'gold');
+    reconcileName();
   } else {
     // tài khoản mới: hỏi có chuyển tiến trình Khách vào không
     const g = readKey(GUEST_KEY);
@@ -93,7 +115,7 @@ async function onAuthChange(user) {
         <p class="center">Bạn có tiến trình chơi ở chế độ Khách trên máy này:<br><b>Cấp ${g.level}</b> · ${Object.keys(g.cards).length} thẻ · 🏆 ${g.stats.titles} danh hiệu · 💰 ${fmt(g.money)}</p>
         <p class="center muted">Chuyển tiến trình này vào tài khoản để chơi tiếp trên mọi thiết bị?</p>
         <div class="actions"><button class="btn primary" id="mv-yes">Chuyển vào tài khoản</button><button class="btn ghost" id="mv-no">Bắt đầu mới</button></div>`);
-      $('#mv-yes').onclick = () => { closeModal(); switchSave(JSON.parse(JSON.stringify(g))); save(); toast('Đã chuyển tiến trình vào tài khoản', 'gold'); };
+      $('#mv-yes').onclick = () => { closeModal(); switchSave(JSON.parse(JSON.stringify(g))); save(); toast('Đã chuyển tiến trình vào tài khoản', 'gold'); reconcileName(); };
       $('#mv-no').onclick = () => { closeModal(); S = null; const got = newGame(); switchSave(S); save(); welcome(got); };
     } else {
       S = null; const got = newGame(); switchSave(S); save(); welcome(got);
@@ -103,24 +125,35 @@ async function onAuthChange(user) {
 }
 
 // ----- đồng bộ lên máy chủ (gom thay đổi, ghi sau 1.5 giây) -----
+// Gom thay đổi: ghi sau 4 giây yên lặng, nhưng không để quá 20 giây kể từ thay đổi đầu tiên.
+// Bỏ qua nếu dữ liệu y hệt lần ghi trước (không tốn lượt ghi Firestore).
 function cloudSave(now) {
   if (!AUTH.ready || !AUTH.user || AUTH.boundUid !== AUTH.user.uid || !S) return;
-  clearTimeout(AUTH.timer);
+  clearTimeout(AUTH.timer); AUTH.timer = null;
   const run = () => {
+    AUTH.timer = null; AUTH.firstChange = 0;
     const uid = AUTH.user && AUTH.user.uid;
-    if (!uid || uid !== AUTH.boundUid) return;
+    if (!uid || uid !== AUTH.boundUid || !S) return;
+    const data = JSON.stringify(S);
+    if (data === AUTH.lastWritten) { if (AUTH.sync !== 'ok') setSync('ok'); return; }
     setSync('saving');
     AUTH.db.collection('saves').doc(uid).set({
-      data: JSON.stringify(S),
-      name: String(S.teamName).slice(0, 24),
+      data,
+      name: String(S.teamName || '').slice(0, 24),
       level: S.level,
       updated: firebase.firestore.FieldValue.serverTimestamp(),
-    }).then(() => { AUTH.lastSync = new Date(); setSync('ok'); })
+    }).then(() => { AUTH.lastWritten = data; AUTH.lastSync = new Date(); setSync('ok'); })
       .catch(e => { console.warn(e); setSync('err'); });
   };
-  if (now) run(); else AUTH.timer = setTimeout(run, 1500);
+  if (now) return run();
+  const t = Date.now();
+  if (!AUTH.firstChange) AUTH.firstChange = t;
+  const wait = Math.max(0, Math.min(SYNC_DEBOUNCE, AUTH.firstChange + SYNC_MAX_WAIT - t));
+  AUTH.timer = setTimeout(run, wait);
 }
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && AUTH.timer) { clearTimeout(AUTH.timer); AUTH.timer = null; cloudSave(true); } });
+const flushCloud = () => { if (AUTH.timer) { clearTimeout(AUTH.timer); AUTH.timer = null; cloudSave(true); } };
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushCloud(); });
+window.addEventListener('pagehide', flushCloud);
 function setSync(s) { AUTH.sync = s; renderAcct(); }
 
 // ----- giao diện -----
@@ -162,7 +195,11 @@ function openAcct() {
       <div class="actions"><button class="btn" id="ac-close">Đóng</button></div>`);
     $('#ac-close').onclick = closeModal; return;
   }
-  if (!AUTH.ready) { toast('Đang kết nối máy chủ đăng nhập…'); return; }
+  if (!AUTH.ready) {
+    toast('Đang kết nối máy chủ đăng nhập…');
+    startFirebase().then(() => { if (!AUTH.user) openAcct(); }).catch(() => { });
+    return;
+  }
   const u = AUTH.user;
   if (u) {
     const prov = (u.providerData[0] && u.providerData[0].providerId) === 'google.com' ? 'Google' : 'Email';
