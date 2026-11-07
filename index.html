@@ -8,34 +8,47 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/ui.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <span class="logo">🏆</span>
-      <div><b>HÀNH TRÌNH CKTG</b><small>Build team · Leo rank · Vô địch thế giới</small></div>
-    </div>
-    <div class="stats">
-      <div class="stat money">💰 <span id="money">0</span></div>
-      <div class="stat level">
-        <span>Cấp <b id="level">1</b></span>
-        <div class="xpbar"><div id="xpfill"></div></div>
-        <small id="xptext"></small>
-      </div>
-      <button class="stat donate-top" id="donate-btn" title="Ủng hộ nhà phát hành">💖<span> Ủng hộ</span></button>
-      <button class="acct" id="acct-btn" title="Tài khoản"><span class="acct-av">👤</span><span class="acct-name">Đăng nhập</span></button>
-    </div>
-  </header>
+  <!-- Màn hình tải -->
+  <div id="splash" aria-hidden="true">
+    <div class="sp-glow"></div>
+    <div class="sp-logo">🏆</div>
+    <div class="sp-title">HÀNH TRÌNH CKTG</div>
+    <div class="sp-sub">Esports Manager</div>
+    <div class="sp-bar"><i></i></div>
+    <small class="sp-tip">Đang chuẩn bị sân đấu…</small>
+  </div>
 
-  <nav class="tabs">
-    <button data-view="team" class="active"><i>⚔️</i><span>Đội hình</span></button>
-    <button data-view="map"><i>🗺️</i><span>Giải đấu</span></button>
-    <button data-view="shop"><i>🛍️</i><span>Cửa hàng</span><span class="dot hidden" id="pack-dot"></span></button>
-    <button data-view="collection"><i>🃏</i><span>Bộ sưu tập</span></button>
-    <button data-view="upgrade"><i>⬆️</i><span>Nâng cấp</span></button>
-    <button data-view="achieve"><i>🏅</i><span>Thành tựu</span><span class="dot hidden" id="ach-dot"></span></button>
-    <button data-view="friends"><i>👥</i><span>Bạn bè</span><span class="dot-num hidden" id="friends-dot">0</span></button>
-  </nav>
+  <header class="topbar">
+    <div class="hud-row">
+      <div class="brand">
+        <span class="logo">🏆</span>
+        <div><b>HÀNH TRÌNH CKTG</b><small>Build team · Leo rank · Vô địch thế giới</small></div>
+      </div>
+      <div class="stats">
+        <div class="stat money"><span class="coin">💰</span><span id="money">0</span></div>
+        <div class="stat level">
+          <span>Cấp <b id="level">1</b></span>
+          <div class="xpbar"><div id="xpfill"></div></div>
+          <small id="xptext"></small>
+        </div>
+        <button class="stat donate-top" id="donate-btn" title="Ủng hộ nhà phát hành">💖<span> Ủng hộ</span></button>
+        <button class="acct" id="acct-btn" title="Tài khoản"><span class="acct-av">👤</span><span class="acct-name">Đăng nhập</span></button>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button data-view="team" class="active"><i>⚔️</i><span>Đội hình</span></button>
+      <button data-view="map"><i>🗺️</i><span>Giải đấu</span></button>
+      <button data-view="shop"><i>🛍️</i><span>Cửa hàng</span><span class="dot hidden" id="pack-dot"></span></button>
+      <button data-view="collection"><i>🃏</i><span>Bộ sưu tập</span></button>
+      <button data-view="upgrade"><i>⬆️</i><span>Nâng cấp</span></button>
+      <button data-view="achieve"><i>🏅</i><span>Thành tựu</span><span class="dot hidden" id="ach-dot"></span></button>
+      <button data-view="friends"><i>👥</i><span>Bạn bè</span><span class="dot-num hidden" id="friends-dot">0</span></button>
+      <span class="tab-ink"></span>
+    </nav>
+  </header>
 
   <main>
     <section id="view-team" class="view active"></section>
@@ -107,6 +120,7 @@
   <script src="js/upgrade.js"></script>
   <script src="js/achieve.js"></script>
   <script src="js/donate-config.js"></script>
+  <script src="js/ui.js"></script>
   <script src="js/main.js"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/auth.js"></script>

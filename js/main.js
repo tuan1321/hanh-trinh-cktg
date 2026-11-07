@@ -260,11 +260,13 @@ function showPackModal(p, res) {
 
 // ===== Modal & thông báo =====
 function openModal(html, wide) {
+  const wasOpen = !$('#modal').classList.contains('hidden');
   $('#modal-box').innerHTML = html;
   $('#modal-box').classList.toggle('wide', !!wide);
   $('#modal').classList.remove('hidden');
+  modalOpenFx(wasOpen);
 }
-function closeModal() { $('#modal').classList.add('hidden'); }
+function closeModal() { modalGhostOut(); $('#modal').classList.add('hidden'); }
 function toast(msg, type = '') {
   const d = document.createElement('div');
   d.className = `toast ${type}`; d.textContent = msg;
@@ -275,7 +277,8 @@ function toast(msg, type = '') {
 
 // ===== Render: header =====
 function renderHeader() {
-  $('#money').textContent = fmt(S.money);
+  animMoney(S.money);
+  animLevel(S.level);
   $('#level').textContent = S.level;
   const need = expNeed(S.level);
   $('#xpfill').style.width = `${(S.exp / need) * 100}%`;
@@ -552,12 +555,15 @@ function openDonate() {
 // ===== Điều hướng =====
 let currentView = 'team';
 function switchView(v) {
+  const prev = currentView;
   currentView = v;
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   document.querySelectorAll('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
   if (v === 'map') { mapSel = null; mapDiff = null; } // mở bản đồ: tự chọn chương & khu vực hiện tại
   renderAll();
-  window.scrollTo(0, 0);
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  moveInk();
+  animateViewSwap(prev, v);
 }
 function renderAll() {
   renderHeader();
@@ -601,4 +607,5 @@ $('#reset').onclick = () => {
 S = load();
 if (!S) { const got = newGame(); renderAll(); welcome(got); }
 else renderAll();
+moveInk(true);
 loadCustomImages(() => { if ($('#modal').classList.contains('hidden')) renderAll(); });

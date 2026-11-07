@@ -49,6 +49,7 @@ Tải lại trang là game tự nhận. Chi tiết trong `img/HUONG-DAN.txt`.
 ## Cấu trúc
 - `index.html` – khung trang
 - `css/style.css` – giao diện, màu bậc thẻ
+- `css/ui.css`, `js/ui.js` – thanh menu, màn hình tải, hiệu ứng chuyển mục / hộp thoại / tiền / thẻ nghiêng 3D
 - `js/data.js` – dữ liệu tuyển thủ, bậc thẻ, gói thẻ, giải đấu (sửa chỉ số ở đây)
 - `js/art.js` – chân dung, huy hiệu đội, màu đội, nạp ảnh tùy chỉnh
 - `js/social.js` – bạn bè, mã đội, kết nối trực tuyến P2P
