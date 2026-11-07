@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hành Trình CKTG – Esports Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">🏆</span>
+      <div><b>HÀNH TRÌNH CKTG</b><small>Build team · Leo rank · Vô địch thế giới</small></div>
+    </div>
+    <div class="stats">
+      <div class="stat money">💰 <span id="money">0</span></div>
+      <div class="stat level">
+        <span>Cấp <b id="level">1</b></span>
+        <div class="xpbar"><div id="xpfill"></div></div>
+        <small id="xptext"></small>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button data-view="team" class="active"><i>⚔️</i><span>Đội hình</span></button>
+    <button data-view="map"><i>🗺️</i><span>Giải đấu</span></button>
+    <button data-view="shop"><i>🛍️</i><span>Cửa hàng</span><span class="dot hidden" id="pack-dot"></span></button>
+    <button data-view="collection"><i>🃏</i><span>Bộ sưu tập</span></button>
+    <button data-view="friends"><i>👥</i><span>Bạn bè</span><span class="dot-num hidden" id="friends-dot">0</span></button>
+  </nav>
+
+  <main>
+    <section id="view-team" class="view active"></section>
+    <section id="view-map" class="view"></section>
+    <section id="view-shop" class="view"></section>
+    <section id="view-collection" class="view"></section>
+    <section id="view-friends" class="view"></section>
+  </main>
+
+  <footer>
+    Fan game phi thương mại. Chỉ số tuyển thủ là ước lượng theo thành tích từng năm, không phải số liệu chính thức.
+    <button id="credits-btn" class="btn ghost small">📷 Nguồn ảnh</button>
+    <button id="reset" class="btn ghost small">Chơi lại từ đầu</button>
+  </footer>
+
+  <!-- Hộp thoại -->
+  <div id="modal" class="overlay hidden"><div class="modal-box" id="modal-box"></div></div>
+
+  <!-- Màn hình trận đấu -->
+  <div id="match" class="overlay hidden">
+    <div class="match-box">
+      <div class="m-head">
+        <div><b id="m-title"></b> <span id="m-sub" class="muted"></span></div>
+        <div class="m-series">Tỉ số loạt: <b id="m-series">0 - 0</b></div>
+      </div>
+      <div class="scoreboard">
+        <div class="sb-team blue"><div class="sb-name" id="m-blue"></div><div class="sb-sub" id="m-s0"></div></div>
+        <div class="sb-mid">
+          <div class="sb-kills"><span id="m-k0" class="blue">0</span><span class="sb-clock" id="m-clock">00:00</span><span id="m-k1" class="red">0</span></div>
+          <div class="gd" id="m-gd"></div>
+        </div>
+        <div class="sb-team red"><div class="sb-name" id="m-red"></div><div class="sb-sub" id="m-s1"></div></div>
+      </div>
+      <div class="m-body">
+        <div class="kda blue" id="m-kda0"></div>
+        <div class="map-wrap">
+          <canvas id="minimap" width="720" height="720"></canvas>
+          <div id="m-feed" class="m-feed"></div>
+          <div id="m-banner" class="m-banner"></div>
+          <div id="m-result" class="m-result hidden"></div>
+        </div>
+        <div class="kda red" id="m-kda1"></div>
+      </div>
+      <div class="m-ctrl">
+        <span class="muted">Tốc độ:</span>
+        <button class="btn small spd" data-s="1">x1</button>
+        <button class="btn small spd" data-s="2">x2</button>
+        <button class="btn small spd" data-s="4">x4</button>
+        <button class="btn small spd" data-s="8">x8</button>
+        <button class="btn small ghost" id="m-skip">⏭ Bỏ qua ván</button>
+        <button class="btn primary hidden" id="m-next">Ván tiếp theo ▶</button>
+      </div>
+      <div class="comm-title">🎙️ Bình luận trực tiếp</div>
+      <div class="commentary" id="comm"></div>
+    </div>
+  </div>
+
+  <div id="toasts"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/credits.js"></script>
+  <script src="js/art.js"></script>
+  <script src="js/worldmap.js"></script>
+  <script src="js/match.js"></script>
+  <script src="js/social.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

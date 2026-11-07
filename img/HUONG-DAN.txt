@@ -1,0 +1,16 @@
+THÊM ẢNH RIÊNG CHO GAME
+=======================
+
+Ảnh tuyển thủ: đặt vào thư mục  img/players/
+  - Tên file = tên tuyển thủ đúng như trong game (phân biệt hoa/thường), đuôi .png hoặc .jpg
+  - Ví dụ: img/players/Faker.png, img/players/Chovy.jpg, img/players/Hans Sama.png
+  - Nên dùng ảnh vuông (ví dụ 256x256), khuôn mặt ở giữa.
+
+Logo đội: đặt vào thư mục  img/teams/
+  - Tên file = mã đội như trên thẻ: SKT, T1, GEN, DRX, DK, DWG, HLE, KT, SSW, SSG, ROX,
+    IG, FPX, RNG, EDG, JDG, BLG, TES, WBG, LNG, SN, RC, G2, FNC, C9, TL, TSM, FW, GAM, PVB, KZ, SSB
+  - Ví dụ: img/teams/T1.png
+  - Nên dùng ảnh PNG nền trong suốt.
+
+Sau khi thêm ảnh, tải lại trang (F5). Tuyển thủ/đội nào chưa có ảnh sẽ dùng hình tự vẽ.
+Lưu ý: chỉ dùng ảnh bạn có quyền sử dụng.

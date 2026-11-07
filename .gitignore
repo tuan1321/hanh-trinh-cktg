@@ -1,0 +1,7 @@
+# Công cụ chạy thử cục bộ
+.claude/
+
+# Rác hệ thống
+Thumbs.db
+desktop.ini
+.DS_Store
