@@ -92,11 +92,21 @@ function doUpgrade(k) {
     <div class="ua-cards"><div class="ua-main">${cardHTML(c)}</div><div class="ua-mat">${cardHTML(c)}</div></div>
     <div class="ua-orb"><b>${rate}%</b></div>
     <div class="ua-text">ĐANG NÂNG CẤP…</div>
+    <div class="ua-hit"></div>
     <div class="ua-sparks">${Array.from({ length: 24 }, (_, i) => `<i style="--a:${i * 15}deg;--d:${rand(0, 0.8).toFixed(2)}s"></i>`).join('')}</div>
   </div>`);
   const box = $('#modal-box .upg-anim');
+  // âm thanh từng bước: đặt 2 thẻ → nạp năng lượng → nhập thẻ → 3 nhát đập → kết quả
+  const at = (ms, fn) => setTimeout(() => { if (box.isConnected) fn(); }, ms);
+  const hit = () => { box.classList.remove('hit'); void box.offsetWidth; box.classList.add('hit'); };
+  SFX.ctx();
+  SFX.place(); at(180, () => SFX.place());
+  at(150, () => SFX.charge(2.3));
+  at(1200, () => { SFX.clang(0); hit(); });
+  [1650, 1950, 2250].forEach((ms, i) => at(ms, () => { SFX.clang(i + 2); hit(); }));
   setTimeout(() => {
     if (!box.isConnected) { upgBusy = false; renderAll(); return; }
+    if (ok) SFX.success(next.lv); else SFX.fail();
     box.classList.add(ok ? 'success' : 'fail');
     box.querySelector('.ua-main').innerHTML = cardHTML(ok ? next : c);
     box.querySelector('.ua-text').innerHTML = ok

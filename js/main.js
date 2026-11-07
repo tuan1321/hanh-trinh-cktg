@@ -274,19 +274,105 @@ function openPack(pid, fromInventory) {
   save(); renderAll();
   showPackModal(p, res);
 }
+// Hiệu ứng theo bậc: i = độ "hoành tráng", c = màu ánh sáng, n = số lần nhấp nháy trước khi mở
+const TIER_FX = {
+  B: { i: 0, c: '#a3aec2', n: 2 }, A: { i: 1, c: '#3ec5ff', n: 3 }, S: { i: 2, c: '#b57bff', n: 3 },
+  'S+': { i: 3, c: '#ffb81f', n: 4 }, SS: { i: 4, c: '#ff4d6d', n: 5 }, SSS: { i: 5, c: '#ff5ee0', n: 6 },
+};
+// Mở gói: gói rung → từng thẻ bay ra → nhấp nháy → ánh sáng màu bậc → lật thẻ → vào khay → thẻ tiếp theo
 function showPackModal(p, res) {
-  openModal(`<h2>${p.icon} ${p.name}</h2><p class="muted center">Nhấn vào từng thẻ để lật</p>
-    <div class="pack-cards">${res.map((r, i) => `<div class="flip" data-i="${i}"><div class="flip-inner"><div class="flip-back pack-${p.id}"><span>${p.icon}</span><b>?</b></div><div class="flip-front">${cardHTML(r.c, { isNew: r.isNew })}</div></div></div>`).join('')}</div>
-    <div class="actions"><button class="btn" id="flip-all">Lật tất cả</button><button class="btn primary" id="pack-done">Xong</button></div>`);
-  const flip = el => {
-    if (el.classList.contains('flipped')) return;
-    el.classList.add('flipped');
-    const r = res[+el.dataset.i];
-    if (['SS', 'SSS'].includes(r.c.tier.id)) { el.classList.add('epic'); toast(`🔥 Thẻ ${r.c.tier.id}: ${r.c.name} ${r.c.year}!`, 'gold'); }
-  };
-  document.querySelectorAll('.flip').forEach(el => el.onclick = () => flip(el));
-  $('#flip-all').onclick = () => document.querySelectorAll('.flip').forEach((el, i) => setTimeout(() => flip(el), i * 250));
-  $('#pack-done').onclick = closeModal;
+  SFX.ctx(); // mở khóa âm thanh ngay trong lượt bấm
+  const fxOf = r => TIER_FX[r.c.tier.id] || TIER_FX.B;
+  openModal(`<div class="po pack-${p.id}">
+    <div class="po-head"><b>${p.icon} ${p.name}</b><span class="po-step" id="po-step">Đang mở gói…</span></div>
+    <div class="po-stage" id="po-stage">
+      <div class="po-rays"></div><div class="po-glow"></div>
+      <div class="po-card shake" id="po-card"><div class="po-pack"><span>${p.icon}</span><b>${p.name}</b></div></div>
+      <div class="po-burst" id="po-burst"></div><div class="po-flash"></div>
+      <div class="po-tap" id="po-tap">Chạm để mở nhanh</div>
+    </div>
+    <div class="po-tray" id="po-tray">${res.map(() => '<span class="po-slot">?</span>').join('')}</div>
+    <div class="actions" id="po-act"><button class="btn ghost" id="po-skip">⏩ Mở hết</button><button class="btn primary" id="po-next" disabled>Thẻ tiếp theo ▶</button></div>
+  </div>`);
+  const root = $('#modal-box .po'), stage = $('#po-stage'), slot = $('#po-card');
+  const alive = () => root.isConnected;
+  let fast = false, skipAll = false, wake = null, step = null;
+  // chờ có thể bị rút ngắn khi người chơi chạm
+  const wait = ms => new Promise(r => {
+    if (fast || skipAll) return r();
+    const t = setTimeout(() => { wake = null; r(); }, ms);
+    wake = () => { clearTimeout(t); wake = null; r(); };
+  });
+  const waitTap = () => new Promise(r => { step = () => { step = null; r(); }; });
+  stage.onclick = () => { if (step) step(); else { fast = true; if (wake) wake(); } };
+  $('#po-next').onclick = () => { if (step) step(); };
+  $('#po-skip').onclick = () => { skipAll = true; if (wake) wake(); if (step) step(); };
+  const replay = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+  const burst = n => { $('#po-burst').innerHTML = Array.from({ length: n }, (_, i) => `<i style="--a:${(360 / n * i + rand(-8, 8)).toFixed(0)}deg;--r:${rand(90, 180).toFixed(0)}px;--d:${rand(0, .12).toFixed(2)}s"></i>`).join(''); };
+  const mini = (r, fx) => `<span class="po-mini" style="--tcol:${fx.c}" title="${esc(r.c.name)} ${r.c.year}"><span class="po-av">${avatarHTML(r.c)}</span><b>${r.c.tier.id}</b></span>`;
+
+  (async () => {
+    // 1) gói rung rồi bung ra
+    SFX.packShake();
+    await wait(850);
+    if (!alive()) return;
+    replay(stage, 'flash');
+    for (let i = 0; i < res.length; i++) {
+      if (!alive()) return;
+      const r = res[i], fx = fxOf(r), last = i === res.length - 1;
+      fast = false;
+      $('#po-step').textContent = `Thẻ ${i + 1} / ${res.length}`;
+      $('#po-tap').textContent = 'Chạm để mở nhanh';
+      $('#po-next').disabled = true;
+      stage.className = 'po-stage';
+      stage.style.setProperty('--tc', fx.c);
+      $('#po-burst').innerHTML = '';
+      slot.className = 'po-card';
+      slot.innerHTML = `<div class="flip"><div class="flip-inner"><div class="flip-back pack-${p.id}"><span>${p.icon}</span><b>?</b></div><div class="flip-front">${cardHTML(r.c, { isNew: r.isNew })}</div></div></div>`;
+      if (!skipAll) {
+        // 2) thẻ bay ra
+        replay(slot, 'enter'); SFX.whoosh();
+        await wait(480);
+        // 3) nhấp nháy vài lần (bậc càng cao càng nhiều lần, càng dồn dập)
+        for (let k = 0; k < fx.n && !fast && !skipAll && alive(); k++) {
+          replay(slot, 'pulse'); SFX.tick(k);
+          await wait(Math.max(130, 300 - k * 32));
+        }
+        if (!alive()) return;
+        // 4) ánh sáng màu của bậc thẻ
+        stage.classList.add('lit');
+        if (fx.i >= 5) stage.classList.add('sss');
+        if (fx.i >= 4) stage.classList.add('big');
+        SFX.glow(fx.i);
+        await wait(fx.i >= 4 ? 1150 : fx.i >= 2 ? 800 : 600);
+        if (!alive()) return;
+      } else {
+        stage.classList.add('lit');
+        SFX.flipQuick();
+      }
+      // 5) lật thẻ
+      slot.querySelector('.flip').classList.add('flipped');
+      replay(stage, 'flash');
+      burst(12 + fx.i * 6);
+      if (!skipAll) SFX.reveal(fx.i);
+      if (fx.i >= 4) toast(`🔥 Thẻ ${r.c.tier.id}: ${r.c.name} ${r.c.year}!`, 'gold');
+      $('#po-tray').children[i].outerHTML = mini(r, fx);
+      if (skipAll) { await new Promise(rs => setTimeout(rs, 140)); continue; }
+      // 6) chờ người chơi chạm để mở thẻ tiếp
+      $('#po-next').disabled = false;
+      $('#po-next').textContent = last ? 'Xem tất cả ▶' : 'Thẻ tiếp theo ▶';
+      $('#po-tap').textContent = last ? 'Chạm để xem tất cả' : 'Chạm để mở thẻ tiếp';
+      await waitTap();
+    }
+    if (!alive()) return;
+    // tổng kết: cả gói
+    if (skipAll) SFX.reveal(Math.max(...res.map(r => fxOf(r).i)));
+    $('#po-step').textContent = `${res.length} thẻ mới`;
+    stage.outerHTML = `<div class="po-sum">${res.map((r, i) => `<div class="po-sc" style="--i:${i}">${cardHTML(r.c, { isNew: r.isNew })}</div>`).join('')}</div>`;
+    $('#po-tray').remove();
+    $('#po-act').innerHTML = '<button class="btn primary" id="pack-done">Xong</button>';
+    $('#pack-done').onclick = closeModal;
+  })();
 }
 
 // ===== Modal & thông báo =====
@@ -630,6 +716,10 @@ $('#credits-btn').onclick = () => {
 };
 $('#donate-btn').onclick = openDonate;
 $('#donate-btn2').onclick = openDonate;
+// nút âm thanh
+const sfxIcon = () => { $('#sfx-btn').textContent = SFX.on ? '🔊' : '🔇'; $('#sfx-btn').classList.toggle('off', !SFX.on); };
+$('#sfx-btn').onclick = () => { SFX.toggle(); sfxIcon(); if (SFX.on) SFX.tick(3); toast(SFX.on ? '🔊 Đã bật âm thanh' : '🔇 Đã tắt âm thanh'); };
+sfxIcon();
 // tạm ẩn mục ủng hộ khi DONATE.enabled = false (js/donate-config.js)
 if (typeof DONATE === 'undefined' || DONATE.enabled === false) ['#donate-btn', '#donate-btn2'].forEach(s => $(s).classList.add('hidden'));
 $('#reset').onclick = () => {

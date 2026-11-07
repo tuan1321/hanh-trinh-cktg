@@ -335,6 +335,97 @@ body.match-open main, body.match-open footer { visibility: hidden; }
   .hs.intl .hs-dot { width: 32px; height: 32px; font-size: 15px; }
 }
 
+/* ===== Nút âm thanh ===== */
+.sfx-btn { cursor: pointer; font-size: 16px; padding: 6px 10px; color: var(--text); font-family: var(--font); }
+.sfx-btn.off { opacity: .55; }
+
+/* ===== Mở gói: từng thẻ một ===== */
+.po { text-align: center; }
+.po-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+.po-head b { font: 700 18px var(--display); }
+.po-step { font-size: 13px; color: var(--muted); font-weight: 600; }
+.po-stage {
+  --tc: #ffffff; position: relative; height: 340px; display: grid; place-items: center; overflow: hidden; border-radius: 20px; cursor: pointer;
+  background: radial-gradient(circle at 50% 50%, #1d1650, #07051a 72%); border: 1px solid var(--stroke); user-select: none; -webkit-user-select: none;
+}
+.po-rays {
+  position: absolute; inset: -50%; opacity: 0; transition: opacity .45s;
+  background: repeating-conic-gradient(color-mix(in srgb, var(--tc) 26%, transparent) 0 7deg, transparent 7deg 18deg);
+  animation: spin 10s linear infinite;
+}
+.po-glow {
+  position: absolute; width: 300px; height: 300px; border-radius: 50%; opacity: 0; transform: scale(.3);
+  background: radial-gradient(circle, color-mix(in srgb, var(--tc) 80%, transparent) 0%, color-mix(in srgb, var(--tc) 30%, transparent) 40%, transparent 68%);
+  transition: opacity .35s, transform .6s cubic-bezier(.2, 1.3, .4, 1);
+}
+.po-stage.lit .po-rays { opacity: 1; }
+.po-stage.lit .po-glow { opacity: 1; transform: scale(1.2); }
+.po-stage.lit .flip-back { border-color: var(--tc); box-shadow: 0 0 26px var(--tc), 0 0 70px color-mix(in srgb, var(--tc) 60%, transparent); }
+.po-stage.lit .flip-back b { color: var(--tc); }
+.po-stage.sss .po-rays, .po-stage.sss .po-glow, .po-stage.sss .flip-back { animation: spin 10s linear infinite, hue 1.6s linear infinite; }
+.po-stage.sss .po-glow, .po-stage.sss .flip-back { animation: hue 1.6s linear infinite; }
+.po-stage.big { animation: poShake .55s; }
+@keyframes poShake { 15%, 55% { transform: translate(-5px, 2px); } 35%, 75% { transform: translate(5px, -2px); } }
+.po-flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 4; }
+.po-stage.flash .po-flash { animation: poFlash .55s ease-out; }
+@keyframes poFlash { 0% { opacity: .8; } 100% { opacity: 0; } }
+
+.po-card { position: relative; z-index: 2; width: 170px; aspect-ratio: 3 / 4.3; }
+.po-card .flip { width: 100%; cursor: inherit; }
+.po-card .flip:not(.flipped):hover .flip-inner { transform: none; }
+.po-card .flip-inner { transition: transform .75s cubic-bezier(.3, 1.4, .5, 1); }
+.po-card.enter { animation: poEnter .5s cubic-bezier(.2, 1.25, .4, 1) both; }
+@keyframes poEnter { from { transform: translateY(90px) scale(.5) rotate(-8deg); opacity: 0; } }
+.po-card.pulse .flip-back { animation: poPulse .24s ease-out; }
+@keyframes poPulse { 0% { filter: brightness(2.6); transform: scale(1.07); box-shadow: 0 0 46px #fff; } 100% { filter: none; transform: none; } }
+.po-stage.lit .po-card:not(:has(.flipped)) { animation: poHover 1.2s ease-in-out infinite; }
+@keyframes poHover { 50% { transform: translateY(-6px) scale(1.02); } }
+.po-pack {
+  position: absolute; inset: 0; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  border: 2px solid var(--pc); box-shadow: 0 0 34px color-mix(in srgb, var(--pc) 55%, transparent);
+  background: radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--pc) 45%, transparent), transparent 70%), repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 8px, transparent 8px 16px), #15112f;
+}
+.po-pack span { font-size: 66px; filter: drop-shadow(0 6px 18px color-mix(in srgb, var(--pc) 70%, transparent)); }
+.po-pack b { font: 700 15px var(--display); color: color-mix(in srgb, var(--pc) 75%, white); letter-spacing: 1px; }
+.po-card.shake { animation: poRattle .85s ease-in both; }
+@keyframes poRattle {
+  0% { transform: scale(.9); } 20% { transform: scale(1) rotate(-2deg); } 30% { transform: rotate(3deg); } 40% { transform: rotate(-4deg); }
+  50% { transform: rotate(5deg) scale(1.03); } 60% { transform: rotate(-6deg) scale(1.05); } 70% { transform: rotate(6deg) scale(1.07); }
+  80% { transform: rotate(-5deg) scale(1.1); filter: brightness(1.4); } 100% { transform: scale(1.18); filter: brightness(2.2); }
+}
+.po-burst { position: absolute; left: 50%; top: 50%; z-index: 3; pointer-events: none; }
+.po-burst i {
+  position: absolute; width: 7px; height: 7px; margin: -3.5px; border-radius: 50%; background: var(--tc); box-shadow: 0 0 10px var(--tc), 0 0 2px #fff;
+  animation: poBurst .95s var(--d) cubic-bezier(.1, .7, .3, 1) both;
+}
+@keyframes poBurst { 0% { opacity: 1; transform: rotate(var(--a)) translateY(-40px) scale(1.2); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(calc(-1 * var(--r))) scale(.3); } }
+.po-stage.sss .po-burst i { animation: poBurst .95s var(--d) cubic-bezier(.1, .7, .3, 1) both, hue .8s linear infinite; }
+.po-tap { position: absolute; bottom: 10px; left: 0; right: 0; z-index: 3; font-size: 12px; color: rgba(255,255,255,.55); pointer-events: none; animation: ping 1.6s infinite; }
+
+.po-tray { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 14px 0 6px; min-height: 52px; }
+.po-slot { width: 46px; height: 46px; border-radius: 50%; border: 2px dashed var(--stroke2); display: grid; place-items: center; color: var(--muted); font-weight: 700; }
+.po-mini { position: relative; width: 46px; height: 46px; animation: pop .35s cubic-bezier(.2, 1.3, .4, 1); }
+.po-av { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; background: #15112f; box-shadow: 0 0 0 2px var(--tcol), 0 0 14px var(--tcol); }
+.po-av > * { width: 100%; height: 100%; display: block; object-fit: cover; }
+.po-mini b { position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); font: 700 9px/1.4 var(--display); padding: 0 5px; border-radius: 6px; background: var(--tcol); color: #0b0920; white-space: nowrap; }
+
+.po-sum { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 6px 0 4px; }
+.po-sc { width: 140px; animation: poEnter .45s cubic-bezier(.2, 1.25, .4, 1) both; animation-delay: calc(var(--i) * 80ms); }
+@media (max-width: 640px) {
+  .po-stage { height: 300px; }
+  .po-card { width: 150px; }
+  .po-sum { gap: 8px; }
+  .po-sc { width: calc(33.33% - 6px); }
+}
+@media (prefers-reduced-motion: reduce) { .po-stage.big, .po-card.shake { animation: none; } }
+
+/* ===== Nâng cấp: chớp sáng mỗi nhát đập ===== */
+.ua-hit { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 42%, rgba(255,255,255,.9), rgba(255, 210, 63, .35) 30%, transparent 62%); }
+.upg-anim.hit .ua-hit { animation: uaHit .32s ease-out; }
+.upg-anim.hit .ua-cards { animation: uaKnock .32s ease-out; }
+@keyframes uaHit { 0% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes uaKnock { 0% { transform: scale(.94) translateY(3px); } 60% { transform: scale(1.03); } 100% { transform: none; } }
+
 /* ===== Nâng cấp: thanh chọn các cấp + của cùng một thẻ ===== */
 .ug-levels { margin: 14px 0 0; padding: 12px 14px; border-radius: 16px; background: rgba(255,255,255,.04); border: 1px solid var(--stroke); }
 .ug-levels > span i { font-style: normal; opacity: .8; }
