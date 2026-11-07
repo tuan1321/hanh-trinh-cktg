@@ -3,8 +3,17 @@
 // Thành công: 2 thẻ thành 1 thẻ cấp mới. Thất bại: mất thẻ nguyên liệu, thẻ chính giữ nguyên.
 let upgSel = null, upgOnlyReady = false, upgBusy = false;
 
+const upgReady = c => owned(c.id) >= 2 && c.lv < MAX_UP;
+// nhóm theo thẻ (cùng tuyển thủ, cùng mùa); nhóm có thẻ đủ nguyên liệu lên đầu; trong nhóm cấp cao trước
 function upgCandidates() {
-  return ownedKeys().map(cardOf).sort((a, b) => (owned(b.id) >= 2) - (owned(a.id) >= 2) || b.rating - a.rating || b.lv - a.lv);
+  return groupSort(ownedKeys().map(cardOf), (a, b) => b.rating - a.rating, upgReady);
+}
+// thanh chọn nhanh các cấp + đang có của cùng một thẻ
+function levelBar(c) {
+  const lvs = ownedKeys().map(cardOf).filter(x => x.baseId === c.baseId).sort((a, b) => a.lv - b.lv);
+  if (lvs.length < 2) return '';
+  return `<div class="ug-levels"><span class="muted small">Các cấp ${esc(c.name)} ${c.year} đang có <i>(khác cấp không ghép được với nhau)</i>:</span>
+    <div>${lvs.map(x => `<button class="ugl ${x.id === c.id ? 'cur' : ''} ${upgReady(x) ? 'ok' : ''}" data-k="${x.id}"><b class="${x.lv ? lvClass(x.lv) : ''}">${x.lv ? '+' + x.lv : 'Gốc'}</b><small>${owned(x.id)} thẻ</small></button>`).join('')}</div></div>`;
 }
 function rateGauge(rate, lv) {
   return `<div class="ug-gauge" style="--pct:${Math.max(rate, 0.8)}">
@@ -13,13 +22,13 @@ function rateGauge(rate, lv) {
 }
 function renderUpgrade() {
   const list = upgCandidates();
-  if (!upgSel || !owned(upgSel)) upgSel = (list.find(c => owned(c.id) >= 2 && c.lv < MAX_UP) || list[0] || {}).id || null;
+  if (!upgSel || !owned(upgSel)) upgSel = (list.find(upgReady) || list[0] || {}).id || null;
   const c = upgSel ? cardOf(upgSel) : null;
   const maxed = c && c.lv >= MAX_UP;
   const ready = c && !maxed && owned(c.id) >= 2;
   const next = c && !maxed ? cardOf(keyOf(c.baseId, c.lv + 1)) : null;
   const rate = next ? UPG_RATE[next.lv] : 0;
-  const shown = upgOnlyReady ? list.filter(x => owned(x.id) >= 2 && x.lv < MAX_UP) : list;
+  const shown = upgOnlyReady ? list.filter(upgReady) : list;
 
   $('#view-upgrade').innerHTML = `
   <div class="panel upg-panel">
@@ -32,6 +41,7 @@ function renderUpgrade() {
       </div>
       <div class="ug-slot mat ${ready ? '' : 'empty'}"><div class="ug-label">NGUYÊN LIỆU</div>${ready ? cardHTML(c) : `<div class="card empty"><span>?</span><small>${maxed ? 'Không cần' : 'Cần thêm 1 thẻ<br>' + esc(c.name) + ' ' + c.year + (c.lv ? ' +' + c.lv : '')}</small></div>`}</div>
     </div>
+    ${levelBar(c)}
     <div class="upg-info">
       <div class="ug-compare">
         <div class="ugc-ovr"><span>Chỉ số tổng</span><b>${c.rating}</b>${next ? `<i>➜</i><b class="up">${next.rating}</b><em>+${next.rating - c.rating}</em>` : ''}</div>
@@ -48,9 +58,10 @@ function renderUpgrade() {
   <div class="panel">
     <div class="filters"><h3 style="margin:0 auto 0 0">🃏 Chọn thẻ để nâng cấp</h3>
       <label class="check"><input type="checkbox" id="ug-ready" ${upgOnlyReady ? 'checked' : ''}> Chỉ thẻ đủ nguyên liệu</label></div>
-    <div class="card-grid">${shown.map(x => `<div class="ug-pick ${x.id === upgSel ? 'sel' : ''} ${owned(x.id) >= 2 && x.lv < MAX_UP ? 'ok' : ''}">${cardHTML(x, { click: true, count: owned(x.id), inLineup: inLineup(x.id) })}</div>`).join('') || '<p class="muted">Chưa có thẻ nào đủ 2 bản để nâng cấp. Mở thêm gói thẻ nhé!</p>'}</div>
+    <div class="card-grid">${shown.map(x => `<div class="ug-pick ${x.id === upgSel ? 'sel' : ''} ${upgReady(x) ? 'ok' : ''}">${cardHTML(x, { click: true, count: owned(x.id), inLineup: inLineup(x.id) })}</div>`).join('') || '<p class="muted">Chưa có thẻ nào đủ 2 bản để nâng cấp. Mở thêm gói thẻ nhé!</p>'}</div>
   </div>`;
   document.querySelectorAll('#view-upgrade .ug-pick .card').forEach(el => el.onclick = () => { upgSel = el.dataset.id; renderUpgrade(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  document.querySelectorAll('#view-upgrade .ugl').forEach(b => b.onclick = () => { upgSel = b.dataset.k; renderUpgrade(); });
   $('#ug-ready').onchange = e => { upgOnlyReady = e.target.checked; renderUpgrade(); };
   if (ready) $('#ug-go').onclick = () => doUpgrade(c.id);
 }
@@ -64,6 +75,7 @@ function doUpgrade(k) {
   const ok = Math.random() * 100 < rate;
   // trừ thẻ & lưu ngay để không thể tải lại trang mà "chơi lại" kết quả
   removeCard(k);
+  upgSel = k;
   if (ok) {
     removeCard(k);
     addCard(next.id);

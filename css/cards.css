@@ -30,6 +30,15 @@
   width: 100%; margin-top: 4.5cqi; line-height: 1.15;
   font-size: clamp(10px, 10.5cqi, 16px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+/* tên + cấp nâng: cấp luôn hiện đủ, chỉ tên bị rút gọn khi thiếu chỗ */
+.c-name { display: flex; justify-content: center; align-items: baseline; gap: .25em; }
+.c-name > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.c-nlv {
+  flex-shrink: 0; font: 700 .82em/1 var(--display); padding: .14em .38em .1em; border-radius: .4em;
+  color: #120c00; background: linear-gradient(180deg, var(--lc), color-mix(in srgb, var(--lc) 60%, var(--lc2)));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--lc) 55%, transparent);
+}
+.c-nlv.lv-max { background: linear-gradient(90deg, #ff5ee0, #ffd23f, #22d3ee); }
 .c-role {
   width: 100%; margin-top: .5cqi; line-height: 1.25;
   font-size: clamp(8px, 7.2cqi, 11px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -56,7 +65,7 @@
 .card .c-in { width: 1.9em; height: 1.9em; padding: 0; display: grid; place-items: center; background: var(--y); color: #0b0920; font-size: clamp(9px, 8.5cqi, 12px); }
 .card .c-new { background: var(--lime); color: #0b0920; }
 .card .c-msi { background: linear-gradient(180deg, #c9f6ff, #4fc3e8); color: #06202b; }
-.card .c-count { background: rgba(0, 0, 0, .7); border: 1px solid var(--tc); color: #fff; }
+.card .c-count { background: rgba(236, 240, 255, .92); color: #14102e; font-weight: 800; }
 .card .c-lv { font-family: var(--display); font-size: clamp(8px, 8cqi, 12px); border-radius: .5em; }
 
 /* ----- Lớp hiệu ứng chung ----- */

@@ -335,6 +335,21 @@ body.match-open main, body.match-open footer { visibility: hidden; }
   .hs.intl .hs-dot { width: 32px; height: 32px; font-size: 15px; }
 }
 
+/* ===== Nâng cấp: thanh chọn các cấp + của cùng một thẻ ===== */
+.ug-levels { margin: 14px 0 0; padding: 12px 14px; border-radius: 16px; background: rgba(255,255,255,.04); border: 1px solid var(--stroke); }
+.ug-levels > span i { font-style: normal; opacity: .8; }
+.ug-levels > div { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.ugl {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 64px; padding: 6px 10px; cursor: pointer;
+  border-radius: 12px; background: rgba(0,0,0,.25); border: 1px solid var(--stroke2); color: var(--text); font-family: var(--font);
+}
+.ugl b { font: 700 15px var(--display); color: var(--text); }
+.ugl b[class*="lv-"] { color: var(--lc); }
+.ugl small { font-size: 11px; color: var(--muted); }
+.ugl.ok { border-color: rgba(163, 255, 71, .55); }
+.ugl.ok small { color: var(--lime); }
+.ugl.cur { background: linear-gradient(180deg, rgba(139, 92, 246, .35), rgba(34, 211, 238, .12)); border-color: var(--c); }
+
 /* ===== Điện thoại: gọn, nhiều thẻ trên một màn hình, dễ chạm ===== */
 button, .btn, .card, .slot, select, label { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .scoreboard { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }

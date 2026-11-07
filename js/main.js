@@ -38,6 +38,16 @@ const removeCard = k => { S.cards[k]--; if (S.cards[k] <= 0) delete S.cards[k]; 
 const inLineup = k => Object.values(S.lineup).includes(k);
 const ownedKeys = () => Object.keys(S.cards).filter(k => cardOf(k));
 const ownedBase = id => ownedKeys().some(k => cardOf(k).baseId === id);
+// Xếp thẻ: các cấp + của cùng một thẻ (cùng tuyển thủ, cùng mùa) đứng liền nhau, cấp cao trước.
+// cmp so sánh 2 nhóm qua thẻ đại diện (cấp cao nhất trong nhóm); first(c) = nhóm được ưu tiên lên đầu.
+function groupSort(cards, cmp, first) {
+  const g = new Map();
+  cards.forEach(c => { if (!g.has(c.baseId)) g.set(c.baseId, []); g.get(c.baseId).push(c); });
+  const groups = [...g.values()].map(arr => arr.sort((a, b) => b.lv - a.lv));
+  const pri = arr => (first && arr.some(first) ? 1 : 0);
+  groups.sort((A, B) => pri(B) - pri(A) || cmp(A[0], B[0]) || A[0].baseId.localeCompare(B[0].baseId));
+  return groups.flat();
+}
 
 function newGame() {
   const keep = S ? { profile: S.profile, friends: S.friends } : {}; // chơi lại vẫn giữ mã kết bạn & bạn bè
@@ -192,8 +202,7 @@ function cardHTML(c, o = {}) {
     + (o.isNew ? '<span class="c-chip c-new">MỚI</span>' : '')
     + (champ && msi ? `<span class="c-chip c-msi" title="Vô địch MSI ${c.year}">MSI</span>` : '')
     + (o.chem > 0 ? `<span class="c-chip c-chem" title="Điểm ăn ý">🔗+${o.chem}</span>` : '');
-  const right = (c.lv ? `<span class="c-chip c-lv ${lvClass(c.lv)}">+${c.lv}</span>` : '')
-    + (o.count > 1 ? `<span class="c-chip c-count" title="Số thẻ đang có">×${o.count}</span>` : '')
+  const right = (o.count > 1 ? `<span class="c-chip c-count" title="Đang có ${o.count} thẻ giống hệt (cùng cấp)">${o.count} thẻ</span>` : '')
     + (o.delta != null ? `<span class="c-chip c-delta ${o.delta > 0 ? 'up' : o.delta < 0 ? 'down' : ''}">⚡${o.delta > 0 ? '+' : ''}${o.delta}</span>` : '');
   const yearTag = champ ? `<em class="champ" title="Vô địch CKTG ${c.year}">🏆 CKTG ${c.year}</em>`
     : msi ? `<em class="msi" title="Vô địch MSI ${c.year}">⭐ MSI ${c.year}</em>` : `<em>${c.year}</em>`;
@@ -205,7 +214,7 @@ function cardHTML(c, o = {}) {
     <div class="card-head"><span class="c-tier">${t.id}</span><span class="c-logo" title="${teamName}">${teamLogoHTML(c.team)}</span><span class="c-rating">${hide ? '??' : c.rating}</span></div>
     <div class="c-avatar">${champ || msi ? LAUREL_SVG : ''}<div class="c-ph">${hide ? hiddenAvatarSVG() : avatarHTML(c)}</div>${yearTag}</div>
     ${left ? `<div class="c-chips l">${left}</div>` : ''}${right ? `<div class="c-chips r">${right}</div>` : ''}
-    <div class="c-name">${hide ? '? ? ?' : esc(c.name)}</div>
+    <div class="c-name"><span>${hide ? '? ? ?' : esc(c.name)}</span>${c.lv && !hide ? `<b class="c-nlv ${lvClass(c.lv)}">+${c.lv}</b>` : ''}</div>
     <div class="c-role">${ROLE_INFO[c.role].icon} ${c.role} · ${c.region}</div>
     <div class="c-team" title="${teamName}"><b>${c.team}</b><span>${c.year}</span></div>
     <div class="card-shine"></div>
@@ -424,7 +433,7 @@ function renderCollection() {
   const mine = ownedKeys().map(cardOf);
   let list = colFilter.all ? mine.concat(CARDS.filter(c => !ownedBase(c.id))) : mine;
   list = list.filter(c => (colFilter.role === 'ALL' || c.role === colFilter.role) && (colFilter.tier === 'ALL' || c.tier.id === colFilter.tier));
-  list = list.slice().sort(colFilter.sort === 'rating' ? (a, b) => b.rating - a.rating : colFilter.sort === 'year' ? (a, b) => b.year - a.year || b.rating - a.rating : (a, b) => a.name.localeCompare(b.name) || a.year - b.year || a.lv - b.lv);
+  list = groupSort(list, colFilter.sort === 'rating' ? (a, b) => b.rating - a.rating : colFilter.sort === 'year' ? (a, b) => b.year - a.year || b.rating - a.rating : (a, b) => a.name.localeCompare(b.name) || a.year - b.year);
   const dupes = ownedKeys().reduce((s, k) => s + S.cards[k] - 1, 0);
   const nBase = new Set(mine.map(c => c.baseId)).size;
   $('#view-collection').innerHTML = `
