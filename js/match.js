@@ -412,7 +412,7 @@ const MatchUI = (() => {
     let gameNo = 0;
     const isOver = () => score[0] >= need || score[1] >= need;
     const me = cfg.me || 0; // góc nhìn: 0 = mình là đội Xanh, 1 = mình là đội Đỏ (khách trong trận trực tuyến)
-    const finish = () => { $id('match').classList.add('hidden'); cfg.onEnd(score[me] >= need, score.slice()); };
+    const finish = () => { $id('match').classList.add('hidden'); if (typeof MatchAudio !== 'undefined') MatchAudio.end(); cfg.onEnd(score[me] >= need, score.slice()); };
     const next = () => {
       gameNo++;
       // trận trực tuyến: dùng các ván do chủ phòng tạo sẵn để hai bên xem giống hệt nhau
@@ -483,6 +483,7 @@ const MatchUI = (() => {
     const evs = g.events;
     let gs = 0, idx = 0, look = 0, done = false, last = performance.now(), lastDom = 0, lastSec = -1;
     const clockEl = $id('m-clock'), commEl = $id('comm');
+    if (typeof MatchAudio !== 'undefined') MatchAudio.start(gameNo, teams);
     let snap = { kills: [0, 0], gold: [2500, 2500], towers: [0, 0], drag: [0, 0], baron: [0, 0], kd: [0, 1].map(() => Object.fromEntries(ROLES.map(r => [r, [0, 0]]))), lanes: [[0, 0, 0], [0, 0, 0]], inhib: [[0, 0, 0], [0, 0, 0]], nt: [0, 0], nexus: [1, 1] };
     updateBoard(snap, teams);
 
@@ -543,6 +544,7 @@ const MatchUI = (() => {
           feed(k);
         });
         if (e.banner) banner(e.banner, e.side);
+        if (typeof MatchAudio !== 'undefined') MatchAudio.event(e, speed);
       }
       e.dead.forEach(([s, r]) => {
         const c = C(s, r);
@@ -596,6 +598,7 @@ const MatchUI = (() => {
       const r = $id('m-result');
       r.className = `m-result ${win ? 'win' : 'lose'}`;
       r.textContent = win ? 'CHIẾN THẮNG' : 'THẤT BẠI';
+      if (typeof MatchAudio !== 'undefined') MatchAudio.result(win);
       const need = Math.ceil(cfg.bo / 2);
       const over = final[0] >= need || final[1] >= need;
       const nb = $id('m-next');
@@ -605,6 +608,7 @@ const MatchUI = (() => {
       nb.onclick = () => { cancelAnimationFrame(raf); score[g.winner]++; onDone(); };
     }
     $id('m-skip').onclick = () => {
+      if (typeof MatchAudio !== 'undefined') MatchAudio.skip();
       while (idx < evs.length) apply(evs[idx++], true);
       updateBoard(snap, teams);
       gs = g.duration; look = evs.length; waves = [];

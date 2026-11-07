@@ -1,0 +1,19 @@
+NHẠC NỀN
+
+menu-heroic-age.mp3
+  "Heroic Age" Kevin MacLeod (incompetech.com)
+  Licensed under Creative Commons: By Attribution 4.0 License
+  http://creativecommons.org/licenses/by/4.0/
+  Nguồn: https://incompetech.com/music/royalty-free/mp3-royaltyfree/Heroic%20Age.mp3
+
+match-five-armies.mp3
+  "Five Armies" Kevin MacLeod (incompetech.com)
+  Licensed under Creative Commons: By Attribution 4.0 License
+  http://creativecommons.org/licenses/by/4.0/
+  Nguồn: https://incompetech.com/music/royalty-free/mp3-royaltyfree/Five%20Armies.mp3
+
+HIỆU ỨNG ÂM THANH
+  Tự tổng hợp bằng Web Audio trong js/sfx.js, không dùng file âm thanh nào.
+
+GIỌNG BÌNH LUẬN
+  Dùng giọng đọc tiếng Việt có sẵn trên thiết bị/trình duyệt của người chơi (Web Speech API).

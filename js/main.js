@@ -711,14 +711,49 @@ $('#credits-btn').onclick = () => {
   openModal(`<h2>📷 Nguồn ảnh & logo</h2>
     <p class="muted">Ảnh và logo tự do từ Wikimedia Commons, dùng theo giấy phép ghi bên dưới. Tuyển thủ/đội không có ảnh dùng hình tự vẽ. Logo là nhãn hiệu của các đội tương ứng, chỉ dùng để nhận diện trong game fan phi thương mại.</p>
     <ol class="credits">${list.map(c => `<li><b>${esc(c.name)}${c.year ? ' (' + c.year + ')' : ''}</b> – ảnh của ${esc(c.artist || 'không rõ')}, giấy phép <a href="${esc(c.licenseUrl || c.page)}" target="_blank" rel="noopener">${esc(c.license)}</a>, <a href="${esc(c.page)}" target="_blank" rel="noopener">nguồn</a>${c.edited ? ' (đã cắt/thu nhỏ)' : ''}</li>`).join('') || '<li>Chưa có ảnh.</li>'}</ol>
+    <h3>🎵 Nhạc nền</h3>
+    <ul class="credits"><li><b>“Heroic Age”</b> và <b>“Five Armies”</b> – Kevin MacLeod (<a href="https://incompetech.com" target="_blank" rel="noopener">incompetech.com</a>), giấy phép <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.</li>
+      <li>Hiệu ứng âm thanh tự tạo bằng Web Audio; giọng bình luận dùng giọng đọc có sẵn trên thiết bị của người chơi.</li></ul>
     <div class="actions"><button class="btn" id="cr-close">Đóng</button></div>`, true);
   $('#cr-close').onclick = closeModal;
 };
 $('#donate-btn').onclick = openDonate;
 $('#donate-btn2').onclick = openDonate;
-// nút âm thanh
-const sfxIcon = () => { $('#sfx-btn').textContent = SFX.on ? '🔊' : '🔇'; $('#sfx-btn').classList.toggle('off', !SFX.on); };
-$('#sfx-btn').onclick = () => { SFX.toggle(); sfxIcon(); if (SFX.on) SFX.tick(3); toast(SFX.on ? '🔊 Đã bật âm thanh' : '🔇 Đã tắt âm thanh'); };
+// ===== Cài đặt âm thanh =====
+const sfxIcon = () => {
+  const any = AUDIO_CFG.sfx || AUDIO_CFG.music || AUDIO_CFG.voice;
+  $('#sfx-btn').textContent = any ? '🔊' : '🔇'; $('#sfx-btn').classList.toggle('off', !any);
+};
+function audioModal() {
+  SFX.ctx(true);
+  const row = (k, icon, name, desc, vol) => `<div class="au-row">
+      <label class="au-sw"><input type="checkbox" data-k="${k}" ${AUDIO_CFG[k] ? 'checked' : ''}><i></i></label>
+      <div class="au-txt"><b>${icon} ${name}</b><small>${desc}</small>
+        ${vol ? `<input type="range" min="0" max="1" step="0.05" value="${AUDIO_CFG[vol]}" data-v="${vol}" aria-label="Âm lượng ${name}">` : ''}</div>
+    </div>`;
+  const vOk = VOICE.available;
+  openModal(`<h2>🔊 Âm thanh</h2>
+    ${row('music', '🎵', 'Nhạc nền', 'Nhạc sảnh và nhạc trận đấu', 'mv')}
+    ${row('sfx', '💥', 'Hiệu ứng', 'Mở thẻ, nâng cấp, diễn biến trận đấu', 'sv')}
+    ${row('voice', '🎙️', 'Giọng bình luận viên', vOk ? `Giọng đọc của máy: ${esc(VOICE.voiceName)}` : 'Máy này chưa có giọng đọc tiếng Việt')}
+    ${vOk ? '<button class="btn small" id="au-test">▶ Nghe thử giọng bình luận</button>'
+      : `<p class="muted small au-help">${VOICE.supported ? 'Cách thêm giọng tiếng Việt: <b>Windows</b> – Cài đặt → Thời gian &amp; ngôn ngữ → Giọng nói → thêm Tiếng Việt (hoặc dùng trình duyệt Edge). <b>Android</b> – Cài đặt → Chuyển văn bản thành giọng nói → Google → tải Tiếng Việt. <b>iPhone</b> – Cài đặt → Trợ năng → Nội dung được đọc → Giọng nói → Tiếng Việt. Sau đó tải lại trang.' : 'Trình duyệt này không hỗ trợ đọc văn bản.'}</p>`}
+    <p class="muted small">Nhạc nền: “Heroic Age”, “Five Armies” – Kevin MacLeod (incompetech.com), giấy phép <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>. Hiệu ứng âm thanh được tạo trực tiếp trong trình duyệt.</p>
+    <div class="actions"><button class="btn primary" id="au-close">Xong</button></div>`);
+  document.querySelectorAll('#modal-box [data-k]').forEach(i => i.onchange = () => {
+    AUDIO_CFG[i.dataset.k] = i.checked; AUDIO_CFG.save(); sfxIcon();
+    if (i.dataset.k === 'music') MUSIC.refresh();
+    if (i.dataset.k === 'voice' && !i.checked) VOICE.stop();
+    if (i.dataset.k === 'sfx' && i.checked) SFX.tick(3);
+  });
+  document.querySelectorAll('#modal-box [data-v]').forEach(i => {
+    i.oninput = () => { const v = +i.value; if (i.dataset.v === 'mv') MUSIC.setVolume(v); else SFX.setVolume(v); };
+    i.onchange = () => { AUDIO_CFG.save(); if (i.dataset.v === 'sv') SFX.tick(2); };
+  });
+  if ($('#au-test')) $('#au-test').onclick = () => { VOICE.stop(); VOICE.say('🩸 FIRST BLOOD! Faker hạ gục Chovy ở đường giữa! Một pha xử lý cực đỉnh!', 3, 1.1); };
+  $('#au-close').onclick = closeModal;
+}
+$('#sfx-btn').onclick = audioModal;
 sfxIcon();
 // tạm ẩn mục ủng hộ khi DONATE.enabled = false (js/donate-config.js)
 if (typeof DONATE === 'undefined' || DONATE.enabled === false) ['#donate-btn', '#donate-btn2'].forEach(s => $(s).classList.add('hidden'));

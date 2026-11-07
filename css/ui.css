@@ -339,6 +339,21 @@ body.match-open main, body.match-open footer { visibility: hidden; }
 .sfx-btn { cursor: pointer; font-size: 16px; padding: 6px 10px; color: var(--text); font-family: var(--font); }
 .sfx-btn.off { opacity: .55; }
 
+/* ===== Cài đặt âm thanh ===== */
+.au-row { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--stroke); }
+.au-txt { flex: 1; min-width: 0; }
+.au-txt b { display: block; font-size: 15px; }
+.au-txt small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; overflow-wrap: anywhere; }
+.au-txt input[type=range] { width: 100%; margin-top: 8px; accent-color: var(--v); }
+.au-sw { position: relative; flex-shrink: 0; width: 46px; height: 26px; margin-top: 2px; cursor: pointer; }
+.au-sw input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.au-sw i { position: absolute; inset: 0; border-radius: 99px; background: rgba(255,255,255,.14); transition: background .2s; pointer-events: none; }
+.au-sw i::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform .2s; }
+.au-sw input:checked + i { background: var(--grad); }
+.au-sw input:checked + i::after { transform: translateX(20px); }
+#au-test { margin: 12px 0 4px; }
+.au-help { margin-top: 10px; line-height: 1.5; }
+
 /* ===== Mở gói: từng thẻ một ===== */
 .po { text-align: center; }
 .po-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
