@@ -1,6 +1,10 @@
 # Hành Trình CKTG – Esports Manager mini
 
-Game quản lý đội hình tuyển thủ LMHT trên nền web. Không cần cài đặt: **mở `index.html` bằng Chrome/Edge** là chơi được. Tiến trình được lưu tự động trong trình duyệt.
+Game quản lý đội hình tuyển thủ LMHT trên nền web.
+
+**▶ Chơi ngay: https://tuan1321.github.io/hanh-trinh-cktg/**
+
+Hoặc tải về và **mở `index.html` bằng Chrome/Edge**, không cần cài đặt. Tiến trình được lưu tự động trong trình duyệt.
 
 ## Cách chơi
 - Bắt đầu với 7 thẻ tuyển thủ ngẫu nhiên (bậc thấp).
