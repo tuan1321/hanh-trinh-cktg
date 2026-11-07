@@ -45,7 +45,7 @@ function switchSave(newS) {
   if (S.online) goOnline();
 }
 const userKey = uid => 'hanhtrinh_cktg_u_' + uid;
-function readKey(k) { try { const s = JSON.parse(localStorage.getItem(k)); return s && s.v === 2 ? s : null; } catch (e) { return null; } }
+function readKey(k) { try { return migrate(JSON.parse(localStorage.getItem(k))); } catch (e) { return null; } }
 
 async function onAuthChange(user) {
   AUTH.user = user;
@@ -66,7 +66,7 @@ async function onAuthChange(user) {
   let cloud = null, failed = false;
   try {
     const d = await AUTH.db.collection('saves').doc(user.uid).get();
-    if (d.exists) { const s = JSON.parse(d.data().data); if (s && s.v === 2) cloud = s; }
+    if (d.exists) cloud = migrate(JSON.parse(d.data().data));
   } catch (e) { failed = true; console.warn(e); }
   if (failed) {
     // không đọc được máy chủ: dùng bản sao trên máy nếu có, không ghi đè máy chủ

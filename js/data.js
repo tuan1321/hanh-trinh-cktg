@@ -15,13 +15,15 @@ const ROLE_INFO = {
 };
 
 // ===== Bậc thẻ (dựa trên chỉ số mùa giải) =====
+// Chỉ số tổng (OVR) giãn từ thang gốc để các mùa giải phân tầng rõ hơn: OVR = 50 + (gốc − 70) × 1.8
+const ovrOf = raw => Math.round(50 + (raw - 70) * 1.8);
 const TIERS = [
-  { id: 'SSS', cls: 'SSS', min: 95, sell: 4000, desc: 'Huyền thoại – mùa vô địch thế giới / MVP' },
-  { id: 'SS',  cls: 'SS',  min: 91, sell: 1800, desc: 'Siêu sao – chung kết / vô địch quốc tế' },
-  { id: 'S+',  cls: 'Sp',  min: 88, sell: 900,  desc: 'Ngôi sao – bán kết thế giới, vô địch khu vực' },
-  { id: 'S',   cls: 'S',   min: 84, sell: 400,  desc: 'Xuất sắc – dự CKTG, top khu vực' },
-  { id: 'A',   cls: 'A',   min: 79, sell: 150,  desc: 'Tốt – tuyển thủ chính ổn định' },
-  { id: 'B',   cls: 'B',   min: 0,  sell: 50,   desc: 'Khá – mùa giải bình thường' },
+  { id: 'SSS', cls: 'SSS', min: 95, sell: 45000, desc: 'Huyền thoại – mùa vô địch thế giới / MVP' },
+  { id: 'SS',  cls: 'SS',  min: 88, sell: 12000, desc: 'Siêu sao – chung kết / vô địch quốc tế' },
+  { id: 'S+',  cls: 'Sp',  min: 82, sell: 3000,  desc: 'Ngôi sao – bán kết thế giới, vô địch khu vực' },
+  { id: 'S',   cls: 'S',   min: 75, sell: 700,   desc: 'Xuất sắc – dự CKTG, top khu vực' },
+  { id: 'A',   cls: 'A',   min: 66, sell: 150,   desc: 'Tốt – tuyển thủ chính ổn định' },
+  { id: 'B',   cls: 'B',   min: 0,  sell: 30,    desc: 'Khá – mùa giải bình thường' },
 ];
 const tierOf = r => TIERS.find(t => r >= t.min);
 
@@ -158,25 +160,70 @@ const RAW = [
   ['Peter', 'SUP', 'LCK', [[2025, 'KT', 84]]],
 ];
 
+// Đội vô địch thế giới từng năm (mã đội như trong dữ liệu)
+const WORLDS_CHAMPS = { 2013: 'SKT', 2014: 'SSW', 2015: 'SKT', 2016: 'SKT', 2017: 'SSG', 2018: 'IG', 2019: 'FPX', 2020: 'DWG', 2021: 'EDG', 2022: 'DRX', 2023: 'T1', 2024: 'T1', 2025: 'T1' };
+
+// ===== Chỉ số phụ & chỉ số ẩn =====
+const h32 = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+const STAT_NAMES = [['LAN', 'Đi đường'], ['TF', 'Giao tranh'], ['MEC', 'Kỹ năng'], ['IQ', 'Tư duy'], ['VIS', 'Tầm nhìn']];
+const ROLE_BIAS = { TOP: [3, 1, 1, -1, -4], JNG: [-4, 1, -1, 3, 3], MID: [2, 1, 3, 1, -4], ADC: [1, 3, 3, -3, -4], SUP: [-2, 1, -4, 3, 5] };
+// Chỉ số ẩn "Bản lĩnh" (1–10): không hiện trên mặt thẻ, cộng thêm vào sức mạnh đội.
+// Hai thẻ cùng chỉ số tổng vẫn khác nhau nhờ chỉ số ẩn.
+const HIDDEN_W = 0.15; // mỗi điểm bản lĩnh trung bình = +0.15 sức mạnh đội
+
 const CARDS = [];
 const CARD = {};
 RAW.forEach(([name, role, region, seasons]) => {
-  seasons.forEach(([year, team, rating]) => {
-    const c = { id: `${name}-${year}`, name, role, region, year, team, rating, tier: tierOf(rating) };
+  seasons.forEach(([year, team, raw], k) => {
+    const rating = ovrOf(raw);
+    const h = h32(name + year);
+    const traits = [];
+    let hid = 3 + (h % 31) / 10;
+    if (WORLDS_CHAMPS[year] === team) { hid += 2.5; traits.push('🏆 Bản lĩnh nhà vô địch'); }
+    if (raw >= 93) { hid += 1; traits.push('⭐ Phong độ đỉnh cao'); }
+    if (k >= 3) { hid += 1; traits.push('📚 Dày dạn kinh nghiệm'); }
+    if (k === 0 && seasons.length > 1) { hid += 0.5; traits.push('🌱 Tân binh khát khao'); }
+    if (h % 7 === 0) { hid += 1; traits.push('🔥 Tay to thời khắc quyết định'); }
+    if (h % 11 === 3) { hid += 0.6; traits.push('🧊 Tâm lý thép'); }
+    if (h % 13 === 5) { hid -= 1; traits.push('😰 Dễ dao động'); }
+    const hidden = Math.max(1, Math.min(10, +hid.toFixed(1)));
+    const stats = ROLE_BIAS[role].map((b, i) => Math.max(35, rating + b + ((h >>> (i * 3)) % 5) - 2));
+    const c = { id: `${name}-${year}`, baseId: `${name}-${year}`, lv: 0, name, role, region, year, team, raw, rating, tier: tierOf(rating), hidden, traits, stats };
     CARDS.push(c); CARD[c.id] = c;
   });
 });
 
-// Đội vô địch thế giới từng năm (mã đội như trong dữ liệu)
-const WORLDS_CHAMPS = { 2013: 'SKT', 2014: 'SSW', 2015: 'SKT', 2016: 'SKT', 2017: 'SSG', 2018: 'IG', 2019: 'FPX', 2020: 'DWG', 2021: 'EDG', 2022: 'DRX', 2023: 'T1', 2024: 'T1', 2025: 'T1' };
+// ===== Nâng cấp thẻ (+1 … +10) =====
+// 2 thẻ giống hệt (cùng tuyển thủ, cùng mùa, cùng cấp) → thử lên 1 cấp.
+const MAX_UP = 10;
+const UPG_BONUS = [0, 1, 2, 4, 6, 8, 11, 14, 18, 22, 27];          // OVR cộng thêm ở mỗi cấp
+const UPG_RATE = [100, 90, 75, 60, 45, 32, 20, 12, 6, 2.5, 0.5];   // % thành công để lên cấp i
+const keyOf = (id, lv) => (lv ? `${id}+${lv}` : id);
+function parseKey(k) {
+  const m = /^(.+)\+([1-9]\d?)$/.exec(k);
+  return m ? { id: m[1], lv: +m[2] } : { id: k, lv: 0 };
+}
+const _CK = {};
+// Lấy thẻ theo khóa ("Faker-2016" hoặc "Faker-2016+3"); null nếu không hợp lệ
+function cardOf(k) {
+  if (typeof k !== 'string') return null;
+  if (_CK[k]) return _CK[k];
+  const { id, lv } = parseKey(k);
+  const b = CARD[id];
+  if (!b || lv > MAX_UP) return null;
+  const c = lv ? { ...b, id: k, lv, rating: b.rating + UPG_BONUS[lv], stats: b.stats.map(s => s + UPG_BONUS[lv]) } : b;
+  return (_CK[k] = c);
+}
+// Giá bán thẻ đã nâng cấp: luôn thấp hơn giá trị nguyên liệu bỏ ra (không thể nâng rồi bán để lời)
+const sellPrice = c => Math.round(c.tier.sell * (1 + c.lv * c.lv * 0.5));
 
 // ===== Gói thẻ =====
 const PACKS = [
-  { id: 'bronze',  name: 'Gói Đồng',        price: 400,   count: 3, icon: '🥉', odds: { B: 62, A: 32, S: 5, 'S+': 1 } },
-  { id: 'silver',  name: 'Gói Bạc',         price: 1000,  count: 3, icon: '🥈', odds: { B: 25, A: 50, S: 20, 'S+': 5 } },
-  { id: 'gold',    name: 'Gói Vàng',        price: 2500,  count: 3, icon: '🥇', odds: { A: 40, S: 36, 'S+': 17, SS: 6, SSS: 1 } },
-  { id: 'diamond', name: 'Gói Kim Cương',   price: 6000,  count: 3, icon: '💎', odds: { S: 40, 'S+': 34, SS: 21, SSS: 5 } },
-  { id: 'legend',  name: 'Gói Huyền Thoại', price: 15000, count: 3, icon: '👑', odds: { 'S+': 45, SS: 42, SSS: 13 } },
+  { id: 'bronze',  name: 'Gói Đồng',        price: 1500,  count: 3, icon: '🥉', odds: { B: 75, A: 22, S: 2.7, 'S+': 0.3 } },
+  { id: 'silver',  name: 'Gói Bạc',         price: 4000,  count: 3, icon: '🥈', odds: { B: 40, A: 45, S: 12, 'S+': 2.7, SS: 0.3 } },
+  { id: 'gold',    name: 'Gói Vàng',        price: 10000, count: 3, icon: '🥇', odds: { A: 50, S: 35, 'S+': 12, SS: 2.7, SSS: 0.3 } },
+  { id: 'diamond', name: 'Gói Kim Cương',   price: 25000, count: 3, icon: '💎', odds: { S: 55, 'S+': 33, SS: 10, SSS: 2 } },
+  { id: 'legend',  name: 'Gói Huyền Thoại', price: 60000, count: 3, icon: '👑', odds: { 'S+': 60, SS: 33, SSS: 7 } },
 ];
 const PACK = Object.fromEntries(PACKS.map(p => [p.id, p]));
 
@@ -191,56 +238,51 @@ const REGIONS = {
   INT: { name: 'Quốc tế', flag: '🌍', color: '#c8aa6e' },
 };
 const TEAM_NAMES = {
-  VCS: ['Sài Gòn Phoenix', 'Hà Nội Thunder', 'Đà Nẵng Tide', 'Cần Thơ Mavericks', 'Hải Phòng Krakens', 'Huế Dynasty', 'Mekong Vipers'],
-  PCS: ['Taipei Comets', 'Hong Kong Dragons', 'Manila Storm', 'Bangkok Tigers', 'Singapore Lions'],
-  LCS: ['Bay Area Titans', 'New York Hawks', 'Texas Outlaws', 'Seattle Ravens', 'Miami Heatwave'],
-  LEC: ['Berlin Wolves', 'Paris Monarchs', 'Madrid Toros', 'London Royals', 'Nordic Valkyries'],
-  LPL: ['Shanghai Qilin', 'Beijing Jade', 'Chengdu Pandas', 'Hangzhou Lotus', 'Shenzhen Rockets'],
-  LCK: ['Seoul Tigers', 'Busan Sharks', 'Incheon Falcons', 'Daegu Blaze', 'Gwangju Spirits'],
+  VCS: ['Sài Gòn Phoenix', 'Hà Nội Thunder', 'Đà Nẵng Tide', 'Cần Thơ Mavericks', 'Hải Phòng Krakens', 'Huế Dynasty', 'Mekong Vipers', 'Nha Trang Corals', 'Vũng Tàu Mariners', 'Quy Nhơn Falcons', 'Đà Lạt Pines'],
+  PCS: ['Taipei Comets', 'Hong Kong Dragons', 'Manila Storm', 'Bangkok Tigers', 'Singapore Lions', 'Kaohsiung Waves', 'Kuala Lumpur Kings', 'Jakarta Garudas', 'Macau Aces', 'Cebu Sharks', 'Taichung Spark'],
+  LCS: ['Bay Area Titans', 'New York Hawks', 'Texas Outlaws', 'Seattle Ravens', 'Miami Heatwave', 'Chicago Blizzard', 'Boston Rebels', 'Denver Peaks', 'Toronto Frost', 'Vegas Jackpot', 'Atlanta Embers'],
+  LEC: ['Berlin Wolves', 'Paris Monarchs', 'Madrid Toros', 'London Royals', 'Nordic Valkyries', 'Milano Lupi', 'Warsaw Hussars', 'Lisbon Navigators', 'Prague Golems', 'Vienna Waltz', 'Istanbul Crescents'],
+  LPL: ['Shanghai Qilin', 'Beijing Jade', 'Chengdu Pandas', 'Hangzhou Lotus', 'Shenzhen Rockets', 'Guangzhou Phoenix', 'Wuhan Cranes', 'Xi\'an Terracotta', 'Chongqing Fire', 'Suzhou Silk', 'Nanjing Plums', 'Tianjin Ports', 'Qingdao Seagulls', 'Harbin Ice', 'Kunming Spring', 'Xiamen Egrets', 'Changsha Stars', 'Dalian Tides'],
+  LCK: ['Seoul Tigers', 'Busan Sharks', 'Incheon Falcons', 'Daegu Blaze', 'Gwangju Spirits', 'Daejeon Comets', 'Ulsan Whales', 'Suwon Knights', 'Jeju Winds', 'Pohang Steel', 'Gangnam Neon'],
 };
-// Các mốc (vòng đấu) trong mỗi giải. d = độ chênh sức mạnh đối thủ so với giải.
-const ST_DIV2 = [
-  { n: 'Vòng loại', bo: 1, d: -4, ic: '🎯' },
-  { n: 'Tứ kết', bo: 1, d: -2, ic: '⚔️' },
-  { n: 'Bán kết', bo: 3, d: 0, ic: '🔥' },
-  { n: 'Chung kết', bo: 3, d: 2, ic: '🏆' },
+const allTeamNames = () => Object.values(TEAM_NAMES).flat();
+
+// ===== Độ khó (mỗi độ khó là một chương hành trình riêng) =====
+const DIFFS = [
+  { id: 0, name: 'Dễ',       icon: '🌱', pow: 0,  cash: 1,   color: '#a3ff47' },
+  { id: 1, name: 'Thường',   icon: '⚔️', pow: 6,  cash: 1.4, color: '#22d3ee' },
+  { id: 2, name: 'Khó',      icon: '🔥', pow: 12, cash: 1.9, color: '#ffb81f', extraPack: 1 },
+  { id: 3, name: 'Địa ngục', icon: '💀', pow: 19, cash: 2.6, color: '#ff4d6d', extraPack: 1 },
 ];
-const ST_DIV1 = [
-  { n: 'Vòng bảng', bo: 1, d: -4, ic: '🎯' },
-  { n: 'Playoffs', bo: 1, d: -3, ic: '🛡️' },
-  { n: 'Tứ kết', bo: 3, d: -2, ic: '⚔️' },
-  { n: 'Bán kết', bo: 3, d: 0, ic: '🔥' },
-  { n: 'Chung kết', bo: 3, d: 2, ic: '🏆' },
-];
-const ST_MSI = [
-  { n: 'Vòng khởi động', bo: 1, d: -4, ic: '🎯' },
-  { n: 'Vòng bảng', bo: 3, d: -2, ic: '🛡️' },
-  { n: 'Bán kết', bo: 3, d: 0, ic: '🔥' },
-  { n: 'Chung kết', bo: 5, d: 2, ic: '🏆' },
-];
-const ST_WORLDS = [
-  { n: 'Vòng khởi động', bo: 1, d: -4, ic: '🎯' },
-  { n: 'Vòng Thụy Sĩ', bo: 1, d: -3, ic: '🛡️' },
-  { n: 'Tứ kết', bo: 3, d: -2, ic: '⚔️' },
-  { n: 'Bán kết', bo: 3, d: 0, ic: '🔥' },
-  { n: 'Chung kết', bo: 5, d: 2, ic: '🏆' },
-];
+const tk = (tid, d) => (d ? `${tid}@${d}` : tid); // khóa tiến độ của giải theo độ khó
+
+// ===== Thể thức giải (mô phỏng theo thể thức thực tế, tối đa BO5) =====
+// league: vòng tròn size đội, rr lượt, mỗi trận BOx, top adv đi tiếp
+// ko: loại trực tiếp; pi = vòng khởi động (đối thủ từ vòng loại)
+// swiss: thắng 3 đi tiếp, thua 3 bị loại; trận quyết định đánh BO3
+const LG = (n, size, rr, bo, adv) => ({ type: 'league', n, ic: '📋', size, rr, bo, adv });
+const KO = (n, bo, ic = '⚔️', pi = false) => ({ type: 'ko', n, ic, bo, pi });
+const SW = () => ({ type: 'swiss', n: 'Vòng Thụy Sĩ', ic: '🛡️', bo: 1 });
+const BK = bo => KO('Bán kết', bo, '🔥');
+const CK = () => KO('Chung kết', 5, '🏆');
+const TK = () => KO('Tứ kết', 5, '⚔️');
 const TOURS = [
-  { id: 'vcs2', region: 'VCS', name: 'VCS Hạng 2', div: 2, power: 73, prize: 800, pack: 'bronze', rounds: ST_DIV2 },
-  { id: 'vcs1', region: 'VCS', name: 'VCS Hạng 1', div: 1, power: 76, prize: 1500, pack: 'silver', rounds: ST_DIV1 },
-  { id: 'pcs2', region: 'PCS', name: 'PCS Hạng 2', div: 2, power: 78, prize: 2000, pack: 'silver', rounds: ST_DIV2 },
-  { id: 'pcs1', region: 'PCS', name: 'PCS Hạng 1', div: 1, power: 80, prize: 3000, pack: 'gold', rounds: ST_DIV1 },
-  { id: 'lcs2', region: 'LCS', name: 'LCS Hạng 2', div: 2, power: 81, prize: 3500, pack: 'gold', rounds: ST_DIV2 },
-  { id: 'lcs1', region: 'LCS', name: 'LCS Hạng 1', div: 1, power: 83, prize: 5000, pack: 'gold', rounds: ST_DIV1 },
-  { id: 'lec2', region: 'LEC', name: 'LEC Hạng 2', div: 2, power: 84, prize: 6000, pack: 'gold', rounds: ST_DIV2 },
-  { id: 'lec1', region: 'LEC', name: 'LEC Hạng 1', div: 1, power: 86, prize: 8000, pack: 'diamond', rounds: ST_DIV1 },
-  { id: 'lpl2', region: 'LPL', name: 'LPL Hạng 2', div: 2, power: 87, prize: 9000, pack: 'diamond', rounds: ST_DIV2 },
-  { id: 'lpl1', region: 'LPL', name: 'LPL Hạng 1', div: 1, power: 89, prize: 13000, pack: 'diamond', rounds: ST_DIV1 },
-  { id: 'lck2', region: 'LCK', name: 'LCK Hạng 2', div: 2, power: 89, prize: 13000, pack: 'diamond', rounds: ST_DIV2 },
-  { id: 'lck1', region: 'LCK', name: 'LCK Hạng 1', div: 1, power: 91, prize: 18000, pack: 'legend', rounds: ST_DIV1 },
-  { id: 'msi', region: 'INT', name: 'MSI', div: 0, power: 93, prize: 28000, pack: 'legend', rounds: ST_MSI },
-  { id: 'worlds', region: 'INT', name: 'Chung Kết Thế Giới', div: 0, power: 95, prize: 60000, pack: 'legend', packCount: 2, rounds: ST_WORLDS },
+  { id: 'vcs2', region: 'VCS', name: 'VCS Hạng 2', div: 2, power: 56, prize: 1500, pack: 'bronze', stages: [LG('Vòng bảng', 8, 2, 1, 4), BK(3), CK()] },
+  { id: 'vcs1', region: 'VCS', name: 'VCS Hạng 1', div: 1, power: 61, prize: 2500, pack: 'silver', stages: [LG('Vòng bảng', 8, 2, 3, 4), BK(5), CK()] },
+  { id: 'pcs2', region: 'PCS', name: 'PCS Hạng 2', div: 2, power: 64, prize: 3500, pack: 'silver', stages: [LG('Vòng bảng', 8, 1, 1, 4), BK(3), CK()] },
+  { id: 'pcs1', region: 'PCS', name: 'PCS Hạng 1', div: 1, power: 68, prize: 5000, pack: 'gold', stages: [LG('Vòng bảng', 10, 2, 1, 6), TK(), BK(5), CK()] },
+  { id: 'lcs2', region: 'LCS', name: 'LCS Hạng 2', div: 2, power: 70, prize: 6000, pack: 'gold', stages: [LG('Vòng bảng', 10, 1, 1, 4), BK(3), CK()] },
+  { id: 'lcs1', region: 'LCS', name: 'LCS Hạng 1', div: 1, power: 73, prize: 8000, pack: 'gold', stages: [LG('Vòng bảng', 8, 2, 1, 6), TK(), BK(5), CK()] },
+  { id: 'lec2', region: 'LEC', name: 'LEC Hạng 2', div: 2, power: 75, prize: 9000, pack: 'gold', stages: [LG('Vòng bảng', 10, 1, 1, 4), BK(3), CK()] },
+  { id: 'lec1', region: 'LEC', name: 'LEC Hạng 1', div: 1, power: 78, prize: 12000, pack: 'diamond', stages: [LG('Mùa giải thường', 10, 1, 1, 8), KO('Vòng nhóm', 3, '🛡️'), BK(5), CK()] },
+  { id: 'lpl2', region: 'LPL', name: 'LPL Hạng 2', div: 2, power: 80, prize: 14000, pack: 'diamond', stages: [LG('Vòng bảng', 12, 1, 3, 4), BK(5), CK()] },
+  { id: 'lpl1', region: 'LPL', name: 'LPL Hạng 1', div: 1, power: 84, prize: 20000, pack: 'diamond', stages: [LG('Vòng bảng', 17, 1, 3, 8), TK(), BK(5), CK()] },
+  { id: 'lck2', region: 'LCK', name: 'LCK Hạng 2', div: 2, power: 84, prize: 20000, pack: 'diamond', stages: [LG('Vòng bảng', 10, 2, 3, 6), TK(), BK(5), CK()] },
+  { id: 'lck1', region: 'LCK', name: 'LCK Hạng 1', div: 1, power: 88, prize: 28000, pack: 'legend', stages: [LG('Vòng bảng', 10, 2, 3, 6), TK(), BK(5), CK()] },
+  { id: 'msi', region: 'INT', name: 'MSI', div: 0, power: 91, prize: 40000, pack: 'legend', stages: [KO('Vòng khởi động', 3, '🎯', true), KO('Khởi động – quyết định', 3, '🎯', true), TK(), BK(5), CK()] },
+  { id: 'worlds', region: 'INT', name: 'Chung Kết Thế Giới', div: 0, power: 95, prize: 80000, pack: 'legend', packCount: 2, stages: [SW(), TK(), BK(5), CK()] },
 ];
 // Thưởng lần đầu vượt qua một mốc (tỉ lệ theo tiền thưởng vô địch)
-const MILESTONE_BONUS = 0.1;
+const MILESTONE_BONUS = 0.08;
 const TOUR = Object.fromEntries(TOURS.map(t => [t.id, t]));
+const stageGames = s => (s.type === 'league' ? s.rr * (s.size - 1) : s.type === 'swiss' ? '3–5' : 1);

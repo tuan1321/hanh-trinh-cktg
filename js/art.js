@@ -119,6 +119,16 @@ function avatarHTML(card) {
   const img = CUSTOM_IMG['p:' + card.name];
   return img ? `<img class="av-img" src="${img}" alt="${esc(card.name)}">` : avatarSVG(card);
 }
+// Ảnh ẩn cho thẻ chưa mở: bóng người tối + dấu hỏi, viền theo màu bậc thẻ
+function hiddenAvatarSVG() {
+  return `<svg viewBox="0 0 100 100" class="av-svg av-hidden" aria-hidden="true">
+    <defs><radialGradient id="hg" cx="50%" cy="35%" r="70%"><stop offset="0" stop-color="#2b2550"/><stop offset="1" stop-color="#0b0920"/></radialGradient></defs>
+    <rect width="100" height="100" fill="url(#hg)"/>
+    <path d="M8,100 C10,78 30,69 50,69 C70,69 90,78 92,100 Z" fill="#050414" stroke="var(--tc)" stroke-opacity=".5" stroke-width="1.2"/>
+    <ellipse cx="50" cy="45" rx="18" ry="21" fill="#050414" stroke="var(--tc)" stroke-opacity=".5" stroke-width="1.2"/>
+    <text x="50" y="55" text-anchor="middle" font-size="28" font-weight="800" font-family="Chakra Petch, sans-serif" fill="var(--tc)" opacity=".9">?</text>
+  </svg>`;
+}
 
 // ----- Huy hiệu đội -----
 function badgeSVG(text, c1, c2) {

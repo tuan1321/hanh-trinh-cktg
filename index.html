@@ -22,6 +22,7 @@
         <div class="xpbar"><div id="xpfill"></div></div>
         <small id="xptext"></small>
       </div>
+      <button class="stat donate-top" id="donate-btn" title="Ủng hộ nhà phát hành">💖<span> Ủng hộ</span></button>
       <button class="acct" id="acct-btn" title="Tài khoản"><span class="acct-av">👤</span><span class="acct-name">Đăng nhập</span></button>
     </div>
   </header>
@@ -31,6 +32,8 @@
     <button data-view="map"><i>🗺️</i><span>Giải đấu</span></button>
     <button data-view="shop"><i>🛍️</i><span>Cửa hàng</span><span class="dot hidden" id="pack-dot"></span></button>
     <button data-view="collection"><i>🃏</i><span>Bộ sưu tập</span></button>
+    <button data-view="upgrade"><i>⬆️</i><span>Nâng cấp</span></button>
+    <button data-view="achieve"><i>🏅</i><span>Thành tựu</span><span class="dot hidden" id="ach-dot"></span></button>
     <button data-view="friends"><i>👥</i><span>Bạn bè</span><span class="dot-num hidden" id="friends-dot">0</span></button>
   </nav>
 
@@ -39,11 +42,14 @@
     <section id="view-map" class="view"></section>
     <section id="view-shop" class="view"></section>
     <section id="view-collection" class="view"></section>
+    <section id="view-upgrade" class="view"></section>
+    <section id="view-achieve" class="view"></section>
     <section id="view-friends" class="view"></section>
   </main>
 
   <footer>
     Fan game phi thương mại. Chỉ số tuyển thủ là ước lượng theo thành tích từng năm, không phải số liệu chính thức.
+    <button id="donate-btn2" class="btn small donate-btn">💖 Ủng hộ nhà phát hành</button>
     <button id="credits-btn" class="btn ghost small">📷 Nguồn ảnh</button>
     <button id="reset" class="btn ghost small">Chơi lại từ đầu</button>
   </footer>
@@ -81,7 +87,6 @@
         <button class="btn small spd" data-s="1">x1</button>
         <button class="btn small spd" data-s="2">x2</button>
         <button class="btn small spd" data-s="4">x4</button>
-        <button class="btn small spd" data-s="8">x8</button>
         <button class="btn small ghost" id="m-skip">⏭ Bỏ qua ván</button>
         <button class="btn primary hidden" id="m-next">Ván tiếp theo ▶</button>
       </div>
@@ -98,6 +103,10 @@
   <script src="js/worldmap.js"></script>
   <script src="js/match.js"></script>
   <script src="js/social.js"></script>
+  <script src="js/tour.js"></script>
+  <script src="js/upgrade.js"></script>
+  <script src="js/achieve.js"></script>
+  <script src="js/donate-config.js"></script>
   <script src="js/main.js"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/auth.js"></script>

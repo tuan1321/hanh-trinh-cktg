@@ -5,38 +5,51 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const GUEST_KEY = 'hanhtrinh_cktg_v1';
 let SAVE_KEY = GUEST_KEY; // đổi sang khóa riêng của tài khoản khi đăng nhập (xem auth.js)
 let S = null;
+const SAVE_VER = 3;
 
 function save() {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { }
   if (typeof cloudSave === 'function') cloudSave(); // đồng bộ lên tài khoản nếu đã đăng nhập
 }
+// Nâng cấp bản lưu cũ lên phiên bản hiện tại (dùng cả cho bản lưu trên tài khoản)
+function migrate(s) {
+  if (!s || typeof s !== 'object') return null;
+  if (s.v === 1) { s.v = 2; s.best = {}; s.run = null; }
+  if (s.v === 2) {
+    // v3: giải đấu theo thể thức thật + độ khó. Giữ các giải đã vô địch (thành chương Dễ), hủy giải đang dở.
+    s.v = 3; s.run = null; s.best = {};
+    Object.keys(s.won || {}).forEach(id => { if (TOUR[id]) s.best[id] = TOUR[id].stages.length - 1; else delete s.won[id]; });
+  }
+  if (s.v !== SAVE_VER) return null;
+  s.won = s.won || {}; s.best = s.best || {}; s.ach = s.ach || {}; s.packs = s.packs || [];
+  s.stats = Object.assign({ w: 0, l: 0, titles: 0, fw: 0, maxUp: 0, maxPow: 0, ups: 0 }, s.stats || {});
+  // bỏ thẻ không còn tồn tại
+  Object.keys(s.cards || {}).forEach(k => { if (!cardOf(k) || !(s.cards[k] > 0)) delete s.cards[k]; });
+  ROLES.forEach(r => { const c = cardOf(s.lineup && s.lineup[r]); if (!c || c.role !== r || !s.cards[s.lineup[r]]) s.lineup[r] = null; });
+  return s;
+}
 function load() {
-  try {
-    const s = JSON.parse(localStorage.getItem(SAVE_KEY));
-    if (!s) return null;
-    if (s.v === 1) { // nâng cấp bản lưu cũ: thêm tiến độ mốc, hủy giải đang dở (số vòng đã thay đổi)
-      s.v = 2; s.best = {}; s.run = null;
-      Object.keys(s.won).forEach(id => { if (TOUR[id]) s.best[id] = TOUR[id].rounds.length - 1; });
-    }
-    return s.v === 2 ? s : null;
-  } catch (e) { return null; }
+  try { return migrate(JSON.parse(localStorage.getItem(SAVE_KEY))); } catch (e) { return null; }
 }
 
-const owned = id => S.cards[id] || 0;
-const addCard = id => { S.cards[id] = owned(id) + 1; };
-const inLineup = id => Object.values(S.lineup).includes(id);
+const owned = k => S.cards[k] || 0;
+const addCard = k => { S.cards[k] = owned(k) + 1; };
+const removeCard = k => { S.cards[k]--; if (S.cards[k] <= 0) delete S.cards[k]; };
+const inLineup = k => Object.values(S.lineup).includes(k);
+const ownedKeys = () => Object.keys(S.cards).filter(k => cardOf(k));
+const ownedBase = id => ownedKeys().some(k => cardOf(k).baseId === id);
 
 function newGame() {
   const keep = S ? { profile: S.profile, friends: S.friends } : {}; // chơi lại vẫn giữ mã kết bạn & bạn bè
-  S = { v: 2, ...keep, teamName: 'Vietnam Legends', money: 1000, level: 1, exp: 0, cards: {}, lineup: { TOP: null, JNG: null, MID: null, ADC: null, SUP: null }, packs: [], won: {}, best: {}, run: null, stats: { w: 0, l: 0, titles: 0 } };
+  S = { v: SAVE_VER, ...keep, teamName: 'Vietnam Legends', money: 1500, level: 1, exp: 0, cards: {}, lineup: { TOP: null, JNG: null, MID: null, ADC: null, SUP: null }, packs: [], won: {}, best: {}, run: null, ach: {}, stats: { w: 0, l: 0, titles: 0, fw: 0, maxUp: 0, maxPow: 0, ups: 0 } };
   const got = [];
   const used = new Set();
   ROLES.forEach(r => {
-    const c = pick(CARDS.filter(c => c.role === r && c.rating <= 78));
+    const c = pick(CARDS.filter(c => c.role === r && c.rating <= 64));
     addCard(c.id); S.lineup[r] = c.id; got.push(c); used.add(c.name);
   });
   for (let i = 0; i < 2; i++) {
-    const c = pick(CARDS.filter(c => c.rating <= 81 && !used.has(c.name)));
+    const c = pick(CARDS.filter(c => c.rating <= 70 && !used.has(c.name)));
     addCard(c.id); got.push(c); used.add(c.name);
   }
   save();
@@ -44,10 +57,10 @@ function newGame() {
 }
 
 // ===== Sức mạnh đội hình =====
-const lineupCards = () => ROLES.map(r => (S.lineup[r] ? CARD[S.lineup[r]] : null));
+const lineupCards = () => ROLES.map(r => (S.lineup[r] ? cardOf(S.lineup[r]) : null));
 // Độ ăn ý: mỗi liên kết cộng điểm cho từng tuyển thủ tham gia.
-// Sức mạnh đội = TB chỉ số + TB điểm ăn ý của 5 người (tối đa +CHEM_TEAM_CAP).
-const CHEM_CARD_CAP = 7, CHEM_TEAM_CAP = 6;
+// Sức mạnh đội = TB chỉ số tổng + TB chỉ số ẩn × HIDDEN_W + điểm ăn ý đội (tối đa +CHEM_TEAM_CAP).
+const CHEM_CARD_CAP = 7, CHEM_MULT = 1.5, CHEM_TEAM_CAP = 9;
 const isChamp = c => WORLDS_CHAMPS[c.year] === c.team;
 function groupBy(arr, fn) { const g = {}; arr.forEach(x => (g[fn(x)] = g[fn(x)] || []).push(x)); return g; }
 function chemistry(cards) {
@@ -93,33 +106,36 @@ function chemistry(cards) {
 
   Object.keys(per).forEach(id => per[id] = Math.min(CHEM_CARD_CAP, +per[id].toFixed(1)));
   const sum = Object.values(per).reduce((a, b) => a + b, 0);
-  return { bonus: Math.min(CHEM_TEAM_CAP, +(sum / 5).toFixed(1)), per, links };
+  return { bonus: Math.min(CHEM_TEAM_CAP, +(sum / 5 * CHEM_MULT).toFixed(1)), per, links };
 }
+const hiddenBonus = cs => +(cs.reduce((s, c) => s + c.hidden, 0) / 5 * HIDDEN_W).toFixed(1);
 function powerOf(cards) {
   const cs = cards.filter(Boolean);
   if (cs.length < 5) return null;
-  return +(cs.reduce((s, c) => s + c.rating, 0) / 5 + chemistry(cs).bonus).toFixed(1);
+  return +(cs.reduce((s, c) => s + c.rating, 0) / 5 + hiddenBonus(cs) + chemistry(cs).bonus).toFixed(1);
 }
-const winProb = (a, b) => 1 / (1 + Math.exp(-(a - b) / 3.5));
+const winProb = (a, b) => 1 / (1 + Math.exp(-(a - b) / 5.5));
 function myTeam() {
   const cs = lineupCards();
   const power = powerOf(cs);
   if (power == null) return null;
+  if (power > (S.stats.maxPow || 0)) S.stats.maxPow = power;
   return { name: S.teamName, players: Object.fromEntries(ROLES.map((r, i) => [r, cs[i]])), power };
 }
-function makeOpponent(region, P) {
+function makeOpponent(region, P, name) {
   const players = {};
   const mine = new Set(lineupCards().filter(Boolean).map(c => c.name));
   const base = CARDS.filter(c => !mine.has(c.name));
   ROLES.forEach(r => {
-    let pool = base.filter(c => c.role === r && Math.abs(c.rating - P) <= 3 && (region === 'INT' || c.region === region));
-    if (!pool.length) pool = base.filter(c => c.role === r && Math.abs(c.rating - P) <= 4);
+    let pool = base.filter(c => c.role === r && Math.abs(c.rating - P) <= 5 && (region === 'INT' || c.region === region));
+    if (pool.length < 2) pool = base.filter(c => c.role === r && Math.abs(c.rating - P) <= 7);
     if (!pool.length) pool = base.filter(c => c.role === r).sort((a, b) => Math.abs(a.rating - P) - Math.abs(b.rating - P)).slice(0, 3);
     players[r] = pick(pool);
   });
-  const names = region === 'INT' ? Object.values(TEAM_NAMES).flat() : TEAM_NAMES[region];
-  let name = pick(names);
-  if (name === S.teamName) name += ' II';
+  if (!name) {
+    name = pick(region === 'INT' ? allTeamNames() : TEAM_NAMES[region]);
+    if (name === S.teamName) name += ' II';
+  }
   return { name, players, power: +P.toFixed(1), region };
 }
 
@@ -127,7 +143,7 @@ function makeOpponent(region, P) {
 const expNeed = lv => 100 + (lv - 1) * 60;
 function levelPack(lv) {
   const order = ['bronze', 'silver', 'gold', 'diamond', 'legend'];
-  let i = lv >= 20 ? 4 : lv >= 14 ? 3 : lv >= 9 ? 2 : lv >= 5 ? 1 : 0;
+  let i = lv >= 25 ? 3 : lv >= 15 ? 2 : lv >= 7 ? 1 : 0;
   if (lv % 5 === 0) i = Math.min(4, i + 1);
   return order[i];
 }
@@ -142,18 +158,28 @@ function gainExp(x) {
   return ups;
 }
 
+// ===== Quyền khi xem trận =====
+const SKIP_LEVEL = 10;
+const anyWon = tid => DIFFS.some(d => S.won[tk(tid, d.id)]);
+function matchPerms() {
+  return { maxSpeed: anyWon('lcs1') ? 4 : 2, skip: S.level >= SKIP_LEVEL };
+}
+
 // ===== Thẻ =====
-const initials = n => n.replace(/[^A-Za-z0-9]/g, '').slice(0, 2).toUpperCase();
+const lvClass = lv => (lv >= 10 ? 'lv-max' : lv >= 8 ? 'lv-gold' : lv >= 5 ? 'lv-silver' : 'lv-bronze');
+const lvBadge = c => (c.lv ? `<span class="c-lv ${lvClass(c.lv)}">+${c.lv}</span>` : '');
 function cardHTML(c, o = {}) {
   const t = c.tier;
   const champ = isChamp(c);
-  return `<div class="card tier-${t.cls} ${o.locked ? 'locked' : ''} ${o.small ? 'small' : ''} ${o.click ? 'clickable' : ''}" data-id="${c.id}" style="${teamStyle(c.team)}">
+  const hide = o.locked; // thẻ chưa mở: ẩn ảnh và chỉ số
+  return `<div class="card tier-${t.cls} ${hide ? 'locked' : ''} ${c.lv ? 'upg ' + lvClass(c.lv) : ''} ${o.small ? 'small' : ''} ${o.click ? 'clickable' : ''}" data-id="${c.id}" style="${teamStyle(c.team)}">
     <div class="card-shine"></div>
     <div class="c-teamglow"></div>
     <div class="c-watermark">${teamLogoHTML(c.team)}</div>
-    <div class="card-head"><span class="c-tier">${t.id}</span><span class="c-logo" title="${esc(TEAM_INFO[c.team]?.name || c.team)}">${teamLogoHTML(c.team)}</span><span class="c-rating">${c.rating}</span></div>
-    <div class="c-avatar">${avatarHTML(c)}<em class="${champ ? 'champ' : ''}" ${champ ? `title="Vô địch CKTG ${c.year}"` : ''}>${champ ? '🏆 ' : ''}${c.year}</em></div>
-    <div class="c-name">${esc(c.name)}</div>
+    <div class="card-head"><span class="c-tier">${t.id}</span><span class="c-logo" title="${esc(TEAM_INFO[c.team]?.name || c.team)}">${teamLogoHTML(c.team)}</span><span class="c-rating">${hide ? '??' : c.rating}</span></div>
+    ${lvBadge(c)}
+    <div class="c-avatar">${hide ? hiddenAvatarSVG() : avatarHTML(c)}<em class="${champ && !hide ? 'champ' : ''}" ${champ && !hide ? `title="Vô địch CKTG ${c.year}"` : ''}>${champ && !hide ? '🏆 ' : ''}${c.year}</em></div>
+    <div class="c-name">${hide ? '? ? ?' : esc(c.name)}</div>
     <div class="c-role">${ROLE_INFO[c.role].icon} ${c.role} · ${c.region}</div>
     <div class="c-team" title="${esc(TEAM_INFO[c.team]?.name || c.team)}"><b>${c.team}</b><span>${c.year}</span></div>
     ${o.chem > 0 ? `<span class="c-chem" title="Điểm ăn ý">🔗 +${o.chem}</span>` : ''}
@@ -163,28 +189,31 @@ function cardHTML(c, o = {}) {
     ${o.inLineup ? '<span class="c-in">ĐANG DÙNG</span>' : ''}
   </div>`;
 }
-function equip(id) {
-  const c = CARD[id];
-  const clash = ROLES.find(r => r !== c.role && S.lineup[r] && CARD[S.lineup[r]].name === c.name);
+function equip(k) {
+  const c = cardOf(k);
+  const clash = ROLES.find(r => r !== c.role && S.lineup[r] && cardOf(S.lineup[r]).name === c.name);
   if (clash) { toast(`${c.name} đã có trong đội hình ở vị trí khác!`, 'err'); return false; }
-  S.lineup[c.role] = id;
+  S.lineup[c.role] = k;
   save(); renderAll();
-  toast(`Đã đưa ${c.name} (${c.year}) vào vị trí ${ROLE_INFO[c.role].vn}`);
+  toast(`Đã đưa ${c.name} (${c.year}${c.lv ? ' +' + c.lv : ''}) vào vị trí ${ROLE_INFO[c.role].vn}`);
   return true;
 }
-function sellCard(id) {
-  const free = owned(id) - (inLineup(id) ? 1 : 0);
-  if (free < 1) { toast('Không thể bán thẻ đang dùng trong đội hình!', 'err'); return false; }
-  const c = CARD[id];
-  S.cards[id]--; if (!S.cards[id]) delete S.cards[id];
-  S.money += c.tier.sell; save(); renderAll();
-  toast(`Đã bán ${c.name} ${c.year} (+${fmt(c.tier.sell)} 💰)`);
+const freeCount = k => owned(k) - (inLineup(k) ? 1 : 0);
+function sellCard(k) {
+  if (freeCount(k) < 1) { toast('Không thể bán thẻ đang dùng trong đội hình!', 'err'); return false; }
+  const c = cardOf(k), price = sellPrice(c);
+  if (c.lv >= 3 && !confirm(`Bán ${c.name} ${c.year} +${c.lv} với giá ${fmt(price)} 💰?`)) return false;
+  removeCard(k);
+  S.money += price; save(); renderAll();
+  toast(`Đã bán ${c.name} ${c.year}${c.lv ? ' +' + c.lv : ''} (+${fmt(price)} 💰)`);
   return true;
 }
 function sellDupes() {
   let total = 0, n = 0;
-  Object.keys(S.cards).forEach(id => { const extra = S.cards[id] - 1; if (extra > 0) { total += extra * CARD[id].tier.sell; n += extra; S.cards[id] = 1; } });
+  ownedKeys().forEach(k => { const extra = S.cards[k] - 1; if (extra > 0) { total += extra * sellPrice(cardOf(k)); n += extra; } });
   if (!n) return toast('Không có thẻ trùng nào.');
+  if (!confirm(`Bán ${n} thẻ trùng để nhận ${fmt(total)} 💰?\nLưu ý: thẻ trùng là nguyên liệu để nâng cấp thẻ.`)) return;
+  ownedKeys().forEach(k => { if (S.cards[k] > 1) S.cards[k] = 1; });
   S.money += total; save(); renderAll();
   toast(`Đã bán ${n} thẻ trùng, nhận ${fmt(total)} 💰`);
 }
@@ -208,7 +237,7 @@ function openPack(pid, fromInventory) {
   for (let i = 0; i < p.count; i++) {
     const tier = rollTier(p.odds);
     const c = pick(CARDS.filter(c => c.tier.id === tier));
-    res.push({ c, isNew: !owned(c.id) });
+    res.push({ c, isNew: !ownedBase(c.id) });
     addCard(c.id);
   }
   save(); renderAll();
@@ -252,19 +281,23 @@ function renderHeader() {
   $('#xpfill').style.width = `${(S.exp / need) * 100}%`;
   $('#xptext').textContent = `${S.exp}/${need} EXP`;
   $('#pack-dot').classList.toggle('hidden', !S.packs.length);
+  if (typeof achClaimable === 'function') $('#ach-dot').classList.toggle('hidden', !achClaimable());
 }
 
 // ===== Render: đội hình =====
 function renderTeam() {
   const cs = lineupCards();
-  const power = powerOf(cs);
+  const me = myTeam();
+  const power = me ? me.power : null;
   const chem = chemistry(cs);
-  const avg = cs.filter(Boolean).length ? (cs.filter(Boolean).reduce((s, c) => s + c.rating, 0) / cs.filter(Boolean).length).toFixed(1) : '-';
+  const full = cs.filter(Boolean);
+  const avg = full.length ? (full.reduce((s, c) => s + c.rating, 0) / full.length).toFixed(1) : '-';
+  const hb = full.length === 5 ? hiddenBonus(full) : 0;
   $('#view-team').innerHTML = `
   <div class="panel team-hero">
     <div class="panel-head">
       <div class="team-name"><span class="my-logo">${clubLogoHTML(S.teamName, true)}</span><div><label>Đội của bạn ✏️</label><input id="team-name" maxlength="24" value="${esc(S.teamName)}" title="Nhấn để đổi tên đội"></div></div>
-      <div class="power-ring" style="--p:${power ? Math.max(4, Math.min(100, (power - 65) / 35 * 100)).toFixed(0) : 0}"><div><small>Sức mạnh</small><b>${power ?? '—'}</b><span>TB ${avg} · ăn ý +${chem.bonus}</span></div></div>
+      <div class="power-ring" style="--p:${power ? Math.max(4, Math.min(100, (power - 55) / 60 * 100)).toFixed(0) : 0}"><div><small>Sức mạnh</small><b>${power ?? '—'}</b><span>TB ${avg} · ẩn +${hb} · ăn ý +${chem.bonus}</span></div></div>
     </div>
     <div class="lineup">
       ${ROLES.map((r, i) => `<div class="slot" data-role="${r}">
@@ -282,15 +315,16 @@ function renderTeam() {
         <button class="btn primary" id="btn-friendly">⚔️ Giao hữu (BO1)</button>
         <button class="btn" id="btn-gomap">🗺️ Bản đồ giải đấu</button>
       </div>
-      ${S.run ? `<div class="notice">Đang dự <b>${TOUR[S.run.tid].name}</b> – ${TOUR[S.run.tid].rounds[S.run.round].n}. <button class="btn small primary" id="btn-resume">Tiếp tục</button></div>` : ''}
+      ${S.run ? `<div class="notice">Đang dự <b>${TOUR[S.run.tid].name}</b> (${DIFFS[S.run.d].name}) – ${TOUR[S.run.tid].stages[S.run.stage].n}. <button class="btn small primary" id="btn-resume">Tiếp tục</button></div>` : ''}
+      <p class="muted small">⏩ Tua x4: ${anyWon('lcs1') ? '✅ đã mở' : '🔒 vô địch LCS Hạng 1'} · ⏭ Bỏ qua ván: ${S.level >= SKIP_LEVEL ? '✅ đã mở' : `🔒 cấp ${SKIP_LEVEL}`}</p>
     </div>
     <div class="panel">
       <h3>📊 Thành tích</h3>
       <div class="stat-tiles">
         <div class="tile"><small>Thắng / Thua</small><b>${S.stats.w} / ${S.stats.l}</b></div>
         <div class="tile"><small>Danh hiệu</small><b>🏆 ${S.stats.titles}</b></div>
-        <div class="tile"><small>Giải đã vô địch</small><b>${Object.keys(S.won).length} / ${TOURS.length}</b></div>
-        <div class="tile"><small>Thẻ sưu tầm</small><b>${Object.keys(S.cards).length} / ${CARDS.length}</b></div>
+        <div class="tile"><small>Giải đã vô địch</small><b>${Object.keys(S.won).length} / ${TOURS.length * DIFFS.length}</b></div>
+        <div class="tile"><small>Thẻ sưu tầm</small><b>${new Set(ownedKeys().map(k => cardOf(k).baseId)).size} / ${CARDS.length}</b></div>
       </div>
     </div>
   </div>`;
@@ -299,13 +333,13 @@ function renderTeam() {
   document.querySelectorAll('[data-sugg]').forEach(b => b.onclick = () => equip(b.dataset.sugg));
   $('#btn-friendly').onclick = friendly;
   $('#btn-gomap').onclick = () => switchView('map');
-  if (S.run) $('#btn-resume').onclick = nextRound;
+  if (S.run) $('#btn-resume').onclick = nextMatch;
 }
-// Sức mạnh đội nếu đưa thẻ id vào vị trí của nó (null nếu trùng tuyển thủ hoặc chưa đủ 5 người)
-function powerIf(id) {
-  const c = CARD[id];
-  if (ROLES.some(r => r !== c.role && S.lineup[r] && CARD[S.lineup[r]].name === c.name)) return null;
-  return powerOf(ROLES.map(r => (r === c.role ? c : S.lineup[r] ? CARD[S.lineup[r]] : null)));
+// Sức mạnh đội nếu đưa thẻ k vào vị trí của nó (null nếu trùng tuyển thủ hoặc chưa đủ 5 người)
+function powerIf(k) {
+  const c = cardOf(k);
+  if (ROLES.some(r => r !== c.role && S.lineup[r] && cardOf(S.lineup[r]).name === c.name)) return null;
+  return powerOf(ROLES.map(r => (r === c.role ? c : S.lineup[r] ? cardOf(S.lineup[r]) : null)));
 }
 const CHEM_RULES = [
   ['🤝', 'Đồng đội cùng đội, cùng mùa', '+1 mỗi người cho mỗi đồng đội'],
@@ -322,14 +356,14 @@ function chemPanelHTML(chem, power) {
   // gợi ý: thẻ trong bộ sưu tập giúp tăng sức mạnh nhiều nhất
   let sugg = [];
   if (power != null) {
-    sugg = Object.keys(S.cards).filter(id => !inLineup(id))
-      .map(id => ({ id, p: powerIf(id) })).filter(x => x.p != null && x.p > power)
+    sugg = ownedKeys().filter(k => !inLineup(k))
+      .map(k => ({ k, p: powerIf(k) })).filter(x => x.p != null && x.p > power)
       .sort((a, b) => b.p - a.p).slice(0, 3);
   }
   return `<div class="panel chem-panel">
     <div class="chem-head">
       <h3>🔗 Độ ăn ý <span class="chem-total">+${chem.bonus}</span></h3>
-      <small class="muted">Trung bình điểm ăn ý của 5 tuyển thủ, cộng thẳng vào sức mạnh đội (tối đa +${CHEM_TEAM_CAP}).</small>
+      <small class="muted">Trung bình điểm ăn ý của 5 tuyển thủ × ${CHEM_MULT}, cộng thẳng vào sức mạnh đội (tối đa +${CHEM_TEAM_CAP}).</small>
     </div>
     <div class="chem-list">${chem.links.length ? chem.links.map(l => `
       <div class="chem-row ${l.team ? 'teamed' : ''}" style="${l.team ? teamStyle(l.team) : ''}">
@@ -337,22 +371,22 @@ function chemPanelHTML(chem, power) {
         <div class="cr-main"><b>${esc(l.name)}</b><small>${l.names.map(esc).join(' · ')}</small></div>
         <em>${esc(l.desc)}</em>
       </div>`).join('') : '<p class="muted">Chưa có liên kết nào. Ghép tuyển thủ cùng đội, cùng mùa, cùng khu vực… để tăng sức mạnh!</p>'}</div>
-    ${sugg.length ? `<div class="sugg"><b>💡 Gợi ý thay người</b>${sugg.map(s => { const c = CARD[s.id]; return `
-      <button class="sugg-item" data-sugg="${s.id}" style="${teamStyle(c.team)}"><span class="si-av tier-${c.tier.cls}">${avatarHTML(c)}</span>
-        <span><b>${esc(c.name)}</b> <small>${c.team} ${c.year} · ${ROLE_INFO[c.role].vn}</small></span><em>⚡ +${(s.p - power).toFixed(1)}</em></button>`; }).join('')}</div>` : ''}
+    ${sugg.length ? `<div class="sugg"><b>💡 Gợi ý thay người</b>${sugg.map(s => { const c = cardOf(s.k); return `
+      <button class="sugg-item" data-sugg="${s.k}" style="${teamStyle(c.team)}"><span class="si-av tier-${c.tier.cls}">${avatarHTML(c)}</span>
+        <span><b>${esc(c.name)}${c.lv ? ' +' + c.lv : ''}</b> <small>${c.team} ${c.year} · ${ROLE_INFO[c.role].vn}</small></span><em>⚡ +${(s.p - power).toFixed(1)}</em></button>`; }).join('')}</div>` : ''}
     <details class="chem-rules"><summary>Cách tính điểm ăn ý</summary>
       <div class="rules">${CHEM_RULES.map(([i, n, d]) => `<div><span>${i}</span><b>${n}</b><small>${d}</small></div>`).join('')}</div>
-      <p class="muted small">Mỗi tuyển thủ được cộng tối đa +${CHEM_CARD_CAP}. Thẻ có 🏆 cạnh năm là thẻ của mùa vô địch thế giới.</p>
+      <p class="muted small">Mỗi tuyển thủ được cộng tối đa +${CHEM_CARD_CAP}. Thẻ có 🏆 cạnh năm là thẻ của mùa vô địch thế giới. Ngoài ra mỗi thẻ có <b>chỉ số ẩn “Bản lĩnh”</b> (xem trong chi tiết thẻ) cộng thêm vào sức mạnh đội.</p>
     </details>
   </div>`;
 }
 function pickModal(role) {
   const cur = powerOf(lineupCards());
-  const list = Object.keys(S.cards).map(id => CARD[id]).filter(c => c.role === role)
+  const list = ownedKeys().map(cardOf).filter(c => c.role === role)
     .map(c => ({ c, p: powerIf(c.id) }))
     .sort((a, b) => (b.p ?? -1) - (a.p ?? -1) || b.c.rating - a.c.rating);
   openModal(`<h2>${ROLE_INFO[role].icon} Chọn ${ROLE_INFO[role].vn}</h2>
-    <p class="muted">Sắp xếp theo sức mạnh đội sau khi đổi (đã tính độ ăn ý). ⚡ là mức tăng/giảm so với hiện tại.</p>
+    <p class="muted">Sắp xếp theo sức mạnh đội sau khi đổi (đã tính độ ăn ý và chỉ số ẩn). ⚡ là mức tăng/giảm so với hiện tại.</p>
     ${list.length ? `<div class="card-grid">${list.map(({ c, p }) => cardHTML(c, { click: true, count: owned(c.id), inLineup: S.lineup[role] === c.id, delta: cur != null && p != null && S.lineup[role] !== c.id ? +(p - cur).toFixed(1) : null })).join('')}</div>` : '<p class="muted center">Bạn chưa có thẻ nào ở vị trí này. Hãy mua gói trong Cửa hàng!</p>'}
     <div class="actions"><button class="btn" id="pm-close">Đóng</button></div>`, true);
   document.querySelectorAll('#modal-box .card[data-id]').forEach(el => el.onclick = () => { if (equip(el.dataset.id)) closeModal(); });
@@ -362,22 +396,24 @@ function pickModal(role) {
 // ===== Render: bộ sưu tập =====
 const colFilter = { role: 'ALL', tier: 'ALL', all: false, sort: 'rating' };
 function renderCollection() {
-  let list = (colFilter.all ? CARDS : Object.keys(S.cards).map(id => CARD[id]))
-    .filter(c => (colFilter.role === 'ALL' || c.role === colFilter.role) && (colFilter.tier === 'ALL' || c.tier.id === colFilter.tier));
-  list = list.slice().sort(colFilter.sort === 'rating' ? (a, b) => b.rating - a.rating : colFilter.sort === 'year' ? (a, b) => b.year - a.year || b.rating - a.rating : (a, b) => a.name.localeCompare(b.name) || a.year - b.year);
-  const dupes = Object.values(S.cards).reduce((s, n) => s + n - 1, 0);
+  const mine = ownedKeys().map(cardOf);
+  let list = colFilter.all ? mine.concat(CARDS.filter(c => !ownedBase(c.id))) : mine;
+  list = list.filter(c => (colFilter.role === 'ALL' || c.role === colFilter.role) && (colFilter.tier === 'ALL' || c.tier.id === colFilter.tier));
+  list = list.slice().sort(colFilter.sort === 'rating' ? (a, b) => b.rating - a.rating : colFilter.sort === 'year' ? (a, b) => b.year - a.year || b.rating - a.rating : (a, b) => a.name.localeCompare(b.name) || a.year - b.year || a.lv - b.lv);
+  const dupes = ownedKeys().reduce((s, k) => s + S.cards[k] - 1, 0);
+  const nBase = new Set(mine.map(c => c.baseId)).size;
   $('#view-collection').innerHTML = `
   <div class="panel">
     <div class="filters">
       <select id="f-role"><option value="ALL">Mọi vị trí</option>${ROLES.map(r => `<option value="${r}" ${colFilter.role === r ? 'selected' : ''}>${ROLE_INFO[r].vn}</option>`).join('')}</select>
       <select id="f-tier"><option value="ALL">Mọi bậc</option>${TIERS.map(t => `<option value="${t.id}" ${colFilter.tier === t.id ? 'selected' : ''}>${t.id}</option>`).join('')}</select>
       <select id="f-sort"><option value="rating">Chỉ số cao</option><option value="year" ${colFilter.sort === 'year' ? 'selected' : ''}>Năm mới nhất</option><option value="name" ${colFilter.sort === 'name' ? 'selected' : ''}>Tên A-Z</option></select>
-      <label class="check"><input type="checkbox" id="f-all" ${colFilter.all ? 'checked' : ''}> Hiện cả thẻ chưa có</label>
+      <label class="check"><input type="checkbox" id="f-all" ${colFilter.all ? 'checked' : ''}> Hiện cả thẻ chưa mở</label>
       <button class="btn small" id="sell-dupes">💸 Bán ${dupes} thẻ trùng</button>
     </div>
-    <div class="tier-legend">${TIERS.map(t => `<span class="tl tier-${t.cls}"><b>${t.id}</b> ${t.min ? '≥' + t.min : '<79'} · ${t.desc}</span>`).join('')}</div>
-    <p class="muted">Đã sưu tầm ${Object.keys(S.cards).length}/${CARDS.length} thẻ. Nhấn vào thẻ để xem chi tiết.</p>
-    <div class="card-grid">${list.map(c => cardHTML(c, { click: owned(c.id) > 0, locked: !owned(c.id), count: owned(c.id), inLineup: inLineup(c.id) })).join('') || '<p class="muted">Không có thẻ.</p>'}</div>
+    <div class="tier-legend">${TIERS.map((t, i) => `<span class="tl tier-${t.cls}"><b>${t.id}</b> ${t.min ? '≥' + t.min : '<' + TIERS[i - 1].min} · ${t.desc}</span>`).join('')}</div>
+    <p class="muted">Đã sưu tầm ${nBase}/${CARDS.length} thẻ. Nhấn vào thẻ để xem chi tiết, chỉ số ẩn và nâng cấp. Thẻ trùng dùng làm nguyên liệu nâng cấp.</p>
+    <div class="card-grid">${list.map(c => { const o = !!owned(c.id); return cardHTML(c, { click: o, locked: !o, count: owned(c.id), inLineup: inLineup(c.id) }); }).join('') || '<p class="muted">Không có thẻ.</p>'}</div>
   </div>`;
   $('#f-role').onchange = e => { colFilter.role = e.target.value; renderCollection(); };
   $('#f-tier').onchange = e => { colFilter.tier = e.target.value; renderCollection(); };
@@ -386,26 +422,38 @@ function renderCollection() {
   $('#sell-dupes').onclick = sellDupes;
   document.querySelectorAll('#view-collection .card.clickable').forEach(el => el.onclick = () => cardModal(el.dataset.id));
 }
-function cardModal(id) {
-  const c = CARD[id];
+function statBars(c, next) {
+  return `<div class="sbars">${STAT_NAMES.map(([k, n], i) => {
+    const v = c.stats[i], w = Math.max(4, Math.min(100, (v - 40) / 90 * 100));
+    return `<div class="sbar"><span>${n}</span><div class="sb-track"><i style="width:${w}%"></i></div><b>${v}${next ? ` <em>→ ${next.stats[i]}</em>` : ''}</b></div>`;
+  }).join('')}</div>`;
+}
+function cardModal(k) {
+  const c = cardOf(k);
   const other = CARDS.filter(x => x.name === c.name).sort((a, b) => a.year - b.year);
+  const canUp = c.lv < MAX_UP && owned(k) >= 2;
   openModal(`<div class="card-detail">${cardHTML(c)}
     <div>
-      <h2>${esc(c.name)} <span class="muted">${c.year}</span></h2>
+      <h2>${esc(c.name)} <span class="muted">${c.year}${c.lv ? ' · +' + c.lv : ''}</span></h2>
       <div class="kv"><span>Vị trí</span><b>${ROLE_INFO[c.role].icon} ${ROLE_INFO[c.role].vn}</b></div>
       <div class="kv"><span>Đội / Khu vực</span><b class="kv-team"><span class="mini-logo">${teamLogoHTML(c.team)}</span>${esc(TEAM_INFO[c.team]?.name || c.team)} · ${c.region}</b></div>
-      <div class="kv"><span>Bậc</span><b class="tier-text tier-${c.tier.cls}">${c.tier.id}</b></div>
-      <div class="kv"><span>Đang sở hữu</span><b>${owned(id)}</b></div>
-      <div class="kv"><span>Giá bán</span><b>${fmt(c.tier.sell)} 💰</b></div>
+      <div class="kv"><span>Bậc · Chỉ số tổng</span><b class="tier-text tier-${c.tier.cls}">${c.tier.id} · ${c.rating}${c.lv ? ` <small class="muted">(gốc ${CARD[c.baseId].rating} +${UPG_BONUS[c.lv]})</small>` : ''}</b></div>
+      <div class="kv"><span>🔮 Chỉ số ẩn – Bản lĩnh</span><b class="hidden-stat">${c.hidden.toFixed(1)} / 10</b></div>
+      ${c.traits.length ? `<div class="traits">${c.traits.map(t => `<span>${t}</span>`).join('')}</div>` : ''}
+      ${statBars(c)}
+      <div class="kv"><span>Đang sở hữu</span><b>${owned(k)}</b></div>
+      <div class="kv"><span>Giá bán</span><b>${fmt(sellPrice(c))} 💰</b></div>
       <p class="muted small">Các mùa của ${esc(c.name)}: ${other.map(o => `<span class="tier-text tier-${o.tier.cls}">${o.year} (${o.rating})</span>`).join(' · ')}</p>
     </div></div>
     <div class="actions">
-      ${S.lineup[c.role] === id ? '<button class="btn" disabled>Đang trong đội hình</button>' : '<button class="btn primary" id="cd-equip">Đưa vào đội hình</button>'}
-      <button class="btn" id="cd-sell">Bán (+${fmt(c.tier.sell)})</button>
+      ${S.lineup[c.role] === k ? '<button class="btn" disabled>Đang trong đội hình</button>' : '<button class="btn primary" id="cd-equip">Đưa vào đội hình</button>'}
+      <button class="btn" id="cd-up" ${c.lv >= MAX_UP ? 'disabled' : ''}>⬆️ Nâng cấp${canUp ? '' : ' (cần 2 thẻ)'}</button>
+      <button class="btn" id="cd-sell">Bán (+${fmt(sellPrice(c))})</button>
       <button class="btn ghost" id="cd-close">Đóng</button>
-    </div>`);
-  if ($('#cd-equip')) $('#cd-equip').onclick = () => { if (equip(id)) closeModal(); };
-  $('#cd-sell').onclick = () => { if (sellCard(id)) { owned(id) ? cardModal(id) : closeModal(); } };
+    </div>`, true);
+  if ($('#cd-equip')) $('#cd-equip').onclick = () => { if (equip(k)) closeModal(); };
+  $('#cd-up').onclick = () => { closeModal(); upgSel = k; switchView('upgrade'); };
+  $('#cd-sell').onclick = () => { if (sellCard(k)) { owned(k) ? cardModal(k) : closeModal(); } };
   $('#cd-close').onclick = closeModal;
 }
 
@@ -421,7 +469,7 @@ function renderShop() {
       <div class="pack-icon">${p.icon}</div>
       <h4>${p.name}</h4>
       <div class="muted">${p.count} thẻ / gói</div>
-      <div class="odds">${Object.entries(p.odds).map(([t, w]) => `<div class="odd"><span class="tier-text tier-${TIERS.find(x => x.id === t).cls}">${t}</span><div class="obar"><i style="width:${w}%" class="tier-bg-${TIERS.find(x => x.id === t).cls}"></i></div><small>${w}%</small></div>`).join('')}</div>
+      <div class="odds">${Object.entries(p.odds).map(([t, w]) => `<div class="odd"><span class="tier-text tier-${TIERS.find(x => x.id === t).cls}">${t}</span><div class="obar"><i style="width:${Math.max(1.5, w)}%" class="tier-bg-${TIERS.find(x => x.id === t).cls}"></i></div><small>${w}%</small></div>`).join('')}</div>
       <button class="btn primary" data-buy="${p.id}" ${S.money < p.price ? 'disabled' : ''}>Mua ${fmt(p.price)} 💰</button>
     </div>`).join('')}</div>
   </div>`;
@@ -429,140 +477,43 @@ function renderShop() {
   document.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openPack(b.dataset.open, true));
 }
 
-// ===== Render: bản đồ giải đấu =====
-const isUnlocked = i => i === 0 || !!S.won[TOURS[i - 1].id];
-const bestOf = tid => (S.best && S.best[tid] != null ? S.best[tid] : -1);
-let mapSel = null;
-
-// Thanh mốc của một giải. cur = mốc đang đấu (-1 nếu không), failAt = mốc bị loại
-function stageTrack(t, cur = -1, failAt = -1) {
-  const best = bestOf(t.id), last = t.rounds.length - 1;
-  return `<div class="track">${t.rounds.map((r, i) => {
-    const done = i <= best || (cur >= 0 && i < cur);
-    const cls = i === failAt ? 'fail' : i === cur ? 'cur' : done ? 'done' : 'todo';
-    const icon = cls === 'fail' ? '✕' : done && i === last ? '🏆' : done ? '✓' : r.ic;
-    const reward = i === last ? `🏆 ${fmt(t.prize)}` : i > best ? `🎯 +${fmt(t.prize * MILESTONE_BONUS)}` : 'Đã đạt';
-    return `${i ? `<i class="ms-line ${done || i <= cur ? 'on' : ''}"></i>` : ''}<div class="ms ${cls}">
-      <span class="ms-dot">${icon}</span><b>${r.n}</b><small>BO${r.bo} · ⚡${t.power + r.d}</small><em>${reward}</em>
-    </div>`;
-  }).join('')}</div>`;
-}
-function regionState(rg) {
-  const idx = TOURS.map((t, i) => i).filter(i => TOURS[i].region === rg);
-  if (idx.every(i => S.won[TOURS[i].id])) return 'done';
-  return isUnlocked(idx[0]) ? 'open' : 'locked';
-}
-function currentRegion() {
-  if (S.run) return TOUR[S.run.tid].region;
-  const i = TOURS.findIndex((t, k) => isUnlocked(k) && !S.won[t.id]);
-  return i < 0 ? 'INT' : TOURS[i].region;
-}
-function renderMap() {
-  if (!mapSel) mapSel = currentRegion();
-  const states = {}, info = {};
-  JOURNEY.forEach(rg => {
-    states[rg] = regionState(rg);
-    const ts = TOURS.filter(t => t.region === rg);
-    info[rg] = `${ts.filter(t => S.won[t.id]).length}/${ts.length}`;
-  });
-  const wonCount = TOURS.filter(t => S.won[t.id]).length;
-  const R = REGIONS[mapSel];
-  const regionTours = TOURS.map((t, i) => [t, i]).filter(([t]) => t.region === mapSel);
-  const me = myTeam();
-  const run = S.run ? TOUR[S.run.tid] : null;
-
-  $('#view-map').innerHTML = `
-  ${run ? `<div class="panel run-banner" style="--rc:${REGIONS[run.region].color}">
-    <div class="run-head"><div><small>ĐANG THI ĐẤU</small><h3>${run.name}</h3></div>
-      <div class="actions left" style="margin:0"><button class="btn primary" id="map-resume">▶ Vào trận: ${run.rounds[S.run.round].n}</button><button class="btn ghost small" id="map-quit">Rút lui</button></div></div>
-    ${stageTrack(run, S.run.round)}
-  </div>` : ''}
-  <div class="panel wm-panel">
-    <div class="wm-head">
-      <div><h3>🌍 Bản đồ hành trình</h3><p class="muted">Chinh phục từng khu vực theo thứ tự đường bay. Chọn một khu vực để xem các giải.</p></div>
-      <div class="journey"><small>Tiến độ hành trình</small><b>${wonCount}/${TOURS.length} giải</b><div class="jbar"><i style="width:${wonCount / TOURS.length * 100}%"></i></div></div>
-    </div>
-    ${worldMapHTML(states, info, mapSel)}
-  </div>
-  <div class="panel region-panel" style="--rc:${R.color}">
-    <div class="rp-head">
-      <span class="rp-code">${mapSel === 'INT' ? '🌍' : mapSel}</span>
-      <div><h3>${mapSel === 'INT' ? 'Đấu trường Quốc tế' : 'Khu vực ' + R.name}</h3>
-      <p class="muted">${states[mapSel] === 'locked' ? '🔒 Chưa mở khóa – hãy vô địch khu vực trước trên đường hành trình.' : states[mapSel] === 'done' ? '🏆 Đã chinh phục toàn bộ khu vực! Bạn vẫn có thể đánh lại để kiếm thưởng.' : 'Vượt qua từng mốc để nhận thưởng; vô địch để mở giải tiếp theo.'}</p></div>
-    </div>
-    <div class="tour-list">${regionTours.map(([t, i]) => {
-      const un = isUnlocked(i), w = S.won[t.id], active = S.run && S.run.tid === t.id, busy = S.run && !active;
-      const label = t.div === 2 ? 'HẠNG 2' : t.div === 1 ? 'HẠNG 1' : t.id === 'msi' ? 'GIẢI GIỮA MÙA' : 'CHUNG KẾT';
-      const gap = me ? +(me.power - t.power).toFixed(1) : null;
-      return `<div class="tour ${un ? '' : 'locked'} ${w ? 'won' : ''} ${active ? 'active' : ''}">
-        <div class="tour-top">
-          <div><span class="div-tag">${label}</span><h4>${t.name} ${w ? `<span class="won-tag">🏆 ×${w}</span>` : ''}</h4>
-            <div class="tour-meta"><span>⚡ Đối thủ ${t.power - 4}–${t.power + 2}</span><span>💰 ${fmt(w ? t.prize / 2 : t.prize)}${w ? ' (đánh lại)' : ''}</span><span>${PACK[t.pack].icon} ${PACK[t.pack].name}${t.packCount ? ' ×' + t.packCount : ''}</span>
-            ${gap != null && un ? `<span class="gap ${gap >= 0 ? 'good' : gap >= -4 ? 'mid' : 'bad'}">${gap >= 0 ? 'Đội bạn mạnh hơn' : gap >= -4 ? 'Cân sức' : 'Đối thủ mạnh hơn'} (${gap > 0 ? '+' : ''}${gap})</span>` : ''}</div>
-          </div>
-          <div class="tour-cta">${!un ? `<span class="muted small">🔒 Vô địch ${TOURS[i - 1].name} để mở</span>`
-            : active ? `<button class="btn primary" data-go="${t.id}">▶ Tiếp tục</button>`
-            : `<button class="btn ${w ? '' : 'primary'}" data-go="${t.id}" ${busy || !me ? 'disabled' : ''}>${w ? '↻ Đánh lại' : '⚔️ Tham gia'}</button>${busy ? '<small class="muted">Đang dự giải khác</small>' : ''}`}</div>
-        </div>
-        ${stageTrack(t, active ? S.run.round : -1)}
-      </div>`;
-    }).join('')}</div>
-  </div>`;
-
-  document.querySelectorAll('.hs').forEach(b => b.onclick = () => { mapSel = b.dataset.rg; renderMap(); document.querySelector('.region-panel').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
-  document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => {
-    const tid = b.dataset.go;
-    if (!S.run) { S.run = { tid, round: 0 }; save(); }
-    nextRound();
-  });
-  if (run) {
-    $('#map-resume').onclick = nextRound;
-    $('#map-quit').onclick = () => {
-      if (!confirm(`Rút lui khỏi ${run.name}? Bạn sẽ mất tiến độ ở giải này (các mốc đã đạt vẫn được giữ).`)) return;
-      S.run = null; save(); renderAll(); toast(`Đã rút lui khỏi ${run.name}`);
-    };
-  }
-}
-
-// ===== Luồng thi đấu =====
+// ===== Trước trận =====
 function rosterList(team) {
   return ROLES.map(r => {
     const c = team.players[r];
-    return `<div class="ro"><span class="ro-av tier-${c.tier.cls}">${avatarHTML(c)}</span><b>${ROLE_INFO[r].icon} ${esc(c.name)}</b><small><span class="mini-logo">${teamLogoHTML(c.team)}</span>${c.team} ${c.year}</small><span class="tier-text tier-${c.tier.cls}">${c.rating}</span></div>`;
+    return `<div class="ro"><span class="ro-av tier-${c.tier.cls}">${avatarHTML(c)}</span><b>${ROLE_INFO[r].icon} ${esc(c.name)}${c.lv ? ` <span class="lv-txt ${lvClass(c.lv)}">+${c.lv}</span>` : ''}</b><small><span class="mini-logo">${teamLogoHTML(c.team)}</span>${c.team} ${c.year}</small><span class="tier-text tier-${c.tier.cls}">${c.rating}</span></div>`;
   }).join('');
 }
-function preMatch({ title, opp, bo, onEnd, allowCancel }) {
+function preMatch({ title, opp, bo, onEnd, allowCancel, extra }) {
   const me = myTeam();
   if (!me) { toast('Đội hình cần đủ 5 vị trí!', 'err'); switchView('team'); return; }
   const p = winProb(me.power, opp.power);
   openModal(`<h2 class="center">${esc(title)}</h2>
+    ${extra || ''}
     <div class="vs">
       <div class="vs-team blue"><div class="vs-logo">${clubLogoHTML(me.name, true)}</div><h3>${esc(me.name)}</h3><div class="pw">⚡ ${me.power}</div>${rosterList(me)}</div>
       <div class="vs-mid"><b>VS</b><small>BO${bo}</small><div class="wp">Cơ hội thắng mỗi ván<br><b>${Math.round(p * 100)}%</b></div></div>
       <div class="vs-team red"><div class="vs-logo">${clubLogoHTML(opp.name)}</div><h3>${esc(opp.name)}</h3><div class="pw">⚡ ${opp.power}</div>${rosterList(opp)}</div>
     </div>
     <div class="actions">
-      <button class="btn primary" id="pm-watch">▶ Xem trận đấu</button>
-      <button class="btn" id="pm-fast">⏩ Mô phỏng nhanh</button>
-      ${allowCancel ? '<button class="btn ghost" id="pm-cancel">Hủy</button>' : ''}
+      <button class="btn primary" id="pm-watch">▶ Vào trận</button>
+      ${allowCancel ? '<button class="btn ghost" id="pm-cancel">Để sau</button>' : ''}
     </div>`, true);
-  const go = fast => { closeModal(); MatchUI.playSeries({ title, teams: [me, opp], bo, pWin: p, fast, onEnd }); };
-  $('#pm-watch').onclick = () => go(false);
-  $('#pm-fast').onclick = () => go(true);
+  $('#pm-watch').onclick = () => { closeModal(); MatchUI.playSeries({ title, teams: [me, opp], bo, pWin: p, onEnd }); };
   if (allowCancel) $('#pm-cancel').onclick = closeModal;
 }
 function rewardHTML(lines, ups) {
   return `<div class="rewards">${lines.map(l => `<div>${l}</div>`).join('')}
-    ${ups.map(u => `<div class="lvup">⭐ LÊN CẤP ${u.level}! Nhận ${PACK[u.pack].icon} ${PACK[u.pack].name}</div>`).join('')}</div>`;
+    ${ups.map(u => `<div class="lvup">⭐ LÊN CẤP ${u.level}! Nhận ${PACK[u.pack].icon} ${PACK[u.pack].name}${u.level === SKIP_LEVEL ? ' · Đã mở khóa ⏭ Bỏ qua ván' : ''}</div>`).join('')}</div>`;
 }
 function friendly() {
   const me = myTeam();
   if (!me) return toast('Đội hình cần đủ 5 vị trí!', 'err');
-  const opp = makeOpponent(pick(Object.keys(TEAM_NAMES)), me.power + rand(-3, 1.5));
+  const opp = makeOpponent(pick(Object.keys(TEAM_NAMES)), me.power + rand(-4, 2));
   preMatch({
     title: 'Giao hữu', opp, bo: 1, allowCancel: true,
     onEnd: (won, score) => {
-      const money = won ? 200 + S.level * 10 : 60, exp = won ? 30 : 10;
+      const money = won ? 100 + S.level * 5 : 25, exp = won ? 20 : 8;
       S.money += money; won ? S.stats.w++ : S.stats.l++;
       const ups = gainExp(exp); save(); renderAll();
       openModal(`<h2 class="center ${won ? 'win-t' : 'lose-t'}">${won ? '🎉 Chiến thắng!' : '😞 Thất bại'}</h2>
@@ -573,78 +524,29 @@ function friendly() {
     },
   });
 }
-function nextRound() {
-  if (!S.run) return;
-  const t = TOUR[S.run.tid], r = t.rounds[S.run.round];
-  if (!S.run.opp) { S.run.opp = makeOpponent(t.region, t.power + r.d); save(); }
-  const opp = { ...S.run.opp, players: Object.fromEntries(ROLES.map(k => [k, CARD[S.run.opp.players[k].id]])) };
-  preMatch({ title: `${t.name} · ${r.n} (mốc ${S.run.round + 1}/${t.rounds.length})`, opp, bo: r.bo, onEnd: (won, score) => tourSeriesEnd(t, won, score) });
-}
-function tourSeriesEnd(t, won, score) {
-  const i = TOURS.indexOf(t);
-  const ri = S.run.round;
-  const r = t.rounds[ri];
-  S.run.opp = null;
-  if (!won) {
-    const money = Math.round(t.prize * 0.05);
-    S.money += money; S.stats.l++;
-    const ups = gainExp(10);
-    S.run = null; save(); renderAll();
-    openModal(`<h2 class="center lose-t">😞 Bị loại ở ${r.n}</h2><p class="center">${t.name} · Tỉ số ${score[0]} - ${score[1]}</p>
-      ${stageTrack(t, -1, ri)}
-      ${rewardHTML([`Tiền an ủi +${fmt(money)} 💰`, '+10 EXP'], ups)}
-      <p class="muted center">Nâng cấp đội hình rồi thử lại nhé!</p>
-      <div class="actions"><button class="btn primary" id="r-shop">🛒 Cửa hàng</button><button class="btn ghost" id="r-close">Đóng</button></div>`);
-    $('#r-shop').onclick = () => { closeModal(); switchView('shop'); };
-    $('#r-close').onclick = closeModal;
-    return;
-  }
-  S.stats.w++;
-  const money = Math.round(t.prize * 0.08), exp = 20 + i * 6;
-  S.money += money;
-  const ups = gainExp(exp);
-  const lines = [`Thắng ${r.n}: +${fmt(money)} 💰`, `+${exp} EXP`];
-  if (bestOf(t.id) < S.run.round) {
-    S.best[t.id] = S.run.round;
-    if (S.run.round < t.rounds.length - 1) {
-      const bonus = Math.round(t.prize * MILESTONE_BONUS);
-      S.money += bonus;
-      lines.push(`🎯 Đạt mốc mới "${r.n}": +${fmt(bonus)} 💰`);
-    }
-  }
-  if (S.run.round < t.rounds.length - 1) {
-    S.run.round++; save(); renderAll();
-    openModal(`<h2 class="center win-t">🎉 Vượt qua ${r.n}!</h2><p class="center">${t.name} · Tỉ số ${score[0]} - ${score[1]}</p>
-      ${stageTrack(t, S.run.round)}
-      ${rewardHTML(lines, ups)}
-      <p class="center">Tiếp theo: <b>${t.rounds[S.run.round].n}</b> (BO${t.rounds[S.run.round].bo} · đối thủ ⚡${t.power + t.rounds[S.run.round].d})</p>
-      <div class="actions"><button class="btn primary" id="r-next">Vào trận ▶</button><button class="btn ghost" id="r-close">Để sau</button></div>`);
-    $('#r-next').onclick = nextRound;
-    $('#r-close').onclick = closeModal;
-    return;
-  }
-  // Vô địch
-  const first = !S.won[t.id];
-  const prize = first ? t.prize : Math.round(t.prize / 2);
-  S.money += prize;
-  S.won[t.id] = (S.won[t.id] || 0) + 1;
-  S.stats.titles++;
-  const nPack = t.packCount || 1;
-  for (let k = 0; k < nPack; k++) S.packs.push(t.pack);
-  S.run = null; save(); renderAll();
-  lines.push(`🏆 Tiền thưởng vô địch +${fmt(prize)} 💰`, `🎁 ${PACK[t.pack].icon} ${PACK[t.pack].name}${nPack > 1 ? ' ×' + nPack : ''}`);
-  const nextT = TOURS[i + 1];
-  openModal(`<div class="confetti">${Array.from({ length: 50 }, () => `<i style="left:${rand(0, 100)}%;background:hsl(${randi(0, 360)},90%,60%);animation-delay:${rand(0, 1.5)}s;animation-duration:${rand(2, 4)}s"></i>`).join('')}</div>
-    <div class="trophy">🏆</div>
-    <h2 class="center win-t">${t.id === 'worlds' ? 'VÔ ĐỊCH THẾ GIỚI!' : 'VÔ ĐỊCH ' + t.name.toUpperCase() + '!'}</h2>
-    <p class="center">${esc(S.teamName)} đã lên ngôi · Chung kết ${score[0]} - ${score[1]}</p>
-    ${stageTrack(t, -1)}
-    ${rewardHTML(lines, ups)}
-    ${first && nextT ? `<p class="center notice">🔓 Đã mở khóa: <b>${nextT.name}</b></p>` : ''}
-    ${t.id === 'worlds' && first ? '<p class="center">Bạn đã hoàn thành Hành Trình CKTG! Tiếp tục sưu tầm thẻ và bảo vệ ngôi vương nhé.</p>' : ''}
-    <div class="actions"><button class="btn primary" id="r-shop">🎁 Mở gói thưởng</button><button class="btn ghost" id="r-map">🗺️ Bản đồ</button></div>`);
-  $('#r-shop').onclick = () => { closeModal(); switchView('shop'); };
-  $('#r-map').onclick = () => { closeModal(); switchView('map'); };
+
+// ===== Ủng hộ nhà phát hành =====
+function openDonate() {
+  const D = typeof DONATE !== 'undefined' ? DONATE : {};
+  const bank = D.bank && D.bank.bankId && D.bank.account ? D.bank : null;
+  const qr = bank ? `https://img.vietqr.io/image/${encodeURIComponent(bank.bankId)}-${encodeURIComponent(bank.account)}-compact2.png?accountName=${encodeURIComponent(bank.name || '')}&addInfo=${encodeURIComponent(bank.note || 'Ung ho Hanh Trinh CKTG')}` : '';
+  const links = (D.links || []).filter(l => l && /^https:\/\//.test(l.url));
+  const any = bank || D.momo || links.length;
+  openModal(`<div class="donate">
+    <div class="dn-heart">💖</div>
+    <h2 class="center">Ủng hộ nhà phát hành</h2>
+    <p class="center muted">${esc(D.message || 'Hành Trình CKTG là game miễn phí, không quảng cáo. Nếu bạn thích game, một ly cà phê nhỏ sẽ giúp nhà phát hành có thêm động lực cập nhật tuyển thủ, giải đấu và tính năng mới!')}</p>
+    ${any ? `<div class="dn-opts">
+      ${bank ? `<div class="dn-card"><h4>🏦 Chuyển khoản / quét mã QR</h4><img src="${qr}" alt="Mã QR chuyển khoản" loading="lazy">
+        <div class="kv"><span>Ngân hàng</span><b>${esc(bank.bankName || bank.bankId)}</b></div>
+        <div class="kv"><span>Số tài khoản</span><b>${esc(bank.account)}</b></div>
+        ${bank.name ? `<div class="kv"><span>Chủ tài khoản</span><b>${esc(bank.name)}</b></div>` : ''}</div>` : ''}
+      ${D.momo ? `<div class="dn-card"><h4>📱 Ví MoMo</h4><div class="kv"><span>Số điện thoại</span><b>${esc(D.momo)}</b></div></div>` : ''}
+      ${links.length ? `<div class="dn-card"><h4>🌐 Ủng hộ trực tuyến</h4>${links.map(l => `<a class="btn" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label || l.url)}</a>`).join('')}</div>` : ''}
+    </div>` : '<p class="center notice">Nhà phát hành chưa thêm thông tin ủng hộ. (Chủ trang: điền vào <code>js/donate-config.js</code>.)</p>'}
+    <p class="center muted small">Ủng hộ là tự nguyện và không mua được vật phẩm trong game. Cảm ơn bạn rất nhiều! 🙏</p>
+    <div class="actions"><button class="btn" id="dn-close">Đóng</button></div></div>`);
+  $('#dn-close').onclick = closeModal;
 }
 
 // ===== Điều hướng =====
@@ -653,13 +555,13 @@ function switchView(v) {
   currentView = v;
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   document.querySelectorAll('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
-  if (v === 'map') mapSel = null; // mở bản đồ: tự chọn khu vực hiện tại
+  if (v === 'map') { mapSel = null; mapDiff = null; } // mở bản đồ: tự chọn chương & khu vực hiện tại
   renderAll();
   window.scrollTo(0, 0);
 }
 function renderAll() {
   renderHeader();
-  ({ team: renderTeam, map: renderMap, shop: renderShop, collection: renderCollection, friends: renderFriends })[currentView]();
+  ({ team: renderTeam, map: renderMap, shop: renderShop, collection: renderCollection, upgrade: renderUpgrade, achieve: renderAch, friends: renderFriends })[currentView]();
 }
 
 // ===== Khởi động =====
@@ -668,18 +570,19 @@ function welcome(got) {
     <p class="center">Bạn nhận được ${got.length} thẻ tuyển thủ ngẫu nhiên để bắt đầu sự nghiệp HLV:</p>
     <div class="card-grid center-grid">${got.map(c => cardHTML(c, { small: true })).join('')}</div>
     <ul class="howto">
-      <li>⚔️ Đánh <b>giao hữu</b> và các <b>giải đấu</b> để kiếm tiền & kinh nghiệm.</li>
-      <li>🛒 Dùng tiền mua <b>gói thẻ</b> – thẻ có bậc B → A → S → S+ → SS → SSS theo thành tích từng năm.</li>
+      <li>⚔️ Đánh <b>giao hữu</b> và các <b>giải đấu</b> (thể thức như giải thật: vòng bảng, playoffs, tối đa BO5) để kiếm tiền & kinh nghiệm.</li>
+      <li>🛒 Dùng tiền mua <b>gói thẻ</b> – thẻ có bậc B → A → S → S+ → SS → SSS theo thành tích từng năm. Thẻ xịn rất hiếm!</li>
+      <li>⬆️ Ghép <b>2 thẻ giống nhau</b> để nâng cấp +1 … +10 (tỉ lệ giảm dần, +10 chỉ 0,5%).</li>
       <li>🚫 Đội hình không được có 2 thẻ của cùng một tuyển thủ (dù khác mùa).</li>
-      <li>🔗 <b>Độ ăn ý</b>: ghép tuyển thủ cùng đội, cùng mùa, cặp đôi đường dưới, cùng khu vực, nhà vô địch CKTG… để tăng sức mạnh.</li>
-      <li>🗺️ Vô địch giải nhỏ để mở giải lớn: VCS → PCS → LCS → LEC → LPL → LCK → MSI → <b>CKTG</b>!</li>
+      <li>🔗 <b>Độ ăn ý</b> và <b>chỉ số ẩn</b> cộng thêm sức mạnh đội.</li>
+      <li>🗺️ 4 chương: <b>Dễ → Thường → Khó → Địa ngục</b>. Vô địch giải nhỏ để mở giải lớn: VCS → PCS → LCS → LEC → LPL → LCK → MSI → <b>CKTG</b>!</li>
     </ul>
     <div class="actions"><button class="btn primary" id="w-go">Bắt đầu!</button></div>`, true);
   $('#w-go').onclick = closeModal;
 }
 
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => switchView(b.dataset.view));
-$('#modal').addEventListener('click', e => { if (e.target.id === 'modal' && !$('#modal-box').querySelector('#w-go')) closeModal(); });
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal' && !$('#modal-box').querySelector('#w-go') && !$('#modal-box').querySelector('.upg-anim')) closeModal(); });
 $('#credits-btn').onclick = () => {
   const list = typeof IMAGE_CREDITS !== 'undefined' ? IMAGE_CREDITS : [];
   openModal(`<h2>📷 Nguồn ảnh & logo</h2>
@@ -688,6 +591,8 @@ $('#credits-btn').onclick = () => {
     <div class="actions"><button class="btn" id="cr-close">Đóng</button></div>`, true);
   $('#cr-close').onclick = closeModal;
 };
+$('#donate-btn').onclick = openDonate;
+$('#donate-btn2').onclick = openDonate;
 $('#reset').onclick = () => {
   if (!confirm('Xóa toàn bộ tiến trình và chơi lại từ đầu?')) return;
   const got = newGame(); switchView('team'); welcome(got);

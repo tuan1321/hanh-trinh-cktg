@@ -9,18 +9,24 @@ Hoặc tải về và **mở `index.html` bằng Chrome/Edge**, không cần cà
 ## Cách chơi
 - Bắt đầu với 7 thẻ tuyển thủ ngẫu nhiên (bậc thấp).
 - **Giao hữu** hoặc tham gia **giải đấu** để kiếm tiền + EXP. Lên cấp được tặng gói thẻ.
-- **Cửa hàng**: mua gói Đồng → Bạc → Vàng → Kim Cương → Huyền Thoại.
-- Bậc thẻ theo chỉ số mùa giải: **B < A < S < S+ < SS < SSS** (mỗi bậc một màu).
+- **Cửa hàng**: gói Đồng 1.500 → Bạc 4.000 → Vàng 10.000 → Kim Cương 25.000 → Huyền Thoại 60.000. Thẻ SS/SSS rất hiếm.
+- Bậc thẻ theo chỉ số tổng (OVR 59–100, giãn rộng để các mùa phân tầng rõ): **B < A (66) < S (75) < S+ (82) < SS (88) < SSS (95)**. Giá bán chênh lệch lớn giữa các bậc (30 → 45.000).
+- **Chỉ số ẩn "Bản lĩnh"** (1–10, xem trong chi tiết thẻ): dựa trên mùa vô địch, phong độ đỉnh cao, kinh nghiệm… Hai thẻ cùng chỉ số tổng vẫn khác nhau nhờ chỉ số ẩn; cộng thêm vào sức mạnh đội. Mỗi thẻ còn có 5 chỉ số phụ (đi đường, giao tranh, kỹ năng, tư duy, tầm nhìn).
+- **Nâng cấp thẻ** (tab ⬆️): ghép 2 thẻ giống hệt → +1, hai thẻ +1 → +2 … tối đa **+10**. Tỉ lệ thành công 90% → 75% → 60% → 45% → 32% → 20% → 12% → 6% → 2,5% → **0,5%**. Thất bại mất thẻ nguyên liệu. Mỗi cấp tăng chỉ số tổng và chỉ số phụ (+10 = +27).
+- Thẻ chưa mở hiện **ảnh ẩn** (bóng đen, dấu ?) trong Bộ sưu tập.
 - Đội hình không được có 2 thẻ cùng một tuyển thủ (dù khác năm).
-- **Độ ăn ý** (tối đa +6 sức mạnh đội): đồng đội cùng đội cùng mùa, đội hình huyền thoại (đủ 5 người), cùng màu áo khác mùa, cặp đôi đường dưới, song sát giữa–rừng, trục đường trên, cùng khu vực, cùng thế hệ, nhà vô địch CKTG. Thẻ có dải màu đội; trang Đội hình có gợi ý thay người.
-- **Bản đồ giải đấu**: VCS → PCS → LCS → LEC → LPL → LCK (mỗi khu vực Hạng 2 rồi Hạng 1) → MSI → **Chung Kết Thế Giới**. Phải vô địch giải trước mới mở giải sau.
-- Mỗi ván đấu có bản đồ thu nhỏ, bảng tỉ số, K/D từng tuyển thủ và bình luận trực tiếp. Có thể tua x1–x8, bỏ qua ván hoặc mô phỏng nhanh.
+- **Độ ăn ý** (tối đa +9 sức mạnh đội): đồng đội cùng đội cùng mùa, đội hình huyền thoại (đủ 5 người), cùng màu áo khác mùa, cặp đôi đường dưới, song sát giữa–rừng, trục đường trên, cùng khu vực, cùng thế hệ, nhà vô địch CKTG. Thẻ có dải màu đội; trang Đội hình có gợi ý thay người.
+- **Bản đồ giải đấu** có 4 chương: **Dễ → Thường → Khó → Địa ngục** (đối thủ mạnh hơn +6/+12/+19, thưởng ×1.4/×1.9/×2.6). Mỗi chương: VCS → PCS → LCS → LEC → LPL → LCK (Hạng 2 rồi Hạng 1) → MSI → **Chung Kết Thế Giới**. Vô địch CKTG để mở chương tiếp theo.
+- **Thể thức như giải thật**: vòng bảng vòng tròn (ví dụ LCK 10 đội, 2 lượt, BO3 = 18 loạt trận; LPL 17 đội BO3 = 16 loạt) có bảng xếp hạng, top đội vào playoffs BO5; MSI có vòng khởi động BO3; CKTG có vòng Thụy Sĩ (thắng 3 đi tiếp). Tối đa BO5.
+- Mỗi ván đấu có bản đồ thu nhỏ, bảng tỉ số, K/D từng tuyển thủ và bình luận trực tiếp. Tua x1, x2; **x4 mở khi vô địch LCS Hạng 1**; **bỏ qua ván mở ở cấp 10**.
+- **Thành tựu** (tab 🏅): sưu tầm 5 tuyển thủ 1 đội, đủ đội hình huyền thoại, số cúp, mốc sức mạnh, thẻ +3/+5/+7/+10, số trận thắng, cấp độ, vô địch CKTG từng chương… mỗi thành tựu thưởng tiền và gói thẻ.
+- **💖 Ủng hộ nhà phát hành**: nút trên thanh đầu trang và cuối trang. Chủ trang điền thông tin (ngân hàng → tự tạo mã VietQR, MoMo, link Ko-fi…) trong `js/donate-config.js`.
 
 ## Bạn bè & chơi nhiều người (tab 👥 Bạn bè)
 - Mỗi người có **mã kết bạn** (8 ký tự) và **mã đội** (chứa đội hình, gửi qua Zalo/Messenger…).
 - **Thêm bạn**: nhập mã kết bạn (cả hai đang trực tuyến) hoặc dán mã đội (dùng được khi ngoại tuyến).
 - **Đấu đội đã lưu**: giao hữu với đội hình bạn bè bất cứ lúc nào.
-- **Trực tuyến**: bật "📡 Trực tuyến" để thấy bạn bè đang mở game và **mời đấu trực tiếp BO1/BO3**; người mời tạo trận, hai bên xem cùng một trận. Kết nối máy-máy (WebRTC) qua máy chủ trung gian miễn phí PeerJS — cần có mạng; một số mạng công ty/trường học có thể chặn kết nối này.
+- **Trực tuyến**: bật "📡 Trực tuyến" để thấy bạn bè đang mở game và **mời đấu trực tiếp BO1/BO3/BO5**; người mời tạo trận, hai bên xem cùng một trận. Kết nối máy-máy (WebRTC) qua máy chủ trung gian miễn phí PeerJS — cần có mạng; một số mạng công ty/trường học có thể chặn kết nối này.
 
 ## Đăng nhập & lưu tiến trình theo tài khoản
 Bấm nút **👤 Đăng nhập** góc trên: đăng nhập bằng Google hoặc email/mật khẩu, tiến trình tự lưu lên tài khoản và chơi tiếp được trên máy khác. Chưa đăng nhập thì chơi ở chế độ **Khách** (lưu trên trình duyệt); lần đầu đăng nhập có thể chuyển tiến trình Khách vào tài khoản.
@@ -48,6 +54,10 @@ Tải lại trang là game tự nhận. Chi tiết trong `img/HUONG-DAN.txt`.
 - `js/social.js` – bạn bè, mã đội, kết nối trực tuyến P2P
 - `js/auth.js`, `js/firebase-config.js`, `firestore.rules` – đăng nhập & lưu theo tài khoản
 - `js/match.js` – mô phỏng trận, minimap, bình luận
+- `js/tour.js` – giải đấu: chương độ khó, vòng bảng, Thụy Sĩ, loại trực tiếp
+- `js/upgrade.js` – nâng cấp thẻ +1…+10
+- `js/achieve.js` – thành tựu
+- `js/donate-config.js` – thông tin ủng hộ nhà phát hành
 - `js/main.js` – logic game & giao diện các tab
 
 Chỉ số tuyển thủ là ước lượng fan-made theo thành tích từng năm, không phải số liệu chính thức.

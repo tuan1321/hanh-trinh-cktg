@@ -417,7 +417,6 @@ const MatchUI = (() => {
       gameNo++;
       // trận trực tuyến: dùng các ván do chủ phòng tạo sẵn để hai bên xem giống hệt nhau
       const g = cfg.games ? cfg.games[gameNo - 1] : genGame(cfg.teams, Math.random() < cfg.pWin ? 0 : 1);
-      if (cfg.fast) { score[g.winner]++; return isOver() ? finish() : next(); }
       showGame(g, cfg, score, gameNo, () => { if (isOver()) finish(); else next(); });
     };
     next();
@@ -449,8 +448,19 @@ const MatchUI = (() => {
     $id('m-banner').className = 'm-banner';
     $id('m-result').className = 'm-result hidden';
     $id('m-next').classList.add('hidden');
-    $id('m-skip').disabled = false;
-    document.querySelectorAll('.spd').forEach(b => b.classList.toggle('active', +b.dataset.s === speed));
+    // Quyền tua/bỏ qua: x4 mở khi vô địch LCS, bỏ qua ván mở ở cấp 10
+    const perm = typeof matchPerms === 'function' ? matchPerms() : { maxSpeed: 4, skip: true };
+    if (speed > perm.maxSpeed) speed = perm.maxSpeed;
+    const skipBtn = $id('m-skip');
+    skipBtn.disabled = !perm.skip;
+    skipBtn.textContent = perm.skip ? '⏭ Bỏ qua ván' : `🔒 Bỏ qua ván (cấp ${typeof SKIP_LEVEL !== 'undefined' ? SKIP_LEVEL : 10})`;
+    document.querySelectorAll('.spd').forEach(b => {
+      const s = +b.dataset.s, lock = s > perm.maxSpeed;
+      b.disabled = lock;
+      b.textContent = lock ? `🔒 x${s}` : `x${s}`;
+      b.title = lock ? 'Vô địch LCS Hạng 1 để mở khóa' : '';
+      b.classList.toggle('active', s === speed);
+    });
 
     const canvas = $id('minimap');
     const ctx = canvas.getContext('2d');

@@ -43,10 +43,11 @@ function cleanSnap(o) {
   const lineup = {};
   for (const r of ROLES) {
     const cid = o.lineup && o.lineup[r];
-    if (typeof cid !== 'string' || !CARD[cid] || CARD[cid].role !== r) return null;
+    const c = cardOf(cid);
+    if (!c || c.role !== r) return null;
     lineup[r] = cid;
   }
-  if (new Set(ROLES.map(r => CARD[lineup[r]].name)).size < 5) return null;
+  if (new Set(ROLES.map(r => cardOf(lineup[r]).name)).size < 5) return null;
   return {
     id, lineup,
     name: String(o.name || 'Đội bạn').replace(/[\u0000-\u001f]/g, '').slice(0, 24) || 'Đội bạn',
@@ -55,7 +56,7 @@ function cleanSnap(o) {
   };
 }
 function teamFromSnap(s) {
-  const cards = ROLES.map(r => CARD[s.lineup[r]]);
+  const cards = ROLES.map(r => cardOf(s.lineup[r]));
   return { name: s.name, players: Object.fromEntries(ROLES.map((r, i) => [r, cards[i]])), power: powerOf(cards) };
 }
 function addFriendSnap(snap, quiet) {
@@ -160,7 +161,7 @@ function onMsg(id, conn, d) {
       break;
     }
     case 'invite': {
-      const bo = d.bo === 3 ? 3 : 1;
+      const bo = [3, 5].includes(d.bo) ? d.bo : 1;
       const f = friendById(id);
       if (!f) return;
       if (matchBusy() || NET.invite || NET.awaiting) return send(conn, { t: 'decline', why: 'busy' });
@@ -199,7 +200,7 @@ function onMsg(id, conn, d) {
       if (NET.awaiting !== id) return;
       NET.awaiting = null;
       const host = cleanSnap(d.host), guest = cleanSnap(d.guest);
-      const bo = d.bo === 3 ? 3 : 1;
+      const bo = [3, 5].includes(d.bo) ? d.bo : 1;
       const games = sanitizeGames(d.games, bo);
       if (!host || host.id !== id || !guest || guest.id !== S.profile.id || !games) { closeModal(); toast('Dữ liệu trận đấu không hợp lệ', 'err'); return; }
       closeModal();
@@ -304,6 +305,7 @@ function friendMatchEnd(id, won, score, live) {
   const exp = live ? (won ? 40 : 15) : (won ? 25 : 10);
   S.money += money;
   won ? S.stats.w++ : S.stats.l++;
+  if (won) S.stats.fw = (S.stats.fw || 0) + 1;
   if (f) won ? f.rec.w++ : f.rec.l++;
   const ups = gainExp(exp); save(); renderAll();
   const sc = score;
@@ -345,12 +347,13 @@ function friendCardHTML(f) {
     <div class="fr-main">
       <div><b class="fr-name"></b> <span class="fr-st">${on ? '● Trực tuyến' : '○ Ngoại tuyến'}</span></div>
       <small>Mã ${f.id} · Cấp ${f.level} · 🏆 ${f.titles} · ⚡ ${t.power}</small>
-      <div class="fr-lineup">${ROLES.map(r => { const c = CARD[f.lineup[r]]; return `<span class="fr-av tier-${c.tier.cls}" title="${esc(c.name)} ${c.year}">${avatarHTML(c)}</span>`; }).join('')}</div>
+      <div class="fr-lineup">${ROLES.map(r => { const c = cardOf(f.lineup[r]); return `<span class="fr-av tier-${c.tier.cls}" title="${esc(c.name)} ${c.year}${c.lv ? ' +' + c.lv : ''}">${avatarHTML(c)}</span>`; }).join('')}</div>
     </div>
     <div class="fr-rec"><small>Đối đầu</small><b>${f.rec.w} - ${f.rec.l}</b></div>
     <div class="fr-act">
       <button class="btn small primary" data-act="live1" ${on ? '' : 'disabled'} title="${on ? '' : 'Bạn này đang ngoại tuyến'}">📡 Mời BO1</button>
       <button class="btn small" data-act="live3" ${on ? '' : 'disabled'}>📡 BO3</button>
+      <button class="btn small" data-act="live5" ${on ? '' : 'disabled'}>📡 BO5</button>
       <button class="btn small" data-act="ghost">⚔️ Đấu đội đã lưu</button>
       <button class="btn small ghost" data-act="del" title="Xóa bạn">🗑</button>
     </div>
@@ -393,6 +396,7 @@ function renderFriends() {
       const a = b.dataset.act;
       if (a === 'live1') inviteFriend(f.id, 1);
       if (a === 'live3') inviteFriend(f.id, 3);
+      if (a === 'live5') inviteFriend(f.id, 5);
       if (a === 'ghost') ghostMatch(f.id);
       if (a === 'del' && confirm(`Xóa ${f.name} khỏi danh sách bạn bè?`)) { S.friends = S.friends.filter(x => x.id !== f.id); save(); renderFriends(); }
     });
