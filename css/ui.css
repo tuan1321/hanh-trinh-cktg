@@ -129,10 +129,7 @@ main { position: relative; }
 @keyframes vOut { to { opacity: 0; transform: translate3d(var(--dx, -26px), 0, 0); } }
 
 /* ===== Khung & nút ===== */
-.panel::before {
-  content: ''; position: absolute; left: 18px; right: 18px; top: 0; height: 1px; pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .28), transparent);
-}
+.panel { box-shadow: 0 10px 40px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .08); }
 .btn { position: relative; overflow: hidden; isolation: isolate; transition: transform .2s var(--ease-out), box-shadow .25s, background .25s, border-color .25s; }
 .btn:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
 .btn.primary::after {
@@ -211,10 +208,42 @@ main { position: relative; }
 @keyframes spLoad { from { transform: scaleX(0); } 60% { transform: scaleX(.8); } to { transform: scaleX(1); } }
 .sp-tip { position: relative; margin-top: 10px; color: var(--muted); font-size: 12px; animation: spUp .8s var(--ease-out) .35s both; }
 
-/* ===== Màn hình hẹp vừa: menu cuộn ngang ===== */
+/* ===== Không cho chữ trên thanh trên xuống dòng ===== */
+.brand b, .stat, .stat.donate-top, .acct { white-space: nowrap; }
+.brand > div { min-width: 0; }
+.brand small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stats { flex-shrink: 0; }
+
+/* ===== Laptop nhỏ / máy tính bảng ===== */
+@media (max-width: 1180px) {
+  .brand small, #xptext { display: none; }
+  .tabs button { padding: 12px 13px 15px; letter-spacing: .6px; }
+}
 @media (max-width: 1000px) {
-  .tabs { justify-content: flex-start; }
-  .tabs button { padding: 12px 14px 15px; letter-spacing: .6px; }
+  /* thanh trên gọn lại */
+  .brand b { font-size: 17px; letter-spacing: 1px; }
+  .brand .logo { width: 38px; height: 38px; font-size: 20px; border-radius: 12px; }
+  .xpbar { width: 64px; }
+  .stat { padding: 6px 11px; }
+  .stat.donate-top span, .acct .acct-name, .acct .acct-sync { display: none; }
+  .acct { padding: 3px; }
+  /* menu: biểu tượng trên, chữ dưới, chia đều chiều ngang */
+  .tabs { justify-content: space-between; padding: 0 8px; overflow: hidden; }
+  .tabs button {
+    flex: 1 1 0; min-width: 0; flex-direction: column; gap: 3px; padding: 8px 2px 11px;
+    font: 600 11px var(--font); letter-spacing: 0; text-transform: none;
+  }
+  .tabs button span:not(.dot):not(.dot-num) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .tabs button i { font-size: 18px; }
+  .tabs button::before { inset: 3px 2px 6px; }
+  #toasts { top: 112px; }
+  /* bản đồ: nhãn khu vực nằm dưới chấm, bỏ dòng phụ để không đè nhau */
+  .hs { gap: 3px; flex-direction: column; }
+  .hs-dot { width: 34px; height: 34px; font-size: 15px; }
+  .hs-label { padding: 2px 7px; border-radius: 8px; text-align: center; }
+  .hs-label b { font-size: 11px; }
+  .hs-label small { display: none; }
+  .hs.intl .hs-dot { width: 44px; height: 44px; font-size: 20px; }
 }
 
 /* ===== Di động: menu dưới đáy như ứng dụng game ===== */
@@ -239,8 +268,20 @@ main { position: relative; }
   .tab-ink { top: 0; bottom: auto; border-radius: 0 0 3px 3px; }
   .tab-ink::after { bottom: auto; top: 3px; background: radial-gradient(50% 100% at 50% 0%, rgba(139, 92, 246, .38), transparent); }
   .dot { top: 4px; right: calc(50% - 18px); }
+  .hs-dot { width: 28px; height: 28px; font-size: 13px; }
+  .hs-label { padding: 1px 6px; }
+  .hs-label b { font-size: 9px; }
+  .hs.intl .hs-dot { width: 38px; height: 38px; font-size: 18px; }
   #toasts { top: 66px; }
   .view.v-out { top: 16px; }
+}
+
+@media (max-width: 420px) {
+  .hs-dot { width: 24px; height: 24px; font-size: 11px; border-width: 1.5px; }
+  .hs-step { width: 13px; height: 13px; font-size: 7px; top: -4px; right: -4px; }
+  .hs-label { padding: 0 4px; }
+  .hs-label b { font-size: 8px; letter-spacing: 0; }
+  .hs.intl .hs-dot { width: 32px; height: 32px; font-size: 15px; }
 }
 
 /* ===== Người dùng chọn giảm chuyển động ===== */
