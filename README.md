@@ -2,7 +2,7 @@
 
 Game quản lý đội hình tuyển thủ LMHT trên nền web.
 
-**▶ Chơi ngay: https://tuan1321.github.io/hanh-trinh-cktg/**
+**▶ Chơi ngay: https://cktg.online**
 
 Hoặc tải về và **mở `index.html` bằng Chrome/Edge**, không cần cài đặt. Tiến trình được lưu tự động trong trình duyệt.
 
@@ -42,7 +42,7 @@ Bấm nút **👤 Đăng nhập** góc trên: đăng nhập bằng Google hoặc
 **Cài đặt cho chủ trang (một lần, miễn phí):**
 1. Vào https://console.firebase.google.com → **Add project** (có thể tắt Google Analytics).
 2. **Build → Authentication → Get started** → bật **Google** và **Email/Password**.
-3. **Authentication → Settings → Authorized domains** → thêm `tuan1321.github.io`.
+3. **Authentication → Settings → Authorized domains** → thêm `cktg.online`, `www.cktg.online` (và `tuan1321.github.io` nếu còn dùng).
 4. **Build → Firestore Database → Create database** → chọn vùng gần (ví dụ `asia-southeast1`) → **production mode**.
 5. **Firestore → Rules** → dán nội dung file `firestore.rules` → **Publish**. (Mỗi khi file này thay đổi, dán lại và Publish — ví dụ luật giữ tên đội.)
 6. **Project settings → Your apps → Web (`</>`)** → đăng ký app → chép đối tượng `firebaseConfig` vào `js/firebase-config.js` (thay `null`).
