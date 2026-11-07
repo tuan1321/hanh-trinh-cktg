@@ -1,0 +1,200 @@
+/* =========================================================
+   THẺ TUYỂN THỦ – bố cục chống mất chữ + hiệu ứng theo bậc
+   + hiệu ứng mùa vô địch (CKTG / MSI)
+   Mọi kích thước chữ co theo bề ngang thẻ (đơn vị cqi), nên thẻ
+   nhỏ trên điện thoại vẫn đủ chữ.
+   ========================================================= */
+
+/* ----- Bố cục ----- */
+.card {
+  container-type: inline-size; isolation: isolate;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 8px 8px 0; gap: 0; /* cqi của chính thẻ không dùng được cho padding của nó */
+}
+.card > * { flex: none; }
+.card-head, .c-avatar, .c-name, .c-role, .c-team, .c-chips { position: relative; z-index: 2; }
+.card-head { width: 100%; min-height: 0; }
+.c-tier { font-size: clamp(8px, 8.5cqi, 12px); padding: .15em .55em; border-radius: .6em; }
+.c-logo { width: 15cqi; height: 17cqi; }
+.c-rating { font-size: clamp(15px, 19cqi, 28px); }
+
+/* khung ảnh: kích thước cố định theo bề ngang → ảnh dọc không đẩy chữ ra ngoài */
+.c-avatar { width: 57%; aspect-ratio: 1; height: auto; margin: 4cqi 0 3.5cqi; }
+.c-ph { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; z-index: 1; }
+.c-ph > .av-img, .c-ph > .av-svg { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; }
+.c-avatar em {
+  z-index: 3; bottom: -.7em; white-space: nowrap; font-size: clamp(7.5px, 7cqi, 10px); padding: .05em .7em; line-height: 1.5;
+}
+
+.c-name {
+  width: 100%; margin-top: 4.5cqi; line-height: 1.15;
+  font-size: clamp(10px, 10.5cqi, 16px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.c-role {
+  width: 100%; margin-top: .5cqi; line-height: 1.25;
+  font-size: clamp(8px, 7.2cqi, 11px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.c-team {
+  margin: auto -8px 0; width: calc(100% + 16px); padding: 3cqi 7cqi;
+  font-size: clamp(8px, 7.2cqi, 11px); white-space: nowrap;
+}
+.c-team b { overflow: hidden; text-overflow: ellipsis; }
+.c-team span { margin-left: auto; position: relative; z-index: 1; padding: .05em .45em; border-radius: .5em; background: rgba(0, 0, 0, .45); color: #fff; opacity: 1; }
+.card.small { font-size: inherit; }
+.c-watermark { z-index: 0; }
+.c-teamglow { z-index: 0; }
+
+/* huy hiệu trạng thái: 2 cột hai bên ảnh */
+.c-chips { position: absolute; top: 31cqi; display: flex; flex-direction: column; gap: 2cqi; pointer-events: none; z-index: 4; }
+.c-chips.l { left: 4cqi; align-items: flex-start; }
+.c-chips.r { right: 4cqi; align-items: flex-end; }
+.card .c-chip {
+  position: static; top: auto; left: auto; right: auto; bottom: auto;
+  font: 800 clamp(7.5px, 7cqi, 10px)/1.25 var(--font); padding: .2em .55em; border-radius: 99px; white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .45);
+}
+.card .c-in { width: 1.9em; height: 1.9em; padding: 0; display: grid; place-items: center; background: var(--y); color: #0b0920; font-size: clamp(9px, 8.5cqi, 12px); }
+.card .c-new { background: var(--lime); color: #0b0920; }
+.card .c-msi { background: linear-gradient(180deg, #c9f6ff, #4fc3e8); color: #06202b; }
+.card .c-count { background: rgba(0, 0, 0, .7); border: 1px solid var(--tc); color: #fff; }
+.card .c-lv { font-family: var(--display); font-size: clamp(8px, 8cqi, 12px); border-radius: .5em; }
+
+/* ----- Lớp hiệu ứng chung ----- */
+.c-frame, .c-bgi { position: absolute; pointer-events: none; display: none; }
+.c-fx { position: absolute; inset: 0; pointer-events: none; z-index: 1; border-radius: inherit; overflow: hidden; }
+.c-fx::before, .c-fx::after { content: ''; position: absolute; pointer-events: none; }
+.card-shine { z-index: 5; }
+
+/* ===== B – thường: mờ, không hiệu ứng ===== */
+.tier-B.card { box-shadow: 0 6px 18px rgba(0, 0, 0, .35); }
+
+/* ===== A – ánh xanh tĩnh ===== */
+.tier-A .c-fx { background: linear-gradient(135deg, transparent 35%, rgba(120, 220, 255, .10) 48%, transparent 60%); }
+
+/* ===== S – hào quang tím "thở" ===== */
+.tier-S.card { border-width: 1.5px; box-shadow: 0 8px 24px rgba(0, 0, 0, .4), 0 0 22px rgba(181, 123, 255, .35); }
+.tier-S .c-fx { background: radial-gradient(70% 45% at 50% 34%, rgba(190, 140, 255, .5), transparent 70%); animation: fxBreathe 3.4s ease-in-out infinite; }
+@keyframes fxBreathe { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+
+/* ===== S+ – khung vàng kim, vệt sáng quét, lấp lánh ===== */
+.tier-Sp.card {
+  border: 2px solid transparent;
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(255, 196, 60, .42), transparent 60%) padding-box,
+    linear-gradient(180deg, #5c3a05, #120d1c 85%) padding-box,
+    linear-gradient(135deg, #7a5200, #ffe69a 22%, #c88a10 45%, #fff2c4 62%, #a86c00 85%, #ffd76a) border-box;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, .45), 0 0 24px rgba(255, 190, 40, .35);
+}
+.tier-Sp .card-shine { background-image: linear-gradient(115deg, transparent 40%, rgba(255, 240, 190, .38) 50%, transparent 60%); animation: shineT 3.6s ease-in-out 1s infinite; }
+.tier-Sp .c-fx::before {   /* 3 ngôi sao lấp lánh */
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 30%, #fff8d0 0 1.2px, transparent 2.5px),
+    radial-gradient(circle at 84% 46%, #fff8d0 0 1.4px, transparent 3px),
+    radial-gradient(circle at 26% 70%, #ffe08a 0 1px, transparent 2.5px);
+  animation: fxTwinkle 2.4s ease-in-out infinite;
+}
+.tier-Sp .c-fx::after {
+  inset: 0;
+  background:
+    radial-gradient(circle at 76% 24%, #fff8d0 0 1.2px, transparent 2.5px),
+    radial-gradient(circle at 12% 52%, #ffe08a 0 1.2px, transparent 2.5px),
+    radial-gradient(circle at 70% 72%, #fff8d0 0 1px, transparent 2.5px);
+  animation: fxTwinkle 2.4s ease-in-out 1.2s infinite;
+}
+@keyframes fxTwinkle { 0%, 100% { opacity: 0; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.05); } }
+
+/* ===== SS – lá kim loại đỏ ánh ba chiều + tàn lửa bay lên ===== */
+.tier-SS.card { border: 1.5px solid #ff6d86; box-shadow: 0 10px 28px rgba(0, 0, 0, .45), 0 0 26px rgba(255, 60, 100, .45); }
+.tier-SS .c-fx { mix-blend-mode: screen; }
+.tier-SS .c-fx::before {   /* lá ánh ba chiều trôi chéo */
+  top: 0; bottom: 0; left: -100%; width: 300%;
+  background: repeating-linear-gradient(115deg, transparent 0 6%, rgba(255, 70, 110, .22) 9%, rgba(255, 190, 90, .18) 12%, rgba(255, 120, 220, .16) 15%, transparent 19%);
+  animation: fxFoil 6s linear infinite;
+}
+.tier-SS .c-fx::after {    /* tàn lửa */
+  left: 0; right: 0; top: 0; height: 200%;
+  background:
+    radial-gradient(circle at 20% 10%, #ffb36b 0 1.3px, transparent 2.5px),
+    radial-gradient(circle at 70% 22%, #ff6d86 0 1.5px, transparent 3px),
+    radial-gradient(circle at 45% 35%, #ffd27a 0 1px, transparent 2.2px),
+    radial-gradient(circle at 85% 6%, #ff8a5c 0 1.2px, transparent 2.5px),
+    radial-gradient(circle at 10% 40%, #ff6d86 0 1px, transparent 2.2px);
+  background-size: 100% 50%;
+  animation: fxRise 5s linear infinite; opacity: .9;
+}
+@keyframes fxFoil { from { transform: translateX(0); } to { transform: translateX(33.333%); } }
+@keyframes fxRise { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+
+/* ===== SSS – khung cầu vồng xoay + lăng kính + sao ===== */
+.tier-SSS.card { border: 0; background: none; animation: none; box-shadow: 0 12px 32px rgba(0, 0, 0, .5), 0 0 30px rgba(255, 94, 224, .45), 0 0 50px rgba(34, 211, 238, .2); }
+.tier-SSS.card:hover, .modal-box .tier-SSS.card { animation: none; }
+.tier-SSS .c-frame {
+  display: block; z-index: -2; left: 50%; top: 50%; width: 190%; aspect-ratio: 1; margin: -95% 0 0 -95%;
+  background: conic-gradient(#ff5ee0, #ffd23f, #3dffa8, #22d3ee, #8b5cf6, #ff5ee0);
+  animation: spin 5s linear infinite;
+}
+.tier-SSS .c-bgi {
+  display: block; z-index: -1; inset: 2.5px; border-radius: 16px;
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(255, 94, 224, .45), transparent 60%),
+    linear-gradient(180deg, #3f0a4a, #100d26 85%);
+}
+.tier-SSS .c-fx { mix-blend-mode: screen; }
+.tier-SSS .c-fx::before {  /* lăng kính */
+  top: 0; bottom: 0; left: -100%; width: 300%;
+  background: repeating-linear-gradient(110deg, transparent 0 5%, rgba(255, 94, 224, .2) 8%, rgba(255, 210, 63, .18) 10.5%, rgba(61, 255, 168, .16) 13%, rgba(34, 211, 238, .2) 15.5%, transparent 19%);
+  animation: fxFoil 5s linear infinite;
+}
+.tier-SSS .c-fx::after {   /* sao nhiều màu bay lên */
+  left: 0; right: 0; top: 0; height: 200%;
+  background:
+    radial-gradient(circle at 15% 12%, #fff 0 1.3px, transparent 2.6px),
+    radial-gradient(circle at 80% 20%, #ffd23f 0 1.4px, transparent 2.8px),
+    radial-gradient(circle at 40% 38%, #22d3ee 0 1.2px, transparent 2.4px),
+    radial-gradient(circle at 65% 5%, #ff5ee0 0 1.3px, transparent 2.6px),
+    radial-gradient(circle at 90% 42%, #fff 0 1px, transparent 2.2px),
+    radial-gradient(circle at 8% 30%, #3dffa8 0 1px, transparent 2.2px);
+  background-size: 100% 50%;
+  animation: fxRise 7s linear infinite;
+}
+.tier-SSS .c-rating { background: linear-gradient(90deg, #ffd6f7, #fff3c4, #c9f8ff); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; filter: drop-shadow(0 0 8px rgba(255, 94, 224, .7)); }
+
+/* ===== Mùa vô địch CKTG: nguyệt quế vàng, khung vàng, kim tuyến rơi ===== */
+.c-laurel { position: absolute; inset: -17%; width: 134%; height: 134%; z-index: 0; overflow: visible; fill: #f5c451; filter: drop-shadow(0 0 3px rgba(255, 200, 60, .7)); pointer-events: none; }
+.card.msi .c-laurel { fill: #9fe7ff; filter: drop-shadow(0 0 3px rgba(80, 210, 255, .7)); }
+.card.champ .c-laurel { fill: #f5c451; filter: drop-shadow(0 0 3px rgba(255, 200, 60, .7)); }
+.card.champ .c-avatar, .card.msi .c-avatar { margin-top: 6cqi; margin-bottom: 4.5cqi; width: 52%; }
+.card.champ .c-avatar { box-shadow: 0 0 0 2px #ffd76a, 0 0 18px rgba(255, 200, 60, .7); }
+.card.msi .c-avatar { box-shadow: 0 0 0 2px #9fe7ff, 0 0 16px rgba(80, 210, 255, .6); }
+.card.champ:not(.tier-SSS) { border-color: #ffd76a; box-shadow: 0 10px 28px rgba(0, 0, 0, .45), 0 0 0 1px rgba(255, 215, 106, .35), 0 0 26px rgba(255, 200, 60, .5); }
+.card.msi:not(.champ):not(.tier-SSS) { border-color: #9fe7ff; box-shadow: 0 10px 28px rgba(0, 0, 0, .45), 0 0 22px rgba(80, 210, 255, .4); }
+.c-avatar em.champ { background: linear-gradient(90deg, #ffe08a, #ffb020, #ffe08a); color: #2a1a00; border-color: #fff6; box-shadow: 0 0 10px rgba(255, 190, 40, .7); }
+.c-avatar em.msi { background: linear-gradient(90deg, #d8f7ff, #5cc9ee); color: #06202b; border-color: #fff6; box-shadow: 0 0 10px rgba(80, 210, 255, .6); }
+/* kim tuyến vàng rơi (lớp riêng, chồng lên hiệu ứng bậc) */
+.c-glitter { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; border-radius: inherit; }
+.c-glitter::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 200%;
+  background:
+    radial-gradient(circle at 12% 8%, #ffe58a 0 1.2px, transparent 2.4px),
+    radial-gradient(circle at 58% 20%, #fff3c0 0 1px, transparent 2.2px),
+    radial-gradient(circle at 86% 4%, #ffd23f 0 1.3px, transparent 2.6px),
+    radial-gradient(circle at 34% 34%, #ffe58a 0 1px, transparent 2.2px),
+    radial-gradient(circle at 74% 42%, #fff3c0 0 1.2px, transparent 2.4px);
+  background-size: 100% 50%;
+  animation: fxFall 6s linear infinite;
+}
+.card.msi:not(.champ) .c-glitter::after { filter: hue-rotate(160deg) saturate(1.4); }
+@keyframes fxFall { from { transform: translateY(0); } to { transform: translateY(50%); } }
+
+/* ----- Thẻ chưa mở: tắt mọi hiệu ứng ----- */
+.card.locked .c-fx, .card.locked .c-frame { animation: none; }
+.card.locked .c-fx { display: none; }
+.card.locked .card-shine { animation: none; }
+
+/* ----- Thẻ trong hộp thoại chi tiết to hơn: sao/hạt to theo ----- */
+.modal-box .card .c-fx::after, .modal-box .card .c-fx::before { background-size: 100% 50%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .c-frame, .c-fx, .c-fx::before, .c-fx::after, .c-glitter::after { animation: none !important; }
+}

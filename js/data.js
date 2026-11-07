@@ -162,6 +162,8 @@ const RAW = [
 
 // Đội vô địch thế giới từng năm (mã đội như trong dữ liệu)
 const WORLDS_CHAMPS = { 2013: 'SKT', 2014: 'SSW', 2015: 'SKT', 2016: 'SKT', 2017: 'SSG', 2018: 'IG', 2019: 'FPX', 2020: 'DWG', 2021: 'EDG', 2022: 'DRX', 2023: 'T1', 2024: 'T1', 2025: 'T1' };
+// Vô địch MSI (2020 không tổ chức) – dùng cho hiệu ứng thẻ mùa vô địch
+const MSI_CHAMPS = { 2015: 'EDG', 2016: 'SKT', 2017: 'SKT', 2018: 'RNG', 2019: 'G2', 2021: 'RNG', 2022: 'RNG', 2023: 'JDG', 2024: 'GEN', 2025: 'GEN' };
 
 // ===== Chỉ số phụ & chỉ số ẩn =====
 const h32 = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };

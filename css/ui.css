@@ -255,6 +255,10 @@ body.match-open main, body.match-open footer { visibility: hidden; }
 @keyframes spLoad { from { transform: scaleX(0); } 60% { transform: scaleX(.8); } to { transform: scaleX(1); } }
 .sp-tip { position: relative; margin-top: 10px; color: var(--muted); font-size: 12px; animation: spUp .8s var(--ease-out) .35s both; }
 
+/* nhãn tab: bản ngắn cho điện thoại */
+.lbl-short { display: none; }
+@media (max-width: 640px) { .tabs .lbl-long { display: none; } .tabs .lbl-short { display: inline; } }
+
 /* ===== Không cho chữ trên thanh trên xuống dòng ===== */
 .brand b, .stat, .stat.donate-top, .acct { white-space: nowrap; }
 .brand > div { min-width: 0; }

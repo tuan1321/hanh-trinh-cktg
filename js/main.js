@@ -170,25 +170,45 @@ function matchPerms() {
 // ===== Thẻ =====
 const lvClass = lv => (lv >= 10 ? 'lv-max' : lv >= 8 ? 'lv-gold' : lv >= 5 ? 'lv-silver' : 'lv-bronze');
 const lvBadge = c => (c.lv ? `<span class="c-lv ${lvClass(c.lv)}">+${c.lv}</span>` : '');
+const isMsiChamp = c => typeof MSI_CHAMPS !== 'undefined' && MSI_CHAMPS[c.year] === c.team;
+// Vòng nguyệt quế quanh ảnh thẻ mùa vô địch (tạo 1 lần)
+const LAUREL_SVG = (() => {
+  let leaves = '';
+  for (const side of [-1, 1]) for (let i = 0; i < 9; i++) {
+    const deg = 90 + side * (28 + i * 15);          // từ dưới đáy vòng lên đỉnh, hai bên
+    const a = deg * Math.PI / 180, x = 50 + Math.cos(a) * 47, y = 50 + Math.sin(a) * 47;
+    const rot = deg + 90 + side * 28;               // lá xuôi theo vòng, chếch ra ngoài
+    leaves += `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="6" ry="2.6" transform="rotate(${rot.toFixed(0)} ${x.toFixed(1)} ${y.toFixed(1)})"/>`;
+  }
+  return `<svg class="c-laurel" viewBox="0 0 100 100" aria-hidden="true">${leaves}</svg>`;
+})();
 function cardHTML(c, o = {}) {
   const t = c.tier;
-  const champ = isChamp(c);
   const hide = o.locked; // thẻ chưa mở: ẩn ảnh và chỉ số
-  return `<div class="card tier-${t.cls} ${hide ? 'locked' : ''} ${c.lv ? 'upg ' + lvClass(c.lv) : ''} ${o.small ? 'small' : ''} ${o.click ? 'clickable' : ''}" data-id="${c.id}" style="${teamStyle(c.team)}">
-    <div class="card-shine"></div>
+  const champ = !hide && isChamp(c), msi = !hide && isMsiChamp(c);
+  const teamName = esc(TEAM_INFO[c.team]?.name || c.team);
+  // huy hiệu trạng thái xếp thành 2 cột hai bên ảnh, không che mặt / chữ
+  const left = (o.inLineup ? '<span class="c-chip c-in" title="Đang dùng trong đội hình">✓</span>' : '')
+    + (o.isNew ? '<span class="c-chip c-new">MỚI</span>' : '')
+    + (champ && msi ? `<span class="c-chip c-msi" title="Vô địch MSI ${c.year}">MSI</span>` : '')
+    + (o.chem > 0 ? `<span class="c-chip c-chem" title="Điểm ăn ý">🔗+${o.chem}</span>` : '');
+  const right = (c.lv ? `<span class="c-chip c-lv ${lvClass(c.lv)}">+${c.lv}</span>` : '')
+    + (o.count > 1 ? `<span class="c-chip c-count" title="Số thẻ đang có">×${o.count}</span>` : '')
+    + (o.delta != null ? `<span class="c-chip c-delta ${o.delta > 0 ? 'up' : o.delta < 0 ? 'down' : ''}">⚡${o.delta > 0 ? '+' : ''}${o.delta}</span>` : '');
+  const yearTag = champ ? `<em class="champ" title="Vô địch CKTG ${c.year}">🏆 CKTG ${c.year}</em>`
+    : msi ? `<em class="msi" title="Vô địch MSI ${c.year}">⭐ MSI ${c.year}</em>` : `<em>${c.year}</em>`;
+  return `<div class="card tier-${t.cls} ${hide ? 'locked' : ''} ${c.lv ? 'upg ' + lvClass(c.lv) : ''} ${champ ? 'champ' : ''} ${msi ? 'msi' : ''} ${o.small ? 'small' : ''} ${o.click ? 'clickable' : ''}" data-id="${c.id}" style="${teamStyle(c.team)}">
+    <div class="c-frame"></div><div class="c-bgi"></div>
+    <div class="c-fx"></div>${champ || msi ? '<div class="c-glitter"></div>' : ''}
     <div class="c-teamglow"></div>
     <div class="c-watermark">${teamLogoHTML(c.team)}</div>
-    <div class="card-head"><span class="c-tier">${t.id}</span><span class="c-logo" title="${esc(TEAM_INFO[c.team]?.name || c.team)}">${teamLogoHTML(c.team)}</span><span class="c-rating">${hide ? '??' : c.rating}</span></div>
-    ${lvBadge(c)}
-    <div class="c-avatar">${hide ? hiddenAvatarSVG() : avatarHTML(c)}<em class="${champ && !hide ? 'champ' : ''}" ${champ && !hide ? `title="Vô địch CKTG ${c.year}"` : ''}>${champ && !hide ? '🏆 ' : ''}${c.year}</em></div>
+    <div class="card-head"><span class="c-tier">${t.id}</span><span class="c-logo" title="${teamName}">${teamLogoHTML(c.team)}</span><span class="c-rating">${hide ? '??' : c.rating}</span></div>
+    <div class="c-avatar">${champ || msi ? LAUREL_SVG : ''}<div class="c-ph">${hide ? hiddenAvatarSVG() : avatarHTML(c)}</div>${yearTag}</div>
+    ${left ? `<div class="c-chips l">${left}</div>` : ''}${right ? `<div class="c-chips r">${right}</div>` : ''}
     <div class="c-name">${hide ? '? ? ?' : esc(c.name)}</div>
     <div class="c-role">${ROLE_INFO[c.role].icon} ${c.role} · ${c.region}</div>
-    <div class="c-team" title="${esc(TEAM_INFO[c.team]?.name || c.team)}"><b>${c.team}</b><span>${c.year}</span></div>
-    ${o.chem > 0 ? `<span class="c-chem" title="Điểm ăn ý">🔗 +${o.chem}</span>` : ''}
-    ${o.delta != null ? `<span class="c-delta ${o.delta > 0 ? 'up' : o.delta < 0 ? 'down' : ''}">⚡ ${o.delta > 0 ? '+' : ''}${o.delta}</span>` : ''}
-    ${o.count > 1 ? `<span class="c-count">×${o.count}</span>` : ''}
-    ${o.isNew ? '<span class="c-new">MỚI</span>' : ''}
-    ${o.inLineup ? '<span class="c-in">ĐANG DÙNG</span>' : ''}
+    <div class="c-team" title="${teamName}"><b>${c.team}</b><span>${c.year}</span></div>
+    <div class="card-shine"></div>
   </div>`;
 }
 function equip(k) {

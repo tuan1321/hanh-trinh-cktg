@@ -13,6 +13,7 @@ Hoặc tải về và **mở `index.html` bằng Chrome/Edge**, không cần cà
 - Bậc thẻ theo chỉ số tổng (OVR 59–100, giãn rộng để các mùa phân tầng rõ): **B < A (66) < S (75) < S+ (82) < SS (88) < SSS (95)**. Giá bán chênh lệch lớn giữa các bậc (30 → 45.000).
 - **Chỉ số ẩn "Bản lĩnh"** (1–10, xem trong chi tiết thẻ): dựa trên mùa vô địch, phong độ đỉnh cao, kinh nghiệm… Hai thẻ cùng chỉ số tổng vẫn khác nhau nhờ chỉ số ẩn; cộng thêm vào sức mạnh đội. Mỗi thẻ còn có 5 chỉ số phụ (đi đường, giao tranh, kỹ năng, tư duy, tầm nhìn).
 - **Nâng cấp thẻ** (tab ⬆️): ghép 2 thẻ giống hệt → +1, hai thẻ +1 → +2 … tối đa **+10**. Tỉ lệ thành công 90% → 75% → 60% → 45% → 32% → 20% → 12% → 6% → 2,5% → **0,5%**. Thất bại mất thẻ nguyên liệu. Mỗi cấp tăng chỉ số tổng và chỉ số phụ (+10 = +27).
+- **Hiệu ứng thẻ theo bậc**: S hào quang tím, S+ khung vàng kim lấp lánh, SS lá ánh ba chiều đỏ + tàn lửa, SSS khung cầu vồng xoay + lăng kính + sao. **Thẻ mùa vô địch** có vòng nguyệt quế và kim tuyến: vàng cho CKTG, xanh bạc cho MSI.
 - Thẻ chưa mở hiện **ảnh ẩn** (bóng đen, dấu ?) trong Bộ sưu tập.
 - Đội hình không được có 2 thẻ cùng một tuyển thủ (dù khác năm).
 - **Độ ăn ý** (tối đa +9 sức mạnh đội): đồng đội cùng đội cùng mùa, đội hình huyền thoại (đủ 5 người), cùng màu áo khác mùa, cặp đôi đường dưới, song sát giữa–rừng, trục đường trên, cùng khu vực, cùng thế hệ, nhà vô địch CKTG. Thẻ có dải màu đội; trang Đội hình có gợi ý thay người.
