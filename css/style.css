@@ -77,6 +77,37 @@ h3 { font-size: 18px; }
 #xpfill { height: 100%; border-radius: 99px; background: var(--grad); box-shadow: 0 0 12px var(--c); transition: width .5s cubic-bezier(.2,.8,.2,1); }
 #xptext { color: var(--muted); }
 
+/* ===== Tài khoản ===== */
+.acct { display: flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; border-radius: 999px; cursor: pointer; color: var(--text); font: 600 13px var(--font); background: var(--glass); border: 1px solid var(--stroke); transition: .2s; max-width: 190px; }
+.acct:hover { border-color: var(--c); }
+.acct.in { border-color: rgba(139, 92, 246, .5); }
+.acct-av { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; overflow: hidden; background: var(--grad); color: #fff; font: 700 14px var(--display); }
+.acct-av img { width: 100%; height: 100%; object-fit: cover; }
+.acct-av.big { width: 56px; height: 56px; font-size: 24px; }
+.acct-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.acct-sync { font-size: 12px; }
+.ac-me { display: flex; align-items: center; gap: 14px; margin: 6px 0 12px; }
+.ac-me b { display: block; font: 700 18px var(--display); }
+.ac-me small { display: block; color: var(--muted); }
+.btn.google { width: 100%; background: #fff; color: #1f1f1f; border-color: #fff; padding: 12px; font-size: 15px; }
+.btn.google:hover:not(:disabled) { background: #f1f1f1; }
+.g-logo { width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center; font: 800 14px Arial, sans-serif; color: #fff; background: conic-gradient(#ea4335 0 25%, #fbbc05 0 50%, #34a853 0 75%, #4285f4 0); }
+.or { display: flex; align-items: center; gap: 10px; margin: 16px 0; color: var(--muted); font-size: 12px; }
+.or::before, .or::after { content: ''; flex: 1; height: 1px; background: var(--stroke2); }
+.ac-form { display: grid; gap: 10px; }
+.ac-form input { background: rgba(0,0,0,.25); color: var(--text); border: 1px solid var(--stroke2); border-radius: 12px; padding: 12px 14px; font: 500 15px var(--font); outline: none; }
+.ac-form input:focus { border-color: var(--c); box-shadow: 0 0 0 3px rgba(34, 211, 238, .2); }
+.ac-form .btn { padding: 12px; font-size: 15px; }
+.ac-err { color: var(--red); font-size: 13px; min-height: 18px; }
+.ac-links { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 14px; font-size: 13px; }
+.ac-links a { color: var(--c); text-decoration: none; }
+.ac-links a:hover { text-decoration: underline; }
+@media (max-width: 640px) {
+  .acct { padding: 3px; }
+  .acct .acct-name, .acct .acct-sync { display: none; }
+  .stat.level { display: none; }
+}
+
 /* ===== Tab điều hướng ===== */
 .tabs {
   position: sticky; top: 80px; z-index: 19;

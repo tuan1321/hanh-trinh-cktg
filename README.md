@@ -22,6 +22,17 @@ Hoặc tải về và **mở `index.html` bằng Chrome/Edge**, không cần cà
 - **Đấu đội đã lưu**: giao hữu với đội hình bạn bè bất cứ lúc nào.
 - **Trực tuyến**: bật "📡 Trực tuyến" để thấy bạn bè đang mở game và **mời đấu trực tiếp BO1/BO3**; người mời tạo trận, hai bên xem cùng một trận. Kết nối máy-máy (WebRTC) qua máy chủ trung gian miễn phí PeerJS — cần có mạng; một số mạng công ty/trường học có thể chặn kết nối này.
 
+## Đăng nhập & lưu tiến trình theo tài khoản
+Bấm nút **👤 Đăng nhập** góc trên: đăng nhập bằng Google hoặc email/mật khẩu, tiến trình tự lưu lên tài khoản và chơi tiếp được trên máy khác. Chưa đăng nhập thì chơi ở chế độ **Khách** (lưu trên trình duyệt); lần đầu đăng nhập có thể chuyển tiến trình Khách vào tài khoản.
+
+**Cài đặt cho chủ trang (một lần, miễn phí):**
+1. Vào https://console.firebase.google.com → **Add project** (có thể tắt Google Analytics).
+2. **Build → Authentication → Get started** → bật **Google** và **Email/Password**.
+3. **Authentication → Settings → Authorized domains** → thêm `tuan1321.github.io`.
+4. **Build → Firestore Database → Create database** → chọn vùng gần (ví dụ `asia-southeast1`) → **production mode**.
+5. **Firestore → Rules** → dán nội dung file `firestore.rules` → **Publish**.
+6. **Project settings → Your apps → Web (`</>`)** → đăng ký app → chép đối tượng `firebaseConfig` vào `js/firebase-config.js` (thay `null`).
+
 ## Ảnh tuyển thủ & logo đội
 56 tuyển thủ dùng ảnh tự do (Creative Commons / public domain) từ Wikimedia Commons và Openverse; 7 đội có logo tự do. Nguồn ghi đầy đủ trong `img/CREDITS.txt` và nút "📷 Nguồn ảnh" trong game (danh sách ở `js/credits.js`). Các tuyển thủ còn lại dùng chân dung tự vẽ (áo đấu theo màu đội); mỗi đội có huy hiệu riêng. Muốn dùng ảnh thật của bạn:
 - `img/players/<Tên>.png` (hoặc .jpg), ví dụ `img/players/Faker.png`
@@ -35,6 +46,7 @@ Tải lại trang là game tự nhận. Chi tiết trong `img/HUONG-DAN.txt`.
 - `js/data.js` – dữ liệu tuyển thủ, bậc thẻ, gói thẻ, giải đấu (sửa chỉ số ở đây)
 - `js/art.js` – chân dung, huy hiệu đội, màu đội, nạp ảnh tùy chỉnh
 - `js/social.js` – bạn bè, mã đội, kết nối trực tuyến P2P
+- `js/auth.js`, `js/firebase-config.js`, `firestore.rules` – đăng nhập & lưu theo tài khoản
 - `js/match.js` – mô phỏng trận, minimap, bình luận
 - `js/main.js` – logic game & giao diện các tab
 

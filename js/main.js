@@ -2,10 +2,14 @@
 const $ = s => document.querySelector(s);
 const fmt = n => Math.round(n).toLocaleString('vi-VN');
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const SAVE_KEY = 'hanhtrinh_cktg_v1';
+const GUEST_KEY = 'hanhtrinh_cktg_v1';
+let SAVE_KEY = GUEST_KEY; // đổi sang khóa riêng của tài khoản khi đăng nhập (xem auth.js)
 let S = null;
 
-function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { } }
+function save() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { }
+  if (typeof cloudSave === 'function') cloudSave(); // đồng bộ lên tài khoản nếu đã đăng nhập
+}
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY));
