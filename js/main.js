@@ -595,12 +595,14 @@ $('#credits-btn').onclick = () => {
   const list = typeof IMAGE_CREDITS !== 'undefined' ? IMAGE_CREDITS : [];
   openModal(`<h2>📷 Nguồn ảnh & logo</h2>
     <p class="muted">Ảnh và logo tự do từ Wikimedia Commons, dùng theo giấy phép ghi bên dưới. Tuyển thủ/đội không có ảnh dùng hình tự vẽ. Logo là nhãn hiệu của các đội tương ứng, chỉ dùng để nhận diện trong game fan phi thương mại.</p>
-    <ol class="credits">${list.map(c => `<li><b>${esc(c.name)}</b> – ảnh của ${esc(c.artist || 'không rõ')}, giấy phép <a href="${esc(c.licenseUrl || c.page)}" target="_blank" rel="noopener">${esc(c.license)}</a>, <a href="${esc(c.page)}" target="_blank" rel="noopener">nguồn</a>${c.edited ? ' (đã cắt/thu nhỏ)' : ''}</li>`).join('') || '<li>Chưa có ảnh.</li>'}</ol>
+    <ol class="credits">${list.map(c => `<li><b>${esc(c.name)}${c.year ? ' (' + c.year + ')' : ''}</b> – ảnh của ${esc(c.artist || 'không rõ')}, giấy phép <a href="${esc(c.licenseUrl || c.page)}" target="_blank" rel="noopener">${esc(c.license)}</a>, <a href="${esc(c.page)}" target="_blank" rel="noopener">nguồn</a>${c.edited ? ' (đã cắt/thu nhỏ)' : ''}</li>`).join('') || '<li>Chưa có ảnh.</li>'}</ol>
     <div class="actions"><button class="btn" id="cr-close">Đóng</button></div>`, true);
   $('#cr-close').onclick = closeModal;
 };
 $('#donate-btn').onclick = openDonate;
 $('#donate-btn2').onclick = openDonate;
+// tạm ẩn mục ủng hộ khi DONATE.enabled = false (js/donate-config.js)
+if (typeof DONATE === 'undefined' || DONATE.enabled === false) ['#donate-btn', '#donate-btn2'].forEach(s => $(s).classList.add('hidden'));
 $('#reset').onclick = () => {
   if (!confirm('Xóa toàn bộ tiến trình và chơi lại từ đầu?')) return;
   const got = newGame(); switchView('team'); welcome(got);

@@ -1,0 +1,256 @@
+DANH SACH ANH THE TUYEN THU (tu tao boi tools/scan-photos.ps1)
+Cap nhat: 2026-11-07 20:14
+Tong 251 the: 37 co anh dung mua, 117 muon anh mua khac / anh chung, 97 chua co anh.
+Dat anh vao dung duong dan ben phai (duoi .jpg/.png/.webp deu duoc), roi chay lai tools/scan-photos.bat.
+
+[   ] chua co anh            369 2023 JDG  -> img/players/369/2023.jpg
+[   ] chua co anh            369 2024 TES  -> img/players/369/2024.jpg
+[ ~ ] dang dung anh chung    Ambition 2017 SSG  -> img/players/Ambition/2017.jpg
+[ ~ ] dang dung anh chung    Ambition 2018 GEN  -> img/players/Ambition/2018.jpg
+[   ] chua co anh            Angel 2020 SN   -> img/players/Angel/2020.jpg
+[ ~ ] dang dung anh 2017     Bang 2015 SKT  -> img/players/Bang/2015.jpg
+[ ~ ] dang dung anh 2017     Bang 2016 SKT  -> img/players/Bang/2016.jpg
+[OK ] co anh mua nay         Bang 2017 SKT  -> img/players/Bang/2017.jpg
+[ ~ ] dang dung anh 2017     Bang 2018 SKT  -> img/players/Bang/2018.jpg
+[   ] chua co anh            Baolan 2018 IG   -> img/players/Baolan/2018.jpg
+[ ~ ] dang dung anh chung    Bdd 2025 KT   -> img/players/Bdd/2025.jpg
+[ ~ ] dang dung anh chung    Bengi 2013 SKT  -> img/players/Bengi/2013.jpg
+[ ~ ] dang dung anh chung    Bengi 2015 SKT  -> img/players/Bengi/2015.jpg
+[ ~ ] dang dung anh chung    Bengi 2016 SKT  -> img/players/Bengi/2016.jpg
+[   ] chua co anh            Berserker 2023 C9   -> img/players/Berserker/2023.jpg
+[   ] chua co anh            BeryL 2019 DWG  -> img/players/BeryL/2019.jpg
+[   ] chua co anh            BeryL 2020 DWG  -> img/players/BeryL/2020.jpg
+[   ] chua co anh            BeryL 2021 DK   -> img/players/BeryL/2021.jpg
+[   ] chua co anh            BeryL 2022 DRX  -> img/players/BeryL/2022.jpg
+[   ] chua co anh            Betty 2017 FW   -> img/players/Betty/2017.jpg
+[   ] chua co anh            Bin 2020 SN   -> img/players/Bin/2020.jpg
+[   ] chua co anh            Bin 2023 BLG  -> img/players/Bin/2023.jpg
+[   ] chua co anh            Bin 2024 BLG  -> img/players/Bin/2024.jpg
+[ ~ ] dang dung anh chung    Blaber 2023 C9   -> img/players/Blaber/2023.jpg
+[   ] chua co anh            BrokenBlade 2024 G2   -> img/players/BrokenBlade/2024.jpg
+[   ] chua co anh            BrokenBlade 2025 G2   -> img/players/BrokenBlade/2025.jpg
+[   ] chua co anh            Broxah 2018 FNC  -> img/players/Broxah/2018.jpg
+[   ] chua co anh            Broxah 2019 FNC  -> img/players/Broxah/2019.jpg
+[ ~ ] dang dung anh chung    Bwipo 2018 FNC  -> img/players/Bwipo/2018.jpg
+[ ~ ] dang dung anh chung    Bwipo 2019 FNC  -> img/players/Bwipo/2019.jpg
+[OK ] co anh mua nay         Canyon 2019 DWG  -> img/players/Canyon/2019.jpg
+[ ~ ] dang dung anh 2019     Canyon 2020 DWG  -> img/players/Canyon/2020.jpg
+[ ~ ] dang dung anh 2019     Canyon 2021 DK   -> img/players/Canyon/2021.jpg
+[ ~ ] dang dung anh 2019     Canyon 2024 GEN  -> img/players/Canyon/2024.jpg
+[ ~ ] dang dung anh 2019     Canyon 2025 GEN  -> img/players/Canyon/2025.jpg
+[ ~ ] dang dung anh 2020     Caps 2018 FNC  -> img/players/Caps/2018.jpg
+[ ~ ] dang dung anh 2020     Caps 2019 G2   -> img/players/Caps/2019.jpg
+[OK ] co anh mua nay         Caps 2020 G2   -> img/players/Caps/2020.jpg
+[ ~ ] dang dung anh chung    Caps 2024 G2   -> img/players/Caps/2024.jpg
+[ ~ ] dang dung anh 2023     Chovy 2022 GEN  -> img/players/Chovy/2022.jpg
+[OK ] co anh mua nay         Chovy 2023 GEN  -> img/players/Chovy/2023.jpg
+[ ~ ] dang dung anh 2025     Chovy 2024 GEN  -> img/players/Chovy/2024.jpg
+[OK ] co anh mua nay         Chovy 2025 GEN  -> img/players/Chovy/2025.jpg
+[   ] chua co anh            Clid 2019 T1   -> img/players/Clid/2019.jpg
+[ ~ ] dang dung anh chung    CoreJJ 2017 SSG  -> img/players/CoreJJ/2017.jpg
+[ ~ ] dang dung anh chung    CoreJJ 2018 GEN  -> img/players/CoreJJ/2018.jpg
+[ ~ ] dang dung anh chung    CoreJJ 2019 TL   -> img/players/CoreJJ/2019.jpg
+[   ] chua co anh            Crisp 2019 FPX  -> img/players/Crisp/2019.jpg
+[   ] chua co anh            Crisp 2023 WBG  -> img/players/Crisp/2023.jpg
+[   ] chua co anh            Crown 2017 SSG  -> img/players/Crown/2017.jpg
+[   ] chua co anh            Crown 2018 GEN  -> img/players/Crown/2018.jpg
+[   ] chua co anh            CuVee 2017 SSG  -> img/players/CuVee/2017.jpg
+[   ] chua co anh            CuVee 2018 GEN  -> img/players/CuVee/2018.jpg
+[ ~ ] dang dung anh chung    Cuzz 2025 KT   -> img/players/Cuzz/2025.jpg
+[ ~ ] dang dung anh chung    Dandy 2014 SSW  -> img/players/Dandy/2014.jpg
+[ ~ ] dang dung anh chung    Deft 2014 SSB  -> img/players/Deft/2014.jpg
+[ ~ ] dang dung anh chung    Deft 2018 KT   -> img/players/Deft/2018.jpg
+[ ~ ] dang dung anh chung    Deft 2020 DRX  -> img/players/Deft/2020.jpg
+[ ~ ] dang dung anh chung    Deft 2022 DRX  -> img/players/Deft/2022.jpg
+[ ~ ] dang dung anh 2024     Delight 2023 GEN  -> img/players/Delight/2023.jpg
+[OK ] co anh mua nay         Delight 2024 HLE  -> img/players/Delight/2024.jpg
+[ ~ ] dang dung anh 2024     Delight 2025 HLE  -> img/players/Delight/2025.jpg
+[   ] chua co anh            Deokdam 2025 KT   -> img/players/Deokdam/2025.jpg
+[ ~ ] dang dung anh chung    Doinb 2019 FPX  -> img/players/Doinb/2019.jpg
+[ ~ ] dang dung anh chung    Doinb 2020 FPX  -> img/players/Doinb/2020.jpg
+[ ~ ] dang dung anh 2024     Doran 2022 GEN  -> img/players/Doran/2022.jpg
+[ ~ ] dang dung anh 2024     Doran 2023 GEN  -> img/players/Doran/2023.jpg
+[OK ] co anh mua nay         Doran 2024 HLE  -> img/players/Doran/2024.jpg
+[OK ] co anh mua nay         Doran 2025 T1   -> img/players/Doran/2025.jpg
+[OK ] co anh mua nay         Doublelift 2016 TSM  -> img/players/Doublelift/2016.jpg
+[OK ] co anh mua nay         Doublelift 2019 TL   -> img/players/Doublelift/2019.jpg
+[   ] chua co anh            Duke 2016 SKT  -> img/players/Duke/2016.jpg
+[   ] chua co anh            Duro 2025 GEN  -> img/players/Duro/2025.jpg
+[   ] chua co anh            EasyLove 2019 GAM  -> img/players/EasyLove/2019.jpg
+[OK ] co anh mua nay         Effort 2019 T1   -> img/players/Effort/2019.jpg
+[   ] chua co anh            Elk 2023 BLG  -> img/players/Elk/2023.jpg
+[   ] chua co anh            Elk 2024 BLG  -> img/players/Elk/2024.jpg
+[   ] chua co anh            EMENES 2023 C9   -> img/players/EMENES/2023.jpg
+[   ] chua co anh            Emo 2023 GAM  -> img/players/Emo/2023.jpg
+[   ] chua co anh            Emo 2024 GAM  -> img/players/Emo/2024.jpg
+[OK ] co anh mua nay         Faker 2013 SKT  -> img/players/Faker/2013.jpg
+[ ~ ] dang dung anh 2015     Faker 2014 SKT  -> img/players/Faker/2014.jpg
+[OK ] co anh mua nay         Faker 2015 SKT  -> img/players/Faker/2015.jpg
+[ ~ ] dang dung anh 2015     Faker 2016 SKT  -> img/players/Faker/2016.jpg
+[ ~ ] dang dung anh 2015     Faker 2017 SKT  -> img/players/Faker/2017.jpg
+[ ~ ] dang dung anh chung    Faker 2018 SKT  -> img/players/Faker/2018.jpg
+[ ~ ] dang dung anh 2021     Faker 2019 T1   -> img/players/Faker/2019.jpg
+[ ~ ] dang dung anh 2021     Faker 2020 T1   -> img/players/Faker/2020.jpg
+[OK ] co anh mua nay         Faker 2021 T1   -> img/players/Faker/2021.jpg
+[ ~ ] dang dung anh 2021     Faker 2022 T1   -> img/players/Faker/2022.jpg
+[ ~ ] dang dung anh 2021     Faker 2023 T1   -> img/players/Faker/2023.jpg
+[ ~ ] dang dung anh chung    Faker 2024 T1   -> img/players/Faker/2024.jpg
+[ ~ ] dang dung anh chung    Faker 2025 T1   -> img/players/Faker/2025.jpg
+[ ~ ] dang dung anh chung    Flandre 2021 EDG  -> img/players/Flandre/2021.jpg
+[   ] chua co anh            Fudge 2023 C9   -> img/players/Fudge/2023.jpg
+[   ] chua co anh            Ghost 2020 DWG  -> img/players/Ghost/2020.jpg
+[   ] chua co anh            Ghost 2021 DK   -> img/players/Ghost/2021.jpg
+[   ] chua co anh            GimGoon 2019 FPX  -> img/players/GimGoon/2019.jpg
+[   ] chua co anh            GimGoon 2020 FPX  -> img/players/GimGoon/2020.jpg
+[   ] chua co anh            GorillA 2016 ROX  -> img/players/GorillA/2016.jpg
+[OK ] co anh mua nay         Gumayusi 2021 T1   -> img/players/Gumayusi/2021.jpg
+[ ~ ] dang dung anh 2023     Gumayusi 2022 T1   -> img/players/Gumayusi/2022.jpg
+[OK ] co anh mua nay         Gumayusi 2023 T1   -> img/players/Gumayusi/2023.jpg
+[ ~ ] dang dung anh 2023     Gumayusi 2024 T1   -> img/players/Gumayusi/2024.jpg
+[ ~ ] dang dung anh 2023     Gumayusi 2025 T1   -> img/players/Gumayusi/2025.jpg
+[ ~ ] dang dung anh chung    Hans Sama 2024 G2   -> img/players/Hans Sama/2024.jpg
+[   ] chua co anh            Huanfeng 2020 SN   -> img/players/Huanfeng/2020.jpg
+[ ~ ] dang dung anh chung    Huni 2017 SKT  -> img/players/Huni/2017.jpg
+[ ~ ] dang dung anh chung    Hylissang 2018 FNC  -> img/players/Hylissang/2018.jpg
+[ ~ ] dang dung anh chung    Hylissang 2019 FNC  -> img/players/Hylissang/2019.jpg
+[ ~ ] dang dung anh chung    Imp 2014 SSW  -> img/players/Imp/2014.jpg
+[OK ] co anh mua nay         Impact 2013 SKT  -> img/players/Impact/2013.jpg
+[OK ] co anh mua nay         Impact 2019 TL   -> img/players/Impact/2019.jpg
+[   ] chua co anh            JackeyLove 2018 IG   -> img/players/JackeyLove/2018.jpg
+[   ] chua co anh            JackeyLove 2020 TES  -> img/players/JackeyLove/2020.jpg
+[   ] chua co anh            Jankos 2019 G2   -> img/players/Jankos/2019.jpg
+[   ] chua co anh            Jankos 2020 G2   -> img/players/Jankos/2020.jpg
+[OK ] co anh mua nay         Jensen 2018 C9   -> img/players/Jensen/2018.jpg
+[ ~ ] dang dung anh 2018     Jensen 2019 TL   -> img/players/Jensen/2019.jpg
+[   ] chua co anh            Jiejie 2021 EDG  -> img/players/Jiejie/2021.jpg
+[ ~ ] dang dung anh chung    Kanavi 2023 JDG  -> img/players/Kanavi/2023.jpg
+[ ~ ] dang dung anh chung    Kanavi 2025 HLE  -> img/players/Kanavi/2025.jpg
+[OK ] co anh mua nay         Karsa 2017 FW   -> img/players/Karsa/2017.jpg
+[ ~ ] dang dung anh 2017     Karsa 2018 RNG  -> img/players/Karsa/2018.jpg
+[ ~ ] dang dung anh 2023     Keria 2021 T1   -> img/players/Keria/2021.jpg
+[ ~ ] dang dung anh 2023     Keria 2022 T1   -> img/players/Keria/2022.jpg
+[OK ] co anh mua nay         Keria 2023 T1   -> img/players/Keria/2023.jpg
+[ ~ ] dang dung anh 2023     Keria 2024 T1   -> img/players/Keria/2024.jpg
+[ ~ ] dang dung anh 2023     Keria 2025 T1   -> img/players/Keria/2025.jpg
+[   ] chua co anh            Khan 2019 T1   -> img/players/Khan/2019.jpg
+[   ] chua co anh            Khan 2021 DK   -> img/players/Khan/2021.jpg
+[   ] chua co anh            Kiaya 2023 GAM  -> img/players/Kiaya/2023.jpg
+[   ] chua co anh            Kiaya 2024 GAM  -> img/players/Kiaya/2024.jpg
+[   ] chua co anh            Kiin 2024 GEN  -> img/players/Kiin/2024.jpg
+[   ] chua co anh            Kiin 2025 GEN  -> img/players/Kiin/2025.jpg
+[ ~ ] dang dung anh chung    Kingen 2022 DRX  -> img/players/Kingen/2022.jpg
+[ ~ ] dang dung anh chung    Kingen 2023 DK   -> img/players/Kingen/2023.jpg
+[   ] chua co anh            Knight 2020 TES  -> img/players/Knight/2020.jpg
+[   ] chua co anh            Knight 2023 JDG  -> img/players/Knight/2023.jpg
+[   ] chua co anh            Knight 2024 BLG  -> img/players/Knight/2024.jpg
+[ ~ ] dang dung anh chung    Kuro 2016 ROX  -> img/players/Kuro/2016.jpg
+[ ~ ] dang dung anh 2024     Lehends 2022 GEN  -> img/players/Lehends/2022.jpg
+[OK ] co anh mua nay         Lehends 2024 GEN  -> img/players/Lehends/2024.jpg
+[   ] chua co anh            Levi 2017 GAM  -> img/players/Levi/2017.jpg
+[   ] chua co anh            Levi 2019 GAM  -> img/players/Levi/2019.jpg
+[   ] chua co anh            Levi 2023 GAM  -> img/players/Levi/2023.jpg
+[   ] chua co anh            Levi 2024 GAM  -> img/players/Levi/2024.jpg
+[ ~ ] dang dung anh chung    Licorice 2018 C9   -> img/players/Licorice/2018.jpg
+[   ] chua co anh            Light 2023 WBG  -> img/players/Light/2023.jpg
+[ ~ ] dang dung anh chung    Looper 2014 SSW  -> img/players/Looper/2014.jpg
+[   ] chua co anh            Lwx 2019 FPX  -> img/players/Lwx/2019.jpg
+[   ] chua co anh            Maple 2017 FW   -> img/players/Maple/2017.jpg
+[   ] chua co anh            MaRin 2014 SKT  -> img/players/MaRin/2014.jpg
+[   ] chua co anh            MaRin 2015 SKT  -> img/players/MaRin/2015.jpg
+[ ~ ] dang dung anh chung    Mata 2014 SSW  -> img/players/Mata/2014.jpg
+[ ~ ] dang dung anh chung    Mata 2018 KT   -> img/players/Mata/2018.jpg
+[   ] chua co anh            Meiko 2021 EDG  -> img/players/Meiko/2021.jpg
+[ ~ ] dang dung anh chung    Mikyx 2019 G2   -> img/players/Mikyx/2019.jpg
+[ ~ ] dang dung anh chung    Mikyx 2024 G2   -> img/players/Mikyx/2024.jpg
+[   ] chua co anh            Ming 2018 RNG  -> img/players/Ming/2018.jpg
+[   ] chua co anh            Ming 2021 RNG  -> img/players/Ming/2021.jpg
+[   ] chua co anh            Missing 2023 JDG  -> img/players/Missing/2023.jpg
+[   ] chua co anh            MMD 2017 FW   -> img/players/MMD/2017.jpg
+[   ] chua co anh            Nemesis 2019 FNC  -> img/players/Nemesis/2019.jpg
+[   ] chua co anh            Ning 2018 IG   -> img/players/Ning/2018.jpg
+[   ] chua co anh            Ning 2019 IG   -> img/players/Ning/2019.jpg
+[   ] chua co anh            Nuguri 2019 DWG  -> img/players/Nuguri/2019.jpg
+[   ] chua co anh            Nuguri 2020 DWG  -> img/players/Nuguri/2020.jpg
+[   ] chua co anh            ON 2023 BLG  -> img/players/ON/2023.jpg
+[   ] chua co anh            ON 2024 BLG  -> img/players/ON/2024.jpg
+[ ~ ] dang dung anh chung    Oner 2021 T1   -> img/players/Oner/2021.jpg
+[ ~ ] dang dung anh 2024     Oner 2022 T1   -> img/players/Oner/2022.jpg
+[ ~ ] dang dung anh 2024     Oner 2023 T1   -> img/players/Oner/2023.jpg
+[OK ] co anh mua nay         Oner 2024 T1   -> img/players/Oner/2024.jpg
+[OK ] co anh mua nay         Oner 2025 T1   -> img/players/Oner/2025.jpg
+[   ] chua co anh            Optimus 2017 GAM  -> img/players/Optimus/2017.jpg
+[   ] chua co anh            Palette 2019 GAM  -> img/players/Palette/2019.jpg
+[ ~ ] dang dung anh chung    PawN 2014 SSW  -> img/players/PawN/2014.jpg
+[ ~ ] dang dung anh 2018     Peanut 2016 ROX  -> img/players/Peanut/2016.jpg
+[ ~ ] dang dung anh 2018     Peanut 2017 SKT  -> img/players/Peanut/2017.jpg
+[OK ] co anh mua nay         Peanut 2018 KZ   -> img/players/Peanut/2018.jpg
+[ ~ ] dang dung anh 2023     Peanut 2022 GEN  -> img/players/Peanut/2022.jpg
+[OK ] co anh mua nay         Peanut 2023 GEN  -> img/players/Peanut/2023.jpg
+[OK ] co anh mua nay         Peanut 2024 HLE  -> img/players/Peanut/2024.jpg
+[   ] chua co anh            PerfecT 2025 KT   -> img/players/PerfecT/2025.jpg
+[ ~ ] dang dung anh chung    Perkz 2019 G2   -> img/players/Perkz/2019.jpg
+[   ] chua co anh            Peter 2025 KT   -> img/players/Peter/2025.jpg
+[OK ] co anh mua nay         Peyz 2023 GEN  -> img/players/Peyz/2023.jpg
+[ ~ ] dang dung anh 2023     Peyz 2024 GEN  -> img/players/Peyz/2024.jpg
+[ ~ ] dang dung anh chung    Piglet 2013 SKT  -> img/players/Piglet/2013.jpg
+[   ] chua co anh            PoohManDu 2013 SKT  -> img/players/PoohManDu/2013.jpg
+[   ] chua co anh            PraY 2016 ROX  -> img/players/PraY/2016.jpg
+[   ] chua co anh            Pyosik 2022 DRX  -> img/players/Pyosik/2022.jpg
+[ ~ ] dang dung anh chung    Rekkles 2018 FNC  -> img/players/Rekkles/2018.jpg
+[ ~ ] dang dung anh chung    Rekkles 2019 FNC  -> img/players/Rekkles/2019.jpg
+[ ~ ] dang dung anh chung    Rookie 2018 IG   -> img/players/Rookie/2018.jpg
+[ ~ ] dang dung anh chung    Rookie 2019 IG   -> img/players/Rookie/2019.jpg
+[ ~ ] dang dung anh chung    Ruler 2017 SSG  -> img/players/Ruler/2017.jpg
+[ ~ ] dang dung anh chung    Ruler 2018 GEN  -> img/players/Ruler/2018.jpg
+[OK ] co anh mua nay         Ruler 2022 GEN  -> img/players/Ruler/2022.jpg
+[ ~ ] dang dung anh 2022     Ruler 2023 JDG  -> img/players/Ruler/2023.jpg
+[ ~ ] dang dung anh chung    Ruler 2025 GEN  -> img/players/Ruler/2025.jpg
+[   ] chua co anh            Score 2018 KT   -> img/players/Score/2018.jpg
+[   ] chua co anh            Scout 2021 EDG  -> img/players/Scout/2021.jpg
+[ ~ ] dang dung anh chung    ShowMaker 2019 DWG  -> img/players/ShowMaker/2019.jpg
+[ ~ ] dang dung anh chung    ShowMaker 2020 DWG  -> img/players/ShowMaker/2020.jpg
+[ ~ ] dang dung anh chung    ShowMaker 2021 DK   -> img/players/ShowMaker/2021.jpg
+[ ~ ] dang dung anh chung    Smeb 2016 ROX  -> img/players/Smeb/2016.jpg
+[ ~ ] dang dung anh chung    Smeb 2017 KT   -> img/players/Smeb/2017.jpg
+[ ~ ] dang dung anh chung    Smeb 2018 KT   -> img/players/Smeb/2018.jpg
+[ ~ ] dang dung anh chung    Sneaky 2018 C9   -> img/players/Sneaky/2018.jpg
+[ ~ ] dang dung anh 2021     SofM 2020 SN   -> img/players/SofM/2020.jpg
+[OK ] co anh mua nay         SofM 2021 LNG  -> img/players/SofM/2021.jpg
+[ ~ ] dang dung anh chung    Svenskeren 2018 C9   -> img/players/Svenskeren/2018.jpg
+[   ] chua co anh            SwordArt 2017 FW   -> img/players/SwordArt/2017.jpg
+[   ] chua co anh            SwordArt 2020 SN   -> img/players/SwordArt/2020.jpg
+[   ] chua co anh            Tarzan 2023 WBG  -> img/players/Tarzan/2023.jpg
+[   ] chua co anh            Teddy 2019 T1   -> img/players/Teddy/2019.jpg
+[   ] chua co anh            TheShy 2018 IG   -> img/players/TheShy/2018.jpg
+[   ] chua co anh            TheShy 2019 IG   -> img/players/TheShy/2019.jpg
+[   ] chua co anh            TheShy 2020 IG   -> img/players/TheShy/2020.jpg
+[   ] chua co anh            TheShy 2023 WBG  -> img/players/TheShy/2023.jpg
+[   ] chua co anh            Tian 2019 FPX  -> img/players/Tian/2019.jpg
+[OK ] co anh mua nay         Ucal 2018 KT   -> img/players/Ucal/2018.jpg
+[ ~ ] dang dung anh chung    Uzi 2013 RC   -> img/players/Uzi/2013.jpg
+[ ~ ] dang dung anh chung    Uzi 2018 RNG  -> img/players/Uzi/2018.jpg
+[OK ] co anh mua nay         Viper 2021 EDG  -> img/players/Viper/2021.jpg
+[OK ] co anh mua nay         Viper 2024 HLE  -> img/players/Viper/2024.jpg
+[ ~ ] dang dung anh 2024     Viper 2025 HLE  -> img/players/Viper/2025.jpg
+[ ~ ] dang dung anh chung    Vulcan 2023 C9   -> img/players/Vulcan/2023.jpg
+[ ~ ] dang dung anh 2017     Wolf 2015 SKT  -> img/players/Wolf/2015.jpg
+[ ~ ] dang dung anh 2017     Wolf 2016 SKT  -> img/players/Wolf/2016.jpg
+[OK ] co anh mua nay         Wolf 2017 SKT  -> img/players/Wolf/2017.jpg
+[ ~ ] dang dung anh chung    Wunder 2019 G2   -> img/players/Wunder/2019.jpg
+[ ~ ] dang dung anh chung    Wunder 2020 G2   -> img/players/Wunder/2020.jpg
+[ ~ ] dang dung anh chung    Xiaohu 2018 RNG  -> img/players/Xiaohu/2018.jpg
+[ ~ ] dang dung anh chung    Xiaohu 2021 RNG  -> img/players/Xiaohu/2021.jpg
+[ ~ ] dang dung anh chung    Xiaohu 2023 WBG  -> img/players/Xiaohu/2023.jpg
+[   ] chua co anh            Xun 2023 BLG  -> img/players/Xun/2023.jpg
+[   ] chua co anh            Xun 2024 BLG  -> img/players/Xun/2024.jpg
+[ ~ ] dang dung anh chung    Yike 2024 G2   -> img/players/Yike/2024.jpg
+[ ~ ] dang dung anh 2024     Zeka 2022 DRX  -> img/players/Zeka/2022.jpg
+[OK ] co anh mua nay         Zeka 2024 HLE  -> img/players/Zeka/2024.jpg
+[ ~ ] dang dung anh 2024     Zeka 2025 HLE  -> img/players/Zeka/2025.jpg
+[   ] chua co anh            Zeros 2018 PVB  -> img/players/Zeros/2018.jpg
+[ ~ ] dang dung anh 2023     Zeus 2021 T1   -> img/players/Zeus/2021.jpg
+[ ~ ] dang dung anh 2023     Zeus 2022 T1   -> img/players/Zeus/2022.jpg
+[OK ] co anh mua nay         Zeus 2023 T1   -> img/players/Zeus/2023.jpg
+[OK ] co anh mua nay         Zeus 2024 T1   -> img/players/Zeus/2024.jpg
+[ ~ ] dang dung anh 2024     Zeus 2025 HLE  -> img/players/Zeus/2025.jpg
+[   ] chua co anh            Zeyzal 2018 C9   -> img/players/Zeyzal/2018.jpg

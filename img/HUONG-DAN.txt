@@ -1,16 +1,29 @@
 THÊM ẢNH RIÊNG CHO GAME
 =======================
 
-Ảnh tuyển thủ: đặt vào thư mục  img/players/
-  - Tên file = tên tuyển thủ đúng như trong game (phân biệt hoa/thường), đuôi .png hoặc .jpg
-  - Ví dụ: img/players/Faker.png, img/players/Chovy.jpg, img/players/Hans Sama.png
-  - Nên dùng ảnh vuông (ví dụ 256x256), khuôn mặt ở giữa.
+1) ẢNH THEO MÙA (mỗi thẻ một ảnh đúng năm)
+   Đặt vào:  img/players/<Tên tuyển thủ>/<Năm>.jpg
+   Ví dụ thẻ SKT Faker 2015  ->  img/players/Faker/2015.jpg
+         thẻ GEN Chovy 2024  ->  img/players/Chovy/2024.png
+         thẻ G2 Hans Sama 2024 -> img/players/Hans Sama/2024.jpg
+   - Tên thư mục = tên tuyển thủ đúng như trong game (phân biệt hoa/thường).
+   - Tên file = năm của thẻ (4 chữ số). Đuôi .jpg .jpeg .png .webp đều được.
+   - Danh sách đầy đủ 251 thẻ và đường dẫn cần đặt: img/players/DANH-SACH-ANH.txt
 
-Logo đội: đặt vào thư mục  img/teams/
-  - Tên file = mã đội như trên thẻ: SKT, T1, GEN, DRX, DK, DWG, HLE, KT, SSW, SSG, ROX,
-    IG, FPX, RNG, EDG, JDG, BLG, TES, WBG, LNG, SN, RC, G2, FNC, C9, TL, TSM, FW, GAM, PVB, KZ, SSB
-  - Ví dụ: img/teams/T1.png
-  - Nên dùng ảnh PNG nền trong suốt.
+2) ẢNH CHUNG (dùng cho mọi mùa chưa có ảnh riêng)
+   img/players/<Tên>.jpg   hoặc   img/players/<Tên>/chung.jpg
 
-Sau khi thêm ảnh, mở trang với ?anhmoi ở cuối địa chỉ (ví dụ index.html?anhmoi) để game dò ảnh mới ngay (bình thường game chỉ dò 12 giờ một lần). Tuyển thủ/đội nào chưa có ảnh sẽ dùng hình tự vẽ.
-Lưu ý: chỉ dùng ảnh bạn có quyền sử dụng.
+   Thứ tự game chọn ảnh: ảnh đúng mùa -> ảnh chung -> hình tự vẽ.
+
+3) LOGO ĐỘI
+   img/teams/<Mã đội>.png, ví dụ img/teams/T1.png (nên dùng PNG nền trong suốt).
+   Mã đội như trên thẻ: SKT, T1, GEN, DRX, DK, DWG, HLE, KT, SSW, SSG, ROX, IG, FPX, RNG, EDG,
+   JDG, BLG, TES, WBG, LNG, SN, RC, G2, FNC, C9, TL, TSM, FW, GAM, PVB, KZ, SSB
+
+4) SAU KHI THÊM / XÓA ẢNH: bấm đúp  tools/scan-photos.bat
+   Công cụ cập nhật js/photo-manifest.js (game đọc file này, không phải dò từng ảnh)
+   và img/players/DANH-SACH-ANH.txt (thẻ nào đã có ảnh, thẻ nào còn thiếu).
+   Rồi tải lại trang bằng Ctrl+F5. Nhớ đẩy cả ảnh lẫn js/photo-manifest.js lên GitHub.
+
+Gợi ý: ảnh dọc hoặc vuông, khuôn mặt ở giữa, rộng khoảng 300px, dung lượng dưới 60KB để game tải nhanh.
+Lưu ý: bạn chịu trách nhiệm về quyền sử dụng của ảnh tự thêm.

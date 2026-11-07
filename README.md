@@ -51,7 +51,9 @@ Bấm nút **👤 Đăng nhập** góc trên: đăng nhập bằng Google hoặc
 - `img/players/<Tên>.png` (hoặc .jpg), ví dụ `img/players/Faker.png`
 - `img/teams/<Mã đội>.png`, ví dụ `img/teams/T1.png`
 
-Game dò ảnh mới 12 giờ một lần (để tránh hàng trăm yêu cầu thừa mỗi lần mở). Muốn thấy ảnh vừa thêm ngay, mở trang với `?anhmoi` ở cuối địa chỉ, ví dụ `index.html?anhmoi`. Chi tiết trong `img/HUONG-DAN.txt`.
+**Ảnh theo mùa:** `img/players/<Tên>/<Năm>.jpg`, ví dụ thẻ SKT Faker 2015 → `img/players/Faker/2015.jpg`. Game chọn ảnh đúng mùa → ảnh chung → hình tự vẽ.
+
+Sau khi thêm/xóa ảnh, bấm đúp **`tools/scan-photos.bat`**: công cụ cập nhật `js/photo-manifest.js` (game đọc danh sách này, không phải dò từng file) và `img/players/DANH-SACH-ANH.txt` (thẻ nào đã có ảnh, thẻ nào còn thiếu). Chi tiết trong `img/HUONG-DAN.txt`.
 
 ## Cấu trúc
 - `index.html` – khung trang
@@ -66,6 +68,7 @@ Game dò ảnh mới 12 giờ một lần (để tránh hàng trăm yêu cầu t
 - `js/upgrade.js` – nâng cấp thẻ +1…+10
 - `js/achieve.js` – thành tựu
 - `js/names.js` – luật đặt tên đội, giữ tên duy nhất
+- `js/photo-manifest.js` – danh sách ảnh (tự tạo bởi `tools/scan-photos.bat`, danh sách thẻ ở `tools/cards.txt`)
 - `js/donate-config.js` – thông tin ủng hộ nhà phát hành
 - `js/main.js` – logic game & giao diện các tab
 

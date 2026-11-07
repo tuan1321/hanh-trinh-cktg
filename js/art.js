@@ -69,12 +69,29 @@ function probeImage(key, bases, done) {
   tryNext();
 }
 // Ảnh tự do đã tải sẵn (danh sách trong js/credits.js) được dùng ngay, không cần dò
-if (typeof IMAGE_CREDITS !== 'undefined') IMAGE_CREDITS.forEach(c => { CUSTOM_IMG[c.kind === 'team' ? 't:' + c.code : 'p:' + c.name] = c.path; });
+if (typeof IMAGE_CREDITS !== 'undefined') IMAGE_CREDITS.forEach(c => { if (c.year) return; /* ảnh theo mùa: lấy qua photo-manifest */ CUSTOM_IMG[c.kind === 'team' ? 't:' + c.code : 'p:' + c.name] = c.path; });
 // Dò ảnh tự thêm (img/players, img/teams). Để tránh hàng trăm yêu cầu 404 mỗi lần mở game:
 // - nhớ kết quả trong trình duyệt 12 giờ (mở trang với ?anhmoi để dò lại ngay)
 // - chạy khi trình duyệt rảnh, tối đa 4 yêu cầu cùng lúc
 const IMG_CACHE_KEY = 'hanhtrinh_cktg_imgprobe_v1', IMG_CACHE_TTL = 12 * 3600 * 1000;
+// Có danh sách ảnh (js/photo-manifest.js, tạo bởi tools/scan-photos.bat) thì dùng luôn, không cần dò.
+const HAS_MANIFEST = typeof PHOTO_MANIFEST !== 'undefined' && PHOTO_MANIFEST && PHOTO_MANIFEST.players;
+const photoUrl = p => encodeURI(p);
+if (HAS_MANIFEST) {
+  Object.entries(PHOTO_MANIFEST.players).forEach(([n, y]) => { if (y.all) CUSTOM_IMG['p:' + n] = photoUrl(y.all); });
+  Object.entries(PHOTO_MANIFEST.teams || {}).forEach(([c, u]) => { CUSTOM_IMG['t:' + c] = photoUrl(u); });
+}
+// Ảnh cho thẻ: đúng mùa → mùa gần nhất (lệch ≤ 2 năm) → ảnh chung → mùa gần nhất bất kỳ → không có
+function playerPhoto(card) {
+  const y = HAS_MANIFEST && PHOTO_MANIFEST.players[card.name];
+  if (y && card.year && y[card.year]) return photoUrl(y[card.year]);
+  const years = y ? Object.keys(y).filter(k => /^\d{4}$/.test(k)).map(Number) : [];
+  const near = years.length && card.year ? years.sort((a, b) => Math.abs(a - card.year) - Math.abs(b - card.year) || b - a)[0] : null;
+  if (near && Math.abs(near - card.year) <= 2) return photoUrl(y[near]);
+  return CUSTOM_IMG['p:' + card.name] || (near ? photoUrl(y[near]) : null);
+}
 function loadCustomImages(onDone) {
+  if (HAS_MANIFEST) return;
   let cache = null;
   try { cache = JSON.parse(localStorage.getItem(IMG_CACHE_KEY)); } catch (e) { }
   const fresh = cache && Date.now() - cache.ts < IMG_CACHE_TTL && !/[?&]anhmoi\b/.test(location.search);
@@ -145,7 +162,7 @@ function avatarSVG(card) {
 }
 const AV_CACHE = new Map();
 function avatarHTML(card) {
-  const img = CUSTOM_IMG['p:' + card.name];
+  const img = playerPhoto(card);
   if (img) return `<img class="av-img" src="${img}" alt="${esc(card.name)}" loading="lazy" decoding="async">`;
   // chân dung tự vẽ chỉ phụ thuộc tên + đội → tạo 1 lần rồi dùng lại
   const k = card.name + '|' + card.team;

@@ -1,4 +1,4 @@
-﻿NGUON ANH TUYEN THU & LOGO DOI (Wikimedia Commons / Openverse)
+NGUON ANH TUYEN THU & LOGO DOI (Wikimedia Commons / Openverse)
 Anh/logo duoc thu nho tu ban goc. Tat ca dung theo giay phep tu do ghi ben canh.
 Logo la nhan hieu cua cac doi tuong ung, chi dung de nhan dien trong game fan phi thuong mai.
 
@@ -128,3 +128,79 @@ EDward Gaming (EDG) – logo: tac gia Edward Gaming - Public domain
   Nguon: https://commons.wikimedia.org/wiki/File:Edward_Gaming_logo.png
 Cloud9 (C9) – logo: tac gia Cloud9 - Public domain 
   Nguon: https://commons.wikimedia.org/wiki/File:Cloud9_logo_c._2023.svg
+
+ANH THEO MUA (img/players/<Ten>/<Nam>.jpg) - da cat khung va thu nho tu ban goc
+Bang 2017: tac gia fomos esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:%EB%B1%85_%EB%B0%B0%EC%A4%80%EC%8B%9D.jpg
+Canyon 2019: tac gia fomos esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Canyon_interview_2019.jpg
+Caps 2020: tac gia G2 Esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Caps_G2_2020_(1).jpg
+Chovy 2023: tac gia E레기 - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Chovy_Season_Kickoff_2023.jpg
+Chovy 2025: tac gia Fomos Esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Chovy_MSI_2025_(cropped).jpg
+Doran 2024: tac gia fomos esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:%EB%8F%84%EB%9E%80_%EC%B5%9C%ED%98%84%EC%A4%80.jpg
+Doran 2025: tac gia Fomos Esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Doran_2025.jpg
+Doublelift 2016: tac gia Kevin Chang for Team Liquid - CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Doublelift_at_the_NA_LCS_Spring_2016_Finals.jpg
+Doublelift 2019: tac gia G2 Esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Doublelift_in_2019.jpg
+Effort 2019: tac gia E레기 - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Effort_2019.jpg
+Faker 2013: tac gia artubr - CC BY 2.0 https://creativecommons.org/licenses/by/2.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Faker_(Lee_Sang-hyeok)_at_LoL_World_Championship_2013.jpg
+Faker 2015: tac gia Bruce Liu - CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Faker_at_the_2015.10.02_S5_Paris_day2.jpeg
+Faker 2021: tac gia E레기 - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Faker_at_2021_LCK_summer_playoffs.jpg
+Gumayusi 2021: tac gia Fomos Esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Gumayusi_in_2021_interview.jpg
+Gumayusi 2023: tac gia fomos esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Gumayusi,_2023_worlds_winning_team_interview.jpg
+Impact 2013: tac gia artubr - CC BY 2.0 https://creativecommons.org/licenses/by/2.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Impact_at_LoL_World_Championship_2013_(cropped).jpg
+Impact 2019: tac gia fomos esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Impact_interview_2019.jpg
+Jensen 2018: tac gia Echo Fox - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Jensen_in_2018.jpg
+Karsa 2017: tac gia Urielpunk - CC BY 4.0 https://creativecommons.org/licenses/by/4.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Karsa_portrait.jpg
+Keria 2023: tac gia fomos esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Keria,_2023_worlds_winning_team_interview.jpg
+Lehends 2024: tac gia fomos esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:%EB%A6%AC%ED%97%A8%EC%A6%88_%EC%86%90%EC%8B%9C%EC%9A%B0.jpg
+Oner 2024: tac gia Fomos Esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Oner_in_2024.jpg
+Oner 2025: tac gia LTA Spanish - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Oner_at_Worlds_2025.jpg
+Peanut 2018: tac gia fomos esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:KZ_Peanut_Interview.jpg
+Peanut 2023: tac gia E레기 - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:GEN_Peanut_MSI.jpg
+Peanut 2024: tac gia Fomos Esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:2024_Hanwha_Life_Esports_Day_-_17.jpg
+Peyz 2023: tac gia E레기 - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:GEN_Peyz_2023.jpg
+Ruler 2022: tac gia fomos esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:GEN_Ruler_2022.jpg
+SofM 2021: tac gia SofM (Lê Quang Duy) - CC BY 4.0 https://creativecommons.org/licenses/by/4.0
+  Nguon: https://commons.wikimedia.org/wiki/File:SofM_(cropped).jpg
+Ucal 2018: tac gia TEENAGE DREAM - CC BY 4.0 https://creativecommons.org/licenses/by/4.0
+  Nguon: https://commons.wikimedia.org/wiki/File:180908_LCK_SUMMER_FINAL_%EC%9D%B8%EC%B2%9C_%EC%82%BC%EC%82%B0%EC%B2%B4%EC%9C%A1%EA%B4%80_vsGRF_-KTRolster_-Ucal_(2).jpg
+Viper 2021: tac gia LoL Esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Viper_Worlds21.png
+Viper 2024: tac gia Fomos Esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:2024_Hanwha_Life_Esports_Day_-_19.jpg
+Zeka 2024: tac gia Fomos Esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:2024_Hanwha_Life_Esports_Day_-_19.jpg
+Delight 2024: tac gia Fomos Esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:2024_Hanwha_Life_Esports_Day_-_20.jpg
+Wolf 2017: tac gia fomos esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:%EC%9A%B8%ED%94%84_%EC%9D%B4%EC%9E%AC%EC%99%84.jpg
+Zeus 2023: tac gia Fomos Esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Zeus,_2023_worlds_winning_team_interview.jpg
+Zeus 2024: tac gia Fomos Esports - CC BY 3.0 https://creativecommons.org/licenses/by/3.0
+  Nguon: https://commons.wikimedia.org/wiki/File:Zeus_2024_post-match_interview.jpg

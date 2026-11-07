@@ -1,6 +1,9 @@
 // Thông tin ủng hộ nhà phát hành (hiện ở nút 💖 Ủng hộ).
 // Điền thông tin của bạn rồi tải lại trang. Mục nào để null / trống sẽ không hiện.
 const DONATE = {
+  // Bật / tắt mục ủng hộ. false = ẩn hết nút 💖 (thông tin bên dưới vẫn giữ để bật lại sau)
+  enabled: false,
+
   // Lời nhắn hiện trong hộp ủng hộ (để trống = dùng lời nhắn mặc định)
   message: '',
 
