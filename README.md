@@ -25,6 +25,18 @@ Hoặc tải về và **mở `index.html` bằng Chrome/Edge**, không cần cà
 - **Thành tựu** (tab 🏅): sưu tầm 5 tuyển thủ 1 đội, đủ đội hình huyền thoại, số cúp, mốc sức mạnh, thẻ +3/+5/+7/+10, số trận thắng, cấp độ, vô địch CKTG từng chương… mỗi thành tựu thưởng tiền và gói thẻ.
 - **💖 Ủng hộ nhà phát hành**: nút trên thanh đầu trang và cuối trang. Chủ trang điền thông tin (ngân hàng → tự tạo mã VietQR, MoMo, link Ko-fi…) trong `js/donate-config.js`.
 
+## Hướng dẫn người mới
+- Người chơi mới (lần đầu vào game hoặc lần đầu đăng nhập tài khoản mới) được dẫn đi 14 bước: đội hình, sức mạnh, giao hữu và từng tab; mỗi bước làm sáng đúng chỗ đang nói tới.
+- Người chơi cũ (cấp > 2 hoặc đã đánh vài trận) không bị hiện. Xem lại bằng nút **📖 Hướng dẫn** cuối trang (`js/guide.js`).
+
+## Đấu xếp hạng & bảng xếp hạng (tab 🏆 Xếp hạng)
+- Cần **đăng nhập**. Đội hình hiện tại là **đội phòng thủ**; "Tìm trận" ghép với đội đã lưu của người có điểm gần mình (không cần online cùng lúc), không có ai thì gặp đội máy.
+- Bắt đầu 1000 điểm (Bạc III). Bậc: Đồng < 1000, Bạc, Vàng, Bạch Kim, Kim Cương (mỗi bậc 300 điểm, 3 phân hạng III → I), Huyền Thoại từ 2200.
+- Điểm tính kiểu Elo: thắng người hạng cao hơn được nhiều hơn; 5 trận đầu là trận định vị; trận có thể lên bậc mới đánh BO3.
+- **10 lượt/ngày** (làm mới 0:00 giờ Việt Nam). Kết quả được ghi lên máy chủ ngay khi tìm thấy đối thủ, thoát giữa trận không né được trận thua.
+- Bảng xếp hạng top 100: Điểm hạng / Cấp độ / Danh hiệu / Lực chiến, lọc Toàn server hoặc Bạn bè. Khách xem được bảng nhưng không đấu được.
+- Dữ liệu ở Firestore `ranked/{uid}`; `firestore.rules` giới hạn mỗi trận ±40 điểm (±60 lúc định vị), cách nhau ≥ 10 giây, tối đa 10 trận/ngày.
+
 ## Bạn bè & chơi nhiều người (tab 👥 Bạn bè)
 - Mỗi người có **mã kết bạn** (8 ký tự) và **mã đội** (chứa đội hình, gửi qua Zalo/Messenger…).
 - **Thêm bạn**: nhập mã kết bạn (cả hai đang trực tuyến) hoặc dán mã đội (dùng được khi ngoại tuyến).
@@ -73,6 +85,7 @@ Sau khi thêm/xóa ảnh, bấm đúp **`tools/scan-photos.bat`**: công cụ c�
 - `js/social.js` – bạn bè, mã đội, kết nối trực tuyến P2P
 - `js/auth.js`, `js/firebase-config.js`, `firestore.rules` – đăng nhập & lưu theo tài khoản
 - `js/match.js` – mô phỏng trận, minimap, bình luận
+- `js/ranked.js` – đấu xếp hạng, bảng xếp hạng
 - `js/tour.js` – giải đấu: chương độ khó, vòng bảng, Thụy Sĩ, loại trực tiếp
 - `js/upgrade.js` – nâng cấp thẻ +1…+10
 - `js/achieve.js` – thành tựu

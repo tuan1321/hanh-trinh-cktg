@@ -1,6 +1,6 @@
 // ===== Hiệu ứng giao diện: màn hình tải, chuyển mục, hộp thoại, đếm tiền, gợn nút, nghiêng thẻ =====
 const UI_REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const VIEW_ORDER = ['team', 'map', 'shop', 'collection', 'upgrade', 'achieve', 'friends'];
+const VIEW_ORDER = ['team', 'map', 'rank', 'shop', 'collection', 'upgrade', 'achieve', 'friends'];
 
 // --- Màn hình tải: hiện tối thiểu 0,7s, tối đa 1,8s ---
 (function splash() {

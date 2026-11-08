@@ -7,6 +7,7 @@ rules_version = '2';
 // - activity/{uid}, daily/{ngày}: thống kê truy cập. Người chơi chỉ ghi được của mình, mỗi lần chỉ cộng
 //   thêm một lượng nhỏ; chỉ quản trị viên (có tài liệu admins/{uid}) mới đọc được toàn bộ.
 // - admins/{uid}: danh sách quản trị viên, chỉ tạo bằng tay trong Firebase Console.
+// - ranked/{uid}: hồ sơ đấu xếp hạng (công khai để làm bảng xếp hạng), giới hạn điểm thay đổi mỗi trận.
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
@@ -48,6 +49,45 @@ service cloud.firestore {
         && num(request.resource.data, 'users') <= num(resource.data, 'users') + 1
         && num(request.resource.data, 'seconds') >= num(resource.data, 'seconds')
         && num(request.resource.data, 'seconds') <= num(resource.data, 'seconds') + 600;
+      allow delete: if false;
+    }
+    // ----- Đấu xếp hạng: ranked/{uid} -----
+    // Ai cũng đọc được (bảng xếp hạng công khai: tên đội, đội hình, điểm). Chỉ chủ hồ sơ được ghi, và:
+    // - tạo mới: 1000 điểm, 0 trận;
+    // - cập nhật đội hình: không đổi điểm / thắng / thua / lượt trong ngày;
+    // - ghi 1 trận: đúng +1 trận, thắng thì cộng 0..40 điểm, thua thì trừ 0..40 (5 trận đầu: 60),
+    //   cách trận trước ≥ 10 giây, tối đa 10 trận mỗi ngày (ngày theo giờ Việt Nam, tính bằng giờ máy chủ).
+    function rkOk(n) {
+      return n.keys().hasOnly(['name', 'fid', 'lineup', 'power', 'level', 'titles', 'rp', 'peak', 'w', 'l', 'streak', 'dk', 'dayN', 'season', 'at', 'upd'])
+        && n.name is string && n.name.size() <= 24 && n.fid is string && n.fid.size() <= 12
+        && n.lineup is map && n.lineup.size() == 5 && n.power is number && n.power <= 200
+        && n.level is int && n.titles is int && n.rp is int && n.rp >= 0 && n.peak is int && n.peak >= n.rp
+        && n.w is int && n.l is int && n.streak is int && n.dk is int && n.dayN is int && n.dayN <= 10
+        && n.season is int && n.upd == request.time;
+    }
+    function rkSame(o, n) {
+      return n.rp == o.rp && n.peak == o.peak && n.w == o.w && n.l == o.l && n.streak == o.streak
+        && n.dk == o.dk && n.dayN == o.dayN && n.at == o.at && n.season == o.season;
+    }
+    function rkMatch(o, n) {
+      return n.at == request.time && n.season == o.season
+        && n.w + n.l == o.w + o.l + 1
+        && (o.w + o.l == 0 || request.time > o.at + duration.value(10, 's'))
+        && n.dk == math.floor((request.time.toMillis() + 25200000) / 86400000)
+        && ((n.dk == o.dk && n.dayN == o.dayN + 1) || (n.dk != o.dk && n.dayN == 1))
+        && ((n.w == o.w + 1 && n.rp >= o.rp && n.rp - o.rp <= 60 && (o.w + o.l < 5 || n.rp - o.rp <= 40))
+          || (n.l == o.l + 1 && n.rp <= o.rp && o.rp - n.rp <= 60 && (o.w + o.l < 5 || o.rp - n.rp <= 40)))
+        && (n.peak == o.peak || n.peak == n.rp);
+    }
+    match /ranked/{uid} {
+      allow read: if true;
+      allow create: if signedIn() && request.auth.uid == uid && rkOk(request.resource.data)
+        && request.resource.data.rp == 1000 && request.resource.data.peak == 1000
+        && request.resource.data.w == 0 && request.resource.data.l == 0 && request.resource.data.streak == 0
+        && request.resource.data.dk == 0 && request.resource.data.dayN == 0 && request.resource.data.season == 1
+        && request.resource.data.at == request.time;
+      allow update: if signedIn() && request.auth.uid == uid && rkOk(request.resource.data)
+        && (rkSame(resource.data, request.resource.data) || rkMatch(resource.data, request.resource.data));
       allow delete: if false;
     }
     match /saves/{uid} {

@@ -62,6 +62,7 @@ function switchSave(newS) {
   switchView('team');
   refreshSocialUI();
   if (S.online) goOnline();
+  if (typeof GUIDE !== 'undefined') GUIDE.maybe(); // lần đầu đăng nhập tài khoản mới → hướng dẫn
 }
 const userKey = uid => 'hanhtrinh_cktg_u_' + uid;
 function readKey(k) { try { return migrate(JSON.parse(localStorage.getItem(k))); } catch (e) { return null; } }

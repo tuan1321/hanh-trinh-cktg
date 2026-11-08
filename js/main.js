@@ -706,7 +706,7 @@ function switchView(v) {
 }
 function renderAll() {
   renderHeader();
-  ({ team: renderTeam, map: renderMap, shop: renderShop, collection: renderCollection, upgrade: renderUpgrade, achieve: renderAch, friends: renderFriends })[currentView]();
+  ({ team: renderTeam, map: renderMap, rank: () => RANKED.render(), shop: renderShop, collection: renderCollection, upgrade: renderUpgrade, achieve: renderAch, friends: renderFriends })[currentView]();
 }
 
 // ===== Khởi động =====
@@ -776,6 +776,7 @@ if (typeof DONATE === 'undefined' || DONATE.enabled === false) ['#donate-btn', '
 $('#reset').onclick = () => {
   if (!confirm('Xóa toàn bộ tiến trình và chơi lại từ đầu?')) return;
   const got = newGame(); switchView('team'); welcome(got);
+  if (typeof GUIDE !== 'undefined') GUIDE.maybe();
 };
 
 S = load();
