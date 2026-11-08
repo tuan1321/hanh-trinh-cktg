@@ -25,6 +25,10 @@ Hoặc tải về và **mở `index.html` bằng Chrome/Edge**, không cần cà
 - **Thành tựu** (tab 🏅): sưu tầm 5 tuyển thủ 1 đội, đủ đội hình huyền thoại, số cúp, mốc sức mạnh, thẻ +3/+5/+7/+10, số trận thắng, cấp độ, vô địch CKTG từng chương… mỗi thành tựu thưởng tiền và gói thẻ.
 - **💖 Ủng hộ nhà phát hành**: nút trên thanh đầu trang và cuối trang. Chủ trang điền thông tin (ngân hàng → tự tạo mã VietQR, MoMo, link Ko-fi…) trong `js/donate-config.js`.
 
+## Góp ý & báo lỗi
+- Nút **📮 Góp ý & báo lỗi** cuối trang: chọn loại (lỗi / tính năng / cân bằng / khác), viết nội dung rồi gửi qua email (mở sẵn thư có tiêu đề + nội dung) hoặc Zalo (sao chép nội dung rồi mở zalo.me).
+- Có thể kèm tên đội, mã kết bạn, thiết bị, phiên bản để dễ tìm lỗi. Đổi email / số Zalo ở `FEEDBACK` trong `js/main.js`.
+
 ## Hướng dẫn người mới
 - Người chơi mới (lần đầu vào game hoặc lần đầu đăng nhập tài khoản mới) được dẫn đi 14 bước: đội hình, sức mạnh, giao hữu và từng tab; mỗi bước làm sáng đúng chỗ đang nói tới.
 - Người chơi cũ (cấp > 2 hoặc đã đánh vài trận) không bị hiện. Xem lại bằng nút **📖 Hướng dẫn** cuối trang (`js/guide.js`).

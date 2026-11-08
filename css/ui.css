@@ -679,3 +679,16 @@ button, .btn, .card, .slot, select, label { -webkit-tap-highlight-color: transpa
 .gd-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 .gd-btns [data-g="skip"] { margin-right: auto; }
 @media (prefers-reduced-motion: reduce) { .gd-hole, .gd-tip { transition: none; animation: none; } }
+
+/* ===== Góp ý & báo lỗi ===== */
+.fb-types { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0; }
+.fb-types label { cursor: pointer; }
+.fb-types input { position: absolute; opacity: 0; pointer-events: none; }
+.fb-types span { display: inline-block; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--stroke); background: var(--glass); color: var(--muted); font-size: 13px; font-weight: 600; transition: all .2s; }
+.fb-types input:checked + span { color: #fff; background: rgba(139, 92, 246, .3); border-color: rgba(139, 92, 246, .7); }
+.fb-types input:focus-visible + span { outline: 2px solid var(--c); }
+#fb-text { width: 100%; box-sizing: border-box; resize: vertical; min-height: 110px; padding: 12px; border-radius: 12px; border: 1px solid var(--stroke2); background: rgba(0, 0, 0, .25); color: var(--text); font: 15px/1.5 var(--font); }
+#fb-text:focus { outline: none; border-color: var(--c); box-shadow: 0 0 0 3px rgba(34, 211, 238, .2); }
+.fb-inc { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; font-size: 13px; color: var(--muted); cursor: pointer; }
+.fb-opts .kv b { font-size: 14px; word-break: break-all; }
+@media (max-width: 640px) { #fb-text { font-size: 16px; } }

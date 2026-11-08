@@ -691,6 +691,54 @@ function openDonate() {
   $('#dn-close').onclick = closeModal;
 }
 
+// ===== Góp ý & báo lỗi gửi nhà phát triển =====
+const FEEDBACK = { email: 'hoanqtuan404@gmail.com', zalo: '0382984896' };
+const FB_TYPES = { bug: '🐞 Báo lỗi', idea: '💡 Góp ý tính năng', balance: '⚖️ Cân bằng chỉ số / thẻ', other: '💬 Khác' };
+function feedbackInfo() {
+  const ua = navigator.userAgent;
+  const dev = /Android/i.test(ua) ? 'Android' : /iPhone|iPad|iPod/i.test(ua) ? 'iOS' : /Windows/i.test(ua) ? 'Windows' : /Mac OS/i.test(ua) ? 'macOS' : 'Khác';
+  const v = (document.querySelector('script[src*="main.js"]') || {}).src || '';
+  return [
+    `Đội: ${S ? S.teamName : '?'} · Mã kết bạn: ${S && S.profile ? S.profile.id : '?'} · Cấp ${S ? S.level : '?'}`,
+    `Tài khoản: ${typeof AUTH !== 'undefined' && AUTH.user ? 'đã đăng nhập' : 'Khách'}`,
+    `Thiết bị: ${dev} · màn hình ${innerWidth}x${innerHeight} · phiên bản ${(v.match(/v=(\d+)/) || [])[1] || '?'}`,
+  ].join('\n');
+}
+function openFeedback() {
+  openModal(`<h2 class="center">📮 Góp ý & báo lỗi</h2>
+    <p class="center muted">Gặp lỗi, có ý tưởng hay muốn góp ý? Gửi thẳng cho nhà phát triển nhé – mọi phản hồi đều được đọc!</p>
+    <div class="fb-types">${Object.entries(FB_TYPES).map(([k, n], i) => `<label><input type="radio" name="fb-type" value="${k}" ${i ? '' : 'checked'}><span>${n}</span></label>`).join('')}</div>
+    <textarea id="fb-text" rows="5" maxlength="2000" placeholder="Mô tả lỗi hoặc góp ý của bạn… (VD: bấm vào đâu, chuyện gì xảy ra, bạn mong muốn điều gì)"></textarea>
+    <label class="fb-inc"><input type="checkbox" id="fb-info" checked> Kèm thông tin để dễ tìm lỗi (tên đội, mã kết bạn, thiết bị)</label>
+    <div class="dn-opts fb-opts">
+      <div class="dn-card"><h4>📧 Gửi email</h4><div class="kv"><span>Email</span><b>${FEEDBACK.email}</b></div>
+        <button class="btn primary" id="fb-mail">Mở ứng dụng email</button></div>
+      <div class="dn-card"><h4>💬 Nhắn Zalo</h4><div class="kv"><span>Số Zalo</span><b>${FEEDBACK.zalo}</b></div>
+        <button class="btn primary" id="fb-zalo">Sao chép nội dung & mở Zalo</button></div>
+    </div>
+    <p class="muted small center">Zalo không cho điền sẵn tin nhắn: nội dung được sao chép sẵn, bạn chỉ cần dán vào khung chat.</p>
+    <div class="actions"><button class="btn ghost" id="fb-copy">📋 Chỉ sao chép nội dung</button><button class="btn" id="fb-close">Đóng</button></div>`, true);
+  const msg = () => {
+    const type = FB_TYPES[(document.querySelector('[name="fb-type"]:checked') || {}).value || 'other'];
+    const text = $('#fb-text').value.trim();
+    return { type, body: `[${type}]\n${text || '(chưa nhập nội dung)'}${$('#fb-info').checked ? '\n\n---\n' + feedbackInfo() : ''}` };
+  };
+  const need = () => { if ($('#fb-text').value.trim().length >= 5) return true; toast('Hãy nhập nội dung góp ý trước nhé', 'err'); $('#fb-text').focus(); return false; };
+  $('#fb-mail').onclick = () => {
+    if (!need()) return;
+    const m = msg();
+    location.href = `mailto:${FEEDBACK.email}?subject=${encodeURIComponent('[Hành Trình CKTG] ' + m.type)}&body=${encodeURIComponent(m.body)}`;
+  };
+  $('#fb-zalo').onclick = () => {
+    if (!need()) return;
+    copyText(msg().body);
+    window.open('https://zalo.me/' + FEEDBACK.zalo, '_blank', 'noopener');
+  };
+  $('#fb-copy').onclick = () => { if (need()) copyText(msg().body); };
+  $('#fb-close').onclick = closeModal;
+  setTimeout(() => $('#fb-text') && $('#fb-text').focus({ preventScroll: true }), 300);
+}
+
 // ===== Điều hướng =====
 let currentView = 'team';
 function switchView(v) {
@@ -741,6 +789,7 @@ $('#credits-btn').onclick = () => {
 };
 $('#donate-btn').onclick = openDonate;
 $('#donate-btn2').onclick = openDonate;
+$('#feedback-btn').onclick = openFeedback;
 // ===== Cài đặt âm thanh =====
 const sfxIcon = () => {
   const any = AUDIO_CFG.sfx || AUDIO_CFG.music;
