@@ -30,7 +30,7 @@ Hoặc tải về và **mở `index.html` bằng Chrome/Edge**, không cần cà
 - Người chơi cũ (cấp > 2 hoặc đã đánh vài trận) không bị hiện. Xem lại bằng nút **📖 Hướng dẫn** cuối trang (`js/guide.js`).
 
 ## Đấu xếp hạng & bảng xếp hạng (tab 🏆 Xếp hạng)
-- Cần **đăng nhập**. Đội hình hiện tại là **đội phòng thủ**; "Tìm trận" ghép với đội đã lưu của người có điểm gần mình (không cần online cùng lúc), không có ai thì gặp đội máy.
+- Cần **đăng nhập**. Đội hình hiện tại là **đội phòng thủ**; "Tìm trận" ghép với đội đã lưu của người có điểm gần mình (không cần online cùng lúc).
 - Bắt đầu 1000 điểm (Bạc III). Bậc: Đồng < 1000, Bạc, Vàng, Bạch Kim, Kim Cương (mỗi bậc 300 điểm, 3 phân hạng III → I), Huyền Thoại từ 2200.
 - Điểm tính kiểu Elo: thắng người hạng cao hơn được nhiều hơn; 5 trận đầu là trận định vị; trận có thể lên bậc mới đánh BO3.
 - **10 lượt/ngày** (làm mới 0:00 giờ Việt Nam). Kết quả được ghi lên máy chủ ngay khi tìm thấy đối thủ, thoát giữa trận không né được trận thua.

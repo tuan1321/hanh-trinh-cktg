@@ -130,8 +130,8 @@ const RANKED = (() => {
     // không có ai phù hợp → đội máy có sức mạnh gần mình
     const mt = myTeam();
     const o = makeOpponent(pick(Object.keys(TEAM_NAMES)), mt.power + rand(-3, 2));
-    o.name = o.name + ' (Máy)';
-    return { uid: null, name: o.name, rp: me.rp, team: o, bot: true };
+    // hiển thị như một đội bình thường, điểm hạng gần mình
+    return { uid: null, name: o.name, rp: Math.max(0, me.rp + randi(-40, 40)), team: o, bot: true };
   }
 
   async function play() {
@@ -151,7 +151,7 @@ const RANKED = (() => {
       const opp = await findOpponent(me);
       const n = games(me);
       const dl = deltas(me.rp, opp.rp, n, opp.bot);
-      const promo = !opp.bot && tierIdx(me.rp + dl.win) > tierIdx(me.rp);
+      const promo = tierIdx(me.rp + dl.win) > tierIdx(me.rp);
       const bo = promo ? 3 : 1;
       const teams = [mt, opp.team];
       const pWin = winProb(mt.power, opp.team.power);
@@ -200,7 +200,7 @@ const RANKED = (() => {
       <div class="vs">
         <div class="vs-team blue"><div class="vs-logo">${clubLogoHTML(me.name, true)}</div><h3>${esc(me.name)}</h3><div class="rk-mini">${badge(R.before)} ${rankOf(R.before).label} · ${R.before}</div><div class="pw">⚡ ${me.power}</div>${rosterList(me)}</div>
         <div class="vs-mid"><b>VS</b><small>BO${bo}</small><div class="wp">Cơ hội thắng mỗi ván<br><b>${Math.round(p * 100)}%</b></div></div>
-        <div class="vs-team red"><div class="vs-logo">${clubLogoHTML(them.name)}</div><h3>${esc(them.name)}</h3><div class="rk-mini">${opp.bot ? '🤖 Đội máy' : `${badge(opp.rp)} ${rankOf(opp.rp).label} · ${opp.rp}`}</div><div class="pw">⚡ ${them.power}</div>${rosterList(them)}</div>
+        <div class="vs-team red"><div class="vs-logo">${clubLogoHTML(them.name)}</div><h3>${esc(them.name)}</h3><div class="rk-mini">${badge(opp.rp)} ${rankOf(opp.rp).label} · ${opp.rp}</div><div class="pw">⚡ ${them.power}</div>${rosterList(them)}</div>
       </div>
       <div class="actions"><button class="btn primary" id="rk-watch">▶ Vào trận</button><button class="btn ghost" id="rk-result">Xem kết quả ngay</button></div>`, true);
     $('#rk-watch').onclick = () => {
