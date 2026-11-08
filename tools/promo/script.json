@@ -1,0 +1,12 @@
+{
+  "voice": "vi-VN-HoaiMyNeural",
+  "rate": "+8%",
+  "lines": [
+    { "id": "l1", "say": "Bạn có đủ bản lĩnh dẫn dắt đội tuyển tới ngôi vô địch thế giới?", "sub": "Bạn có đủ bản lĩnh dẫn dắt đội tuyển\ntới ngôi vô địch thế giới?" },
+    { "id": "l2", "say": "Hành Trình Chung Kết Thế Giới. Game quản lý đội tuyển thể thao điện tử, chơi ngay trên trình duyệt.", "sub": "Hành Trình CKTG – game quản lý đội eSports\nchơi ngay trên trình duyệt" },
+    { "id": "l3", "say": "Mở gói thẻ, săn những tuyển thủ huyền thoại hiếm nhất.", "sub": "Mở gói thẻ, săn tuyển thủ huyền thoại\nbậc B → SSS" },
+    { "id": "l4", "say": "Xếp đội hình, tận dụng độ ăn ý, ghép thẻ nâng cấp lên cộng mười.", "sub": "Xếp đội hình, tận dụng độ ăn ý,\nghép thẻ nâng cấp lên +10" },
+    { "id": "l5", "say": "Chinh phục từng giải đấu, rồi leo bảng xếp hạng cùng người chơi khắp nơi.", "sub": "Chinh phục từng giải đấu,\nleo bảng xếp hạng cùng người chơi khắp nơi" },
+    { "id": "l6", "say": "Chơi miễn phí ngay tại, xê ca tê giê chấm online!", "sub": "Chơi miễn phí tại cktg.online" }
+  ]
+}

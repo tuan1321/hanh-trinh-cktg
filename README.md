@@ -97,5 +97,7 @@ Sau khi thêm/xóa ảnh, bấm đúp **`tools/scan-photos.bat`**: công cụ c�
 - `js/photo-manifest.js` – danh sách ảnh (tự tạo bởi `tools/scan-photos.bat`, danh sách thẻ ở `tools/cards.txt`)
 - `js/donate-config.js` – thông tin ủng hộ nhà phát hành
 - `js/main.js` – logic game & giao diện các tab
+- `img/brand/` – logo game: `logo.svg` (khiên có chữ CKTG), `icon.svg` (biểu tượng tab), `avatar-1080.png` (ảnh đại diện mạng xã hội), `cover-fb.png` (ảnh bìa Facebook), `og-image.png` (ảnh khi chia sẻ link). Sửa SVG xong chạy `python tools/promo/brand.py` để xuất lại PNG
+- `tools/promo/` – làm video quảng cáo: `script.json` (lời thoại) → `voice.py` (giọng đọc) → `capture.py` (quay cảnh) → `build.py` (ghép video, ra thư mục `promo-out/`)
 
 Chỉ số tuyển thủ là ước lượng fan-made theo thành tích từng năm, không phải số liệu chính thức.
