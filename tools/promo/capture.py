@@ -29,10 +29,67 @@ SEED = r"""
 })();
 """
 
+# Bản quảng cáo không được có người/thương hiệu thật (TikTok, Facebook chặn):
+# - bỏ ảnh chụp tuyển thủ/logo đội → game tự dùng chân dung vẽ
+# - đổi tên tuyển thủ, mã đội, tên giải thật sang tên giả ngay trên màn hình (chỉ khi quay)
+ANON = r"""
+(() => {
+  const A = ['Ka','Ry','Zen','Vo','Lu','Mi','Ta','Ze','No','Ki','Ra','Xi','Do','Fe','Ji','Sa','Ha','Bo','Qu','Ny','Ve','Ko'];
+  const B = ['ro','vik','sel','nox','ra','ko','lis','dan','ven','mo','zy','rin','thos','ka','lux','ne','vo','ris','gan','tor'];
+  const L = 'BCDFGHKLMNPRSTVXZ';
+  let re = null, map = null;
+  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  function build() {
+    if (typeof CARDS === 'undefined' || typeof TEAM_INFO === 'undefined') return false;
+    map = {};
+    // tên giả không được trùng tên thật (tránh đổi qua đổi lại vô tận)
+    const names = new Set(CARDS.map(c => c.name));
+    const used = new Set(['KR', 'CN', 'EU', 'NA', 'VN', 'APAC', 'GMS']);
+    [...names].forEach((n, i) => {
+      let k = i * 3, f;
+      do { f = A[k % A.length] + B[Math.floor(k / A.length) % B.length]; k++; } while (used.has(f) || names.has(f));
+      used.add(f); map[n] = f;
+    });
+    const codes = [...new Set([...Object.keys(TEAM_INFO), ...CARDS.map(c => c.team)])];
+    codes.forEach((c, i) => {
+      let k = i * 7 + 20, f;
+      do { f = L[k % L.length] + L[Math.floor(k / L.length) % L.length] + L[(k * 3 + 5) % L.length]; k++; } while (used.has(f) || codes.includes(f) || names.has(f));
+      used.add(f); map[c] = f; if (TEAM_INFO[c]) map[TEAM_INFO[c].name] = 'Team ' + f;
+    });
+    Object.assign(map, { LCK: 'KR', LPL: 'CN', LEC: 'EU', LCS: 'NA', VCS: 'VN', PCS: 'APAC', MSI: 'GMS' });
+    const keys = Object.keys(map).sort((a, b) => b.length - a.length).map(esc);
+    re = new RegExp('(?<![\\w.])(' + keys.join('|') + ')(?![\\w])', 'g');
+    return true;
+  }
+  function fix(node) {
+    if (!re && !build()) return;
+    if (node.nodeType === 3) {
+      const t = node.nodeValue;
+      if (t && re.test(t)) { re.lastIndex = 0; node.nodeValue = t.replace(re, m => map[m]); }
+      re.lastIndex = 0;
+      return;
+    }
+    if (node.nodeType !== 1 && node.nodeType !== 9) return;
+    const w = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+    const list = []; while (w.nextNode()) list.push(w.currentNode);
+    list.forEach(fix);
+  }
+  new MutationObserver(ms => ms.forEach(m => {
+    if (m.type === 'characterData') fix(m.target); else m.addedNodes.forEach(fix);
+  })).observe(document, { childList: true, subtree: true, characterData: true });
+  document.addEventListener('DOMContentLoaded', () => fix(document));
+})();
+"""
+
 def main():
     with sync_playwright() as p:
         br = p.chromium.launch(channel='msedge', headless=True, args=['--autoplay-policy=no-user-gesture-required'])
         ctx = br.new_context(viewport=VIEW, device_scale_factor=DPR, is_mobile=(MODE == 'vertical'), has_touch=(MODE == 'vertical'))
+        ctx.route('**/js/photo-manifest.js*', lambda r: r.fulfill(content_type='text/javascript', body='const PHOTO_MANIFEST={players:{},teams:{}};'))
+        ctx.route('**/js/credits.js*', lambda r: r.fulfill(content_type='text/javascript', body='const IMAGE_CREDITS=[];'))
+        ctx.route('**/img/players/**', lambda r: r.abort())
+        ctx.route('**/img/teams/**', lambda r: r.abort())
+        ctx.add_init_script(ANON)
         page = ctx.new_page()
         page.goto(URL, wait_until='load')
         page.wait_for_timeout(2500)

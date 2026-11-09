@@ -5,6 +5,8 @@ HERE = pathlib.Path(__file__).parent
 ROOT = HERE.parent.parent
 RAW, VOICE, OUT, MODE = pathlib.Path(sys.argv[1]).resolve(), pathlib.Path(sys.argv[2]).resolve(), pathlib.Path(sys.argv[3]).resolve(), sys.argv[4]
 V = MODE == 'vertical'
+# 'nomusic': chỉ giữ giọng đọc — chọn nhạc từ thư viện nhạc thương mại của TikTok/Facebook khi tạo quảng cáo
+NOMUSIC = len(sys.argv) > 5 and sys.argv[5] == 'nomusic'
 W, H = (1080, 1920) if V else (1920, 1080)
 WORK = OUT.parent / ('work-' + MODE); WORK.mkdir(parents=True, exist_ok=True)
 FONT = 'C\\:/Windows/Fonts/segoeuib.ttf'
@@ -82,7 +84,8 @@ vd = [dur(VOICE / f"{ln['id']}.mp3") for ln in cfg['lines']]
 def ts(t):
     h, t = divmod(t, 3600); m, s = divmod(t, 60)
     return f'{int(h)}:{int(m):02d}:{s:05.2f}'
-fs, mv = (50, 330) if V else (50, 60)
+# Khung dọc: phụ đề nằm trên vùng chữ/nút của TikTok, Reels (~ 1/4 dưới màn hình)
+fs, mv = (50, 560) if V else (50, 60)
 ass = [
     '[Script Info]', 'ScriptType: v4.00+', f'PlayResX: {W}', f'PlayResY: {H}', 'WrapStyle: 0', '',
     '[V4+ Styles]',
@@ -98,17 +101,20 @@ for i, ln in enumerate(cfg['lines'][:5]):
 ai = n + 2
 for i, ln in enumerate(cfg['lines']):
     inputs += ['-i', VOICE / f"{ln['id']}.mp3"]
-inputs += ['-i', MUSIC]
+if not NOMUSIC: inputs += ['-i', MUSIC]
 vo = []
 for i in range(6):
     d = int(starts[i] * 1000)
     fl.append(f'[{ai + i}:a]aresample=48000,adelay={d}|{d},volume=1.6[v{i}]')
     vo.append(f'[v{i}]')
 fl.append(f"{''.join(vo)}amix=inputs=6:normalize=0,apad,atrim=0:{total}[voice]")
-fl.append('[voice]asplit[vx][vsc]')
-fl.append(f'[{ai + 6}:a]aresample=48000,atrim=0:{total},volume=0.55,afade=t=in:d=0.8,afade=t=out:st={total - 1.8}:d=1.8[mus]')
-fl.append('[mus][vsc]sidechaincompress=threshold=0.03:ratio=8:attack=20:release=400[duck]')
-fl.append('[vx][duck]amix=inputs=2:normalize=0,alimiter=limit=0.95[aout]')
+if NOMUSIC:
+    fl.append('[voice]alimiter=limit=0.95[aout]')
+else:
+    fl.append('[voice]asplit[vx][vsc]')
+    fl.append(f'[{ai + 6}:a]aresample=48000,atrim=0:{total},volume=0.55,afade=t=in:d=0.8,afade=t=out:st={total - 1.8}:d=1.8[mus]')
+    fl.append('[mus][vsc]sidechaincompress=threshold=0.03:ratio=8:attack=20:release=400[duck]')
+    fl.append('[vx][duck]amix=inputs=2:normalize=0,alimiter=limit=0.95[aout]')
 
 # 6) Nối hình + phụ đề + mờ dần đầu/cuối
 fl.append(''.join(f'[p{i}]' for i in range(n)) + f'[pend]concat=n={n + 1}:v=1:a=0[cat]')
