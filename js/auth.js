@@ -14,9 +14,19 @@ const hasHint = () => { try { return localStorage.getItem(AUTH_HINT) === '1'; } 
 
 function authConfigured() { return typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey; }
 
+// Mã băm (SRI) của thư viện tải từ máy chủ ngoài: nếu file bị sửa, trình duyệt từ chối chạy.
+// Đổi FB_VER thì phải cập nhật lại mã băm (xem README → Bảo mật).
+const SRI = {
+  'firebase-app-compat.js': 'sha384-AQ3POAMqIhwS81FrUH95ekxqBZHeP5tG2JfEL3+7GuTtfRLWnrRh32UxwzM+//A9',
+  'firebase-auth-compat.js': 'sha384-TnlRYaR4JYz/lpaGuaiU61PjNberSA4vjLjtF+oRC/IkohkJqnWxw5EmDSOt1vA1',
+  'firebase-firestore-compat.js': 'sha384-qn4Jh88HhJA8dplNQyGjOh9OGI4izVhrfj/qIFgaKcdgOE06pXqIKGlsCILZcLAC',
+  'peerjs.min.js': 'sha384-nlUQ8ZqCbvStErob+biJNzSgltf6urV3VGqhfIfzhmg9RXmpeRm76ELw0pYnKlTR',
+};
 function loadScript(src) {
   return new Promise((ok, fail) => {
     const s = document.createElement('script');
+    const sri = SRI[src.split('/').pop()];
+    if (sri) { s.integrity = sri; s.crossOrigin = 'anonymous'; }
     s.src = src; s.onload = ok; s.onerror = () => fail(new Error('Không tải được ' + src));
     document.head.appendChild(s);
   });

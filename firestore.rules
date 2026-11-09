@@ -18,15 +18,26 @@ service cloud.firestore {
       allow get: if signedIn() && request.auth.uid == uid;
       allow list, write: if false;
     }
+    // Kiểu dữ liệu hồ sơ hoạt động: chỉ chữ ngắn / số nguyên (chặn chèn mã vào trang quản trị)
+    function actOk(d) {
+      return d.get('name', '') is string && d.get('name', '').size() <= 24
+        && d.get('level', 1) is int && d.get('level', 1) >= 0 && d.get('level', 1) <= 100000
+        && d.get('device', '') is string && d.get('device', '').size() <= 80
+        && d.get('lastDay', '') is string && d.get('lastDay', '').size() <= 10
+        && d.sessions is int && d.seconds is int;
+    }
     match /activity/{uid} {
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
       allow create: if signedIn() && request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['name', 'level', 'device', 'first', 'last', 'lastDay', 'sessions', 'seconds'])
+        && actOk(request.resource.data)
+        && request.resource.data.first == request.time
         && request.resource.data.sessions == 1
         && request.resource.data.seconds is int && request.resource.data.seconds <= 600
         && request.resource.data.last == request.time;
       allow update: if signedIn() && request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['name', 'level', 'device', 'first', 'last', 'lastDay', 'sessions', 'seconds'])
+        && actOk(request.resource.data)
         && request.resource.data.first == resource.data.first
         && request.resource.data.sessions >= resource.data.sessions
         && request.resource.data.sessions <= resource.data.sessions + 1
@@ -60,7 +71,8 @@ service cloud.firestore {
     function rkOk(n) {
       return n.keys().hasOnly(['name', 'fid', 'lineup', 'power', 'level', 'titles', 'rp', 'peak', 'w', 'l', 'streak', 'dk', 'dayN', 'season', 'at', 'upd'])
         && n.name is string && n.name.size() <= 24 && n.fid is string && n.fid.size() <= 12
-        && n.lineup is map && n.lineup.size() == 5 && n.power is number && n.power <= 200
+        && n.lineup is map && n.lineup.keys().hasOnly(['TOP', 'JNG', 'MID', 'ADC', 'SUP']) && n.lineup.size() == 5
+        && n.power is number && n.power >= 0 && n.power <= 200
         && n.level is int && n.titles is int && n.rp is int && n.rp >= 0 && n.peak is int && n.peak >= n.rp
         && n.w is int && n.l is int && n.streak is int && n.dk is int && n.dayN is int && n.dayN <= 10
         && n.season is int && n.upd == request.time;
@@ -95,7 +107,9 @@ service cloud.firestore {
       allow create, update: if request.auth != null && request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['data', 'name', 'level', 'updated'])
         && request.resource.data.data is string
-        && request.resource.data.data.size() < 900000;
+        && request.resource.data.data.size() < 900000
+        && request.resource.data.get('name', '') is string && request.resource.data.get('name', '').size() <= 24
+        && request.resource.data.get('level', 1) is number;
     }
     match /names/{key} {
       allow get: if request.auth != null;

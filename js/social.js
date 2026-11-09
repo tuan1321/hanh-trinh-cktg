@@ -74,14 +74,10 @@ function addFriendSnap(snap, quiet) {
 
 // ----- Kết nối trực tuyến (PeerJS) -----
 function loadPeerJS() {
-  return new Promise((ok, fail) => {
-    if (window.Peer) return ok();
-    const s = document.createElement('script');
-    s.src = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
-    s.onload = ok;
-    s.onerror = () => fail(new Error('Không tải được thư viện kết nối (cần có mạng).'));
-    document.head.appendChild(s);
-  });
+  if (window.Peer) return Promise.resolve();
+  // loadScript (auth.js) gắn mã băm SRI: thư viện bị sửa sẽ không chạy
+  return loadScript('https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js')
+    .catch(() => { throw new Error('Không tải được thư viện kết nối (cần có mạng).'); });
 }
 async function goOnline() {
   if (NET.peer) return;

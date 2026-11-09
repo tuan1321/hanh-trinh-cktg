@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Chỉ chạy mã của trang + thư viện tin cậy; chặn mã bị chèn vào (XSS). Thêm nguồn mới thì sửa cả admin.html -->
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://www.gstatic.com https://apis.google.com https://unpkg.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Hành Trình CKTG – Esports Manager</title>
   <meta name="description" content="Game quản lý đội tuyển eSports chơi ngay trên trình duyệt: mở gói thẻ tuyển thủ, xếp đội hình, chinh phục giải đấu và leo bảng xếp hạng. Miễn phí, không cần tải.">
   <meta name="theme-color" content="#0b0920">
@@ -20,9 +23,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=21">
-  <link rel="stylesheet" href="css/ui.css?v=21">
-  <link rel="stylesheet" href="css/cards.css?v=21">
+  <link rel="stylesheet" href="css/style.css?v=22">
+  <link rel="stylesheet" href="css/ui.css?v=22">
+  <link rel="stylesheet" href="css/cards.css?v=22">
 </head>
 <body>
   <!-- Màn hình tải -->
@@ -130,25 +133,25 @@
 
   <div id="toasts"></div>
 
-  <script src="js/data.js?v=21"></script>
-  <script src="js/sfx.js?v=21"></script>
-  <script src="js/credits.js?v=21"></script>
-  <script src="js/photo-manifest.js?v=21"></script>
-  <script src="js/art.js?v=21"></script>
-  <script src="js/worldmap.js?v=21"></script>
-  <script src="js/match.js?v=21"></script>
-  <script src="js/social.js?v=21"></script>
-  <script src="js/tour.js?v=21"></script>
-  <script src="js/upgrade.js?v=21"></script>
-  <script src="js/achieve.js?v=21"></script>
-  <script src="js/donate-config.js?v=21"></script>
-  <script src="js/names.js?v=21"></script>
-  <script src="js/ui.js?v=21"></script>
-  <script src="js/main.js?v=21"></script>
-  <script src="js/firebase-config.js?v=21"></script>
-  <script src="js/auth.js?v=21"></script>
-  <script src="js/activity.js?v=21"></script>
-  <script src="js/ranked.js?v=21"></script>
-  <script src="js/guide.js?v=21"></script>
+  <script src="js/data.js?v=22"></script>
+  <script src="js/sfx.js?v=22"></script>
+  <script src="js/credits.js?v=22"></script>
+  <script src="js/photo-manifest.js?v=22"></script>
+  <script src="js/art.js?v=22"></script>
+  <script src="js/worldmap.js?v=22"></script>
+  <script src="js/match.js?v=22"></script>
+  <script src="js/social.js?v=22"></script>
+  <script src="js/tour.js?v=22"></script>
+  <script src="js/upgrade.js?v=22"></script>
+  <script src="js/achieve.js?v=22"></script>
+  <script src="js/donate-config.js?v=22"></script>
+  <script src="js/names.js?v=22"></script>
+  <script src="js/ui.js?v=22"></script>
+  <script src="js/main.js?v=22"></script>
+  <script src="js/firebase-config.js?v=22"></script>
+  <script src="js/auth.js?v=22"></script>
+  <script src="js/activity.js?v=22"></script>
+  <script src="js/ranked.js?v=22"></script>
+  <script src="js/guide.js?v=22"></script>
 </body>
 </html>

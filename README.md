@@ -71,6 +71,14 @@ Bấm nút **👤 Đăng nhập** góc trên: đăng nhập bằng Google hoặc
 - **Cấp quyền xem**: đăng nhập admin.html → chép UID hiện ra → Firestore → tạo collection `admins`, document ID = UID đó (thêm 1 trường bất kỳ). Nhớ Publish `firestore.rules` mới.
 - **Lượt truy cập của mọi người (cả Khách)**: bật Google Analytics trong Firebase (Project settings → Integrations), điền Measurement ID `G-…` vào `ANALYTICS_ID` trong `js/firebase-config.js`.
 
+## Bảo mật
+- **Luật Firestore** (`firestore.rules`) là lớp bảo vệ dữ liệu chính. Mỗi lần sửa file này phải dán vào Firebase Console → Firestore → Rules và bấm **Publish** (đẩy lên GitHub không tự áp dụng).
+- **Chặn chèn mã (CSP)**: `index.html` và `admin.html` có thẻ `Content-Security-Policy`, chỉ cho chạy mã của trang và vài nguồn tin cậy (gstatic, apis.google.com, unpkg, googletagmanager). Thêm thư viện từ nguồn mới thì phải thêm nguồn đó vào cả hai trang. Không dùng `<script>` viết thẳng trong HTML hay `onclick="…"`.
+- **Mã băm thư viện (SRI)**: Firebase và PeerJS được kiểm tra mã băm (`SRI` trong `js/auth.js` và `js/admin.js`). Đổi phiên bản thì tính lại mã băm (PowerShell):
+  `$b=(Invoke-WebRequest <url> -UseBasicParsing).RawContentStream.ToArray(); 'sha384-'+[Convert]::ToBase64String([Security.Cryptography.SHA384]::Create().ComputeHash($b))`
+- **Dữ liệu từ người chơi khác** (tên đội, mã đội, bảng xếp hạng, trang quản trị) luôn qua `esc()` hoặc `textContent` trước khi hiển thị.
+- `apiKey` trong `js/firebase-config.js` là khóa công khai, không phải mật khẩu. Nên giới hạn nó theo tên miền ở Google Cloud Console → APIs & Services → Credentials.
+
 ## Ảnh tuyển thủ & logo đội
 56 tuyển thủ dùng ảnh tự do (Creative Commons / public domain) từ Wikimedia Commons và Openverse; 7 đội có logo tự do. Nguồn ghi đầy đủ trong `img/CREDITS.txt` và nút "📷 Nguồn ảnh" trong game (danh sách ở `js/credits.js`). Các tuyển thủ còn lại dùng chân dung tự vẽ (áo đấu theo màu đội); mỗi đội có huy hiệu riêng. Muốn dùng ảnh thật của bạn:
 - `img/players/<Tên>.png` (hoặc .jpg), ví dụ `img/players/Faker.png`
