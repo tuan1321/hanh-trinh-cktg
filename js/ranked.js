@@ -112,26 +112,49 @@ const RANKED = (() => {
   }
 
   // ----- ghép trận -----
+  // Ưu tiên đối thủ có SỨC MẠNH ngang mình (chênh ≤ POW_TOL), điểm hạng gần là tiêu chí phụ.
+  // Không có người chơi hợp → đấu bot. Kể cả khi có, BOT_SHARE số trận vẫn gặp bot để luôn có trận nhanh.
+  const POW_TOL = 4, POW_TOL_WIDE = 8, BOT_SHARE = 0.3;
+  function makeBot(me, mt) {
+    // tạo vài đội, giữ đội có sức mạnh thật (tính từ thẻ) gần mình nhất
+    const target = mt.power + rand(-2, 2);
+    let best = null;
+    for (let i = 0; i < 8; i++) {
+      const o = makeOpponent(pick(Object.keys(TEAM_NAMES)), target);
+      const real = powerOf(ROLES.map(r => o.players[r]));
+      if (real == null) continue;
+      o.power = real;
+      if (!best || Math.abs(real - target) < Math.abs(best.power - target)) best = o;
+      if (Math.abs(real - target) <= 1) break;
+    }
+    // không tạo được đội hợp lệ (hiếm) → dùng sức mạnh mục tiêu như trước
+    if (!best || Math.abs(best.power - mt.power) > POW_TOL_WIDE) { best = best || makeOpponent(pick(Object.keys(TEAM_NAMES)), target); best.power = +target.toFixed(1); }
+    return { uid: null, name: best.name, rp: Math.max(0, me.rp + randi(-60, 60)), team: best, bot: true };
+  }
   async function findOpponent(me) {
+    const mt = myTeam();
     const uid = AUTH.user.uid, recent = new Set(hist().recent);
     const col = AUTH.db.collection('ranked');
-    for (const w of [150, 400, 1200]) {
-      const q = await col.where('rp', '>=', me.rp - w).where('rp', '<=', me.rp + w).orderBy('rp').limit(40).get();
-      let list = q.docs.filter(d => d.id !== uid).map(d => ({ uid: d.id, d: d.data() })).map(o => ({ ...o, team: teamFromDoc(o.d) })).filter(o => o.team);
-      const fresh = list.filter(o => !recent.has(o.uid));
-      if (fresh.length) list = fresh;
-      if (list.length) {
-        // ưu tiên người có điểm gần mình
-        list.sort((a, b) => Math.abs(a.d.rp - me.rp) - Math.abs(b.d.rp - me.rp));
-        const o = pick(list.slice(0, Math.min(8, list.length)));
-        return { uid: o.uid, name: o.team.name, rp: o.d.rp | 0, team: o.team, bot: false };
-      }
+    const seen = new Map();
+    for (const w of [250, 600, 1500]) {
+      const q = await col.where('rp', '>=', me.rp - w).where('rp', '<=', me.rp + w).orderBy('rp').limit(80).get();
+      q.docs.forEach(d => {
+        if (d.id === uid || seen.has(d.id)) return;
+        const team = teamFromDoc(d.data());
+        if (team) seen.set(d.id, { uid: d.id, d: d.data(), team, gap: Math.abs(team.power - mt.power) });
+      });
+      if ([...seen.values()].filter(o => o.gap <= POW_TOL).length >= 3) break;
     }
-    // không có ai phù hợp → đội máy có sức mạnh gần mình
-    const mt = myTeam();
-    const o = makeOpponent(pick(Object.keys(TEAM_NAMES)), mt.power + rand(-3, 2));
-    // hiển thị như một đội bình thường, điểm hạng gần mình
-    return { uid: null, name: o.name, rp: Math.max(0, me.rp + randi(-40, 40)), team: o, bot: true };
+    let list = [...seen.values()];
+    const fresh = list.filter(o => !recent.has(o.uid));
+    if (fresh.length) list = fresh;
+    let fit = list.filter(o => o.gap <= POW_TOL);
+    if (!fit.length) fit = list.filter(o => o.gap <= POW_TOL_WIDE);
+    if (!fit.length || Math.random() < BOT_SHARE) return makeBot(me, mt);
+    // điểm phù hợp: chênh sức mạnh là chính, chênh điểm hạng là phụ (100 điểm hạng ≈ 1 sức mạnh)
+    fit.sort((a, b) => (a.gap + Math.abs(a.d.rp - me.rp) / 100) - (b.gap + Math.abs(b.d.rp - me.rp) / 100));
+    const o = pick(fit.slice(0, Math.min(5, fit.length)));
+    return { uid: o.uid, name: o.team.name, rp: o.d.rp | 0, team: o.team, bot: false };
   }
 
   async function play() {
@@ -140,7 +163,7 @@ const RANKED = (() => {
     const mt = myTeam();
     if (!mt) { toast('Đội hình cần đủ 5 vị trí!', 'err'); return switchView('team'); }
     st.busy = true;
-    openModal(`<h2 class="center">🔎 Đang tìm đối thủ…</h2><p class="center muted">Ghép với đội hình của người chơi có điểm hạng gần bạn</p><div class="spinner"></div>`);
+    openModal(`<h2 class="center">🔎 Đang tìm đối thủ…</h2><p class="center muted">Ghép với đội có sức mạnh ngang bạn (⚡ ${mt.power}) – người chơi khác hoặc đội máy</p><div class="spinner"></div>`);
     try {
       // luật máy chủ: 2 trận cách nhau ≥ 10 giây → tự chờ trong lúc "tìm đối thủ"
       const wait = (st.lastMatch || 0) + 11000 - Date.now();
@@ -200,7 +223,7 @@ const RANKED = (() => {
       <div class="vs">
         <div class="vs-team blue"><div class="vs-logo">${clubLogoHTML(me.name, true)}</div><h3>${esc(me.name)}</h3><div class="rk-mini">${badge(R.before)} ${rankOf(R.before).label} · ${R.before}</div><div class="pw">⚡ ${me.power}</div>${rosterList(me)}</div>
         <div class="vs-mid"><b>VS</b><small>BO${bo}</small><div class="wp">Cơ hội thắng mỗi ván<br><b>${Math.round(p * 100)}%</b></div></div>
-        <div class="vs-team red"><div class="vs-logo">${clubLogoHTML(them.name)}</div><h3>${esc(them.name)}</h3><div class="rk-mini">${badge(opp.rp)} ${rankOf(opp.rp).label} · ${opp.rp}</div><div class="pw">⚡ ${them.power}</div>${rosterList(them)}</div>
+        <div class="vs-team red"><div class="vs-logo">${clubLogoHTML(them.name)}</div><h3>${esc(them.name)}${opp.bot ? ' <small class="muted" title="Đội máy">🤖</small>' : ''}</h3><div class="rk-mini">${badge(opp.rp)} ${rankOf(opp.rp).label} · ${opp.rp}</div><div class="pw">⚡ ${them.power}</div>${rosterList(them)}</div>
       </div>
       <div class="actions"><button class="btn primary" id="rk-watch">▶ Vào trận</button><button class="btn ghost" id="rk-result">Xem kết quả ngay</button></div>`, true);
     $('#rk-watch').onclick = () => {
@@ -381,7 +404,7 @@ const RANKED = (() => {
       </div>
     </div>`;
     const H = hist().hist;
-    el.querySelectorAll('.rk-h-opp').forEach((s, i) => { s.textContent = H[i].opp; });
+    el.querySelectorAll('.rk-h-opp').forEach((s, i) => { s.textContent = H[i].opp + (H[i].bot ? ' 🤖' : ''); });
     const on = (id, fn) => { const b = document.getElementById(id); if (b) b.onclick = fn; };
     on('rk-login', () => openAcct());
     on('rk-team', () => switchView('team'));
