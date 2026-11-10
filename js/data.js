@@ -199,7 +199,8 @@ RAW.forEach(([name, role, region, seasons]) => {
 // 2 thẻ giống hệt (cùng tuyển thủ, cùng mùa, cùng cấp) → thử lên 1 cấp.
 const MAX_UP = 10;
 const UPG_BONUS = [0, 1, 2, 4, 6, 8, 11, 14, 18, 22, 27];          // OVR cộng thêm ở mỗi cấp
-const UPG_RATE = [100, 90, 75, 60, 45, 32, 20, 12, 6, 2.5, 0.5];   // % thành công để lên cấp i
+// % thành công để lên cấp i: +1…+7 dễ (giảm 5% mỗi cấp), từ +8 giảm mạnh
+const UPG_RATE = [100, 100, 95, 90, 85, 80, 75, 70, 45, 25, 10];
 const keyOf = (id, lv) => (lv ? `${id}+${lv}` : id);
 function parseKey(k) {
   const m = /^(.+)\+([1-9]\d?)$/.exec(k);

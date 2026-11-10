@@ -765,7 +765,7 @@ function welcome(got) {
     <ul class="howto">
       <li>⚔️ Đánh <b>giao hữu</b> và các <b>giải đấu</b> (thể thức như giải thật: vòng bảng, playoffs, tối đa BO5) để kiếm tiền & kinh nghiệm.</li>
       <li>🛒 Dùng tiền mua <b>gói thẻ</b> – thẻ có bậc B → A → S → S+ → SS → SSS theo thành tích từng năm. Thẻ xịn rất hiếm!</li>
-      <li>⬆️ Ghép <b>2 thẻ giống nhau</b> để nâng cấp +1 … +10 (tỉ lệ giảm dần, +10 chỉ 0,5%).</li>
+      <li>⬆️ Ghép <b>2 thẻ giống nhau</b> để nâng cấp +1 … +10 (tới +6 rất dễ, từ +8 khó dần, +10 chỉ 10%).</li>
       <li>🚫 Đội hình không được có 2 thẻ của cùng một tuyển thủ (dù khác mùa).</li>
       <li>🔗 <b>Độ ăn ý</b> và <b>chỉ số ẩn</b> cộng thêm sức mạnh đội.</li>
       <li>🗺️ 4 chương: <b>Dễ → Thường → Khó → Địa ngục</b>. Vô địch giải nhỏ để mở giải lớn: VCS → PCS → LCS → LEC → LPL → LCK → MSI → <b>CKTG</b>!</li>
